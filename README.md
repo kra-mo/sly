@@ -1,0 +1,3 @@
+# Sly
+
+Friendly image editor
