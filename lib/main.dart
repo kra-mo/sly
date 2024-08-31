@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'utils.dart';
 import 'image.dart';
+import 'button.dart';
 import 'editor_page.dart';
 
 void main() {
@@ -23,25 +22,19 @@ class SlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformProvider(
-      settings: PlatformSettingsData(
-        platformStyle: const PlatformStyleData(
-          windows: PlatformStyle.Cupertino,
-          web: PlatformStyle.Cupertino,
-          linux: PlatformStyle.Cupertino,
-        ),
-      ),
-      builder: (context) => PlatformTheme(
-        themeMode: ThemeMode.system,
-        builder: (context) => const PlatformApp(
-          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-            DefaultCupertinoLocalizations.delegate,
-          ],
-          title: 'Sly',
-          home: SlyHomePage(title: 'Home'),
-          debugShowCheckedModeBanner: false,
+    return MaterialApp(
+      title: 'Sly',
+      home: const SlyHomePage(title: 'Home'),
+      debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.grey,
+          accentColor: Colors.white,
+          cardColor: Colors.grey.shade900,
+          backgroundColor: Colors.black,
+          brightness: Brightness.dark,
         ),
       ),
     );
@@ -60,60 +53,60 @@ class SlyHomePage extends StatefulWidget {
 class _SlyHomePageState extends State<SlyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return PlatformScaffold(
+    return Scaffold(
       body: MoveWindow(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Icon(context.platformIcons.photoLibrary, size: 64),
+              const ImageIcon(
+                AssetImage("assets/icons/sly.png"),
+                color: Colors.deepOrangeAccent,
+                size: 128,
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   'Edit an Image',
                   textAlign: TextAlign.center,
-                  style: platformThemeData(
-                    context,
-                    material: (ThemeData data) => data.textTheme.titleLarge,
-                    cupertino: (CupertinoThemeData data) =>
-                        data.textTheme.navLargeTitleTextStyle,
-                  ),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 36),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
                 child: Text(
                   'Choose an image to get started',
                   textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
-              PlatformElevatedButton(
-                child: const Text('Choose File'),
-                onPressed: () async {
-                  final ImagePicker picker = ImagePicker();
-                  final XFile? file =
-                      await picker.pickImage(source: ImageSource.gallery);
-                  if (file == null) return;
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: SlyButton(
+                  child: const Text('Choose File'),
+                  onPressed: () async {
+                    final ImagePicker picker = ImagePicker();
+                    final XFile? file =
+                        await picker.pickImage(source: ImageSource.gallery);
+                    if (file == null) return;
 
-                  final image = await loadImage(await file.readAsBytes());
-                  if (image == null) return;
+                    final image = await loadImage(await file.readAsBytes());
+                    if (image == null) return;
 
-                  if (!context.mounted) {
-                    throw Exception('Context is not mounted.');
-                  }
+                    if (!context.mounted) {
+                      throw Exception('Context is not mounted.');
+                    }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                          body:
-                              SlyEditorPage(image: SlyImage.fromImage(image))),
-                    ),
-                  );
-                },
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                            body: SlyEditorPage(
+                                image: SlyImage.fromImage(image))),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),

@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_platform_widgets: ^7.0.1
   bitsdojo_window: ^0.1.6
   image: ^4.2.0
   image_picker: ^1.1.2
@@ -70,6 +69,8 @@ flutter:
     - assets/icons/rotate-right.png
     - assets/icons/flip-horizontal.png
     - assets/icons/flip-vertical.png
+    - assets/icons/flip-vertical.png
+    - assets/icons/sly.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
