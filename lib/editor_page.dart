@@ -30,7 +30,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   late SlyImage croppedThumbnail;
   Future<Uint8List>? futureImage;
   Future<Uint8List>? editedFutureImage;
-  Widget? controlsWidget;
+  Widget? controlsChild;
   final cropController = CropController();
   int _selectedPageIndex = 0;
   bool _saveMetadata = true;
@@ -253,6 +253,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final imageView = FittedBox(
+            key: const Key('imageView'),
             child: SizedBox(
               width: thumbnail.width.toDouble(),
               height: thumbnail.height.toDouble(),
@@ -277,6 +278,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           );
 
           final cropImageView = FittedBox(
+            key: const Key('cropImageView'),
             child: SizedBox(
               width: thumbnail.width.toDouble(),
               height: thumbnail.height.toDouble(),
@@ -316,177 +318,179 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             ),
           );
 
-          final lightControls = ConstrainedBox(
+          final lightControls = ListView.builder(
             key: const Key('lightControls'),
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: ListView.builder(
-              physics: constraints.maxWidth > 600
-                  ? null
-                  : const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: croppedThumbnail.lightAttributes.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    left: 8,
-                    right: 8,
-                    top: index == 0 ? 16 : 0,
-                    bottom: index == croppedThumbnail.lightAttributes.length - 1
-                        ? 28
-                        : 0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, top: 8),
-                        child: Text(
-                          croppedThumbnail.lightAttributes.values
-                              .elementAt(index)
-                              .name,
-                          style: TextStyle(color: Colors.grey.shade400),
-                        ),
+            physics: constraints.maxWidth > 600
+                ? null
+                : const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: croppedThumbnail.lightAttributes.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  top: index == 0 ? 16 : 0,
+                  bottom: index == croppedThumbnail.lightAttributes.length - 1
+                      ? 28
+                      : 0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 8),
+                      child: Text(
+                        croppedThumbnail.lightAttributes.values
+                            .elementAt(index)
+                            .name,
+                        style: TextStyle(color: Colors.grey.shade400),
                       ),
-                      SlySlider(
-                        value: croppedThumbnail.lightAttributes.values
+                    ),
+                    SlySlider(
+                      value: croppedThumbnail.lightAttributes.values
+                          .elementAt(index)
+                          .value,
+                      secondaryTrackValue: croppedThumbnail
+                          .lightAttributes.values
+                          .elementAt(index)
+                          .anchor,
+                      min: croppedThumbnail.lightAttributes.values
+                          .elementAt(index)
+                          .min,
+                      max: croppedThumbnail.lightAttributes.values
+                          .elementAt(index)
+                          .max,
+                      onChanged: (value) {},
+                      onChangeEnd: (value) {
+                        croppedThumbnail.lightAttributes.values
                             .elementAt(index)
-                            .value,
-                        secondaryTrackValue: croppedThumbnail
-                            .lightAttributes.values
-                            .elementAt(index)
-                            .anchor,
-                        min: croppedThumbnail.lightAttributes.values
-                            .elementAt(index)
-                            .min,
-                        max: croppedThumbnail.lightAttributes.values
-                            .elementAt(index)
-                            .max,
-                        onChanged: (value) {},
-                        onChangeEnd: (value) {
-                          croppedThumbnail.lightAttributes.values
-                              .elementAt(index)
-                              .value = value;
-                          updateImage();
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                            .value = value;
+                        updateImage();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           );
 
-          final colorControls = ConstrainedBox(
+          final colorControls = ListView.builder(
             key: const Key('colorControls'),
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: ListView.builder(
-              physics: constraints.maxWidth > 600
-                  ? null
-                  : const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: croppedThumbnail.colorAttributes.length + 1,
-              itemBuilder: (context, index) {
-                // I am adding padding like this here because of some Flutter bug.
-                // If I didn't, the value of the first slider would be messed up.
-                // No idea why.
-                //
-                // Or maybe I'm stupid. In that case, please tell me.
-                if (index == 0) return const SizedBox(height: 16);
-                index--;
+            physics: constraints.maxWidth > 600
+                ? null
+                : const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: croppedThumbnail.colorAttributes.length + 1,
+            itemBuilder: (context, index) {
+              // I am adding padding like this here because of some Flutter bug.
+              // If I didn't, the value of the first slider would be messed up.
+              // No idea why.
+              //
+              // Or maybe I'm stupid. In that case, please tell me.
+              if (index == 0) return const SizedBox(height: 16);
+              index--;
 
-                return Padding(
-                  padding: EdgeInsets.only(
-                    left: 8,
-                    right: 8,
-                    bottom: index == croppedThumbnail.colorAttributes.length - 1
-                        ? 28
-                        : 0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, top: 8),
-                        child: Text(
-                          croppedThumbnail.colorAttributes.values
-                              .elementAt(index)
-                              .name,
-                          style: TextStyle(color: Colors.grey.shade400),
-                        ),
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  bottom: index == croppedThumbnail.colorAttributes.length - 1
+                      ? 28
+                      : 0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 8),
+                      child: Text(
+                        croppedThumbnail.colorAttributes.values
+                            .elementAt(index)
+                            .name,
+                        style: TextStyle(color: Colors.grey.shade400),
                       ),
-                      SlySlider(
-                        value: croppedThumbnail.colorAttributes.values
+                    ),
+                    SlySlider(
+                      value: croppedThumbnail.colorAttributes.values
+                          .elementAt(index)
+                          .value,
+                      secondaryTrackValue: croppedThumbnail
+                          .colorAttributes.values
+                          .elementAt(index)
+                          .anchor,
+                      min: croppedThumbnail.colorAttributes.values
+                          .elementAt(index)
+                          .min,
+                      max: croppedThumbnail.colorAttributes.values
+                          .elementAt(index)
+                          .max,
+                      onChanged: (value) {},
+                      onChangeEnd: (value) {
+                        croppedThumbnail.colorAttributes.values
                             .elementAt(index)
-                            .value,
-                        secondaryTrackValue: croppedThumbnail
-                            .colorAttributes.values
-                            .elementAt(index)
-                            .anchor,
-                        min: croppedThumbnail.colorAttributes.values
-                            .elementAt(index)
-                            .min,
-                        max: croppedThumbnail.colorAttributes.values
-                            .elementAt(index)
-                            .max,
-                        onChanged: (value) {},
-                        onChangeEnd: (value) {
-                          croppedThumbnail.colorAttributes.values
-                              .elementAt(index)
-                              .value = value;
-                          updateImage();
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                            .value = value;
+                        updateImage();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           );
 
           final geometryControls = LayoutBuilder(
             builder: (context, constraints) {
-              final buttons = <Padding>[
-                Padding(
-                  padding: const EdgeInsets.all(12),
+              final buttons = <Semantics>[
+                Semantics(
+                  label: 'Rotate Left',
                   child: IconButton(
                     color: Colors.white,
                     icon: const ImageIcon(
-                        AssetImage("assets/icons/rotate-left.png")),
+                      AssetImage('assets/icons/rotate-left.png'),
+                    ),
+                    padding: const EdgeInsets.all(12),
                     onPressed: () async {
                       cropController.rotateLeft();
                       updateCroppedImage();
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
+                Semantics(
+                  label: 'Rotate Right',
                   child: IconButton(
                     color: Colors.white,
                     icon: const ImageIcon(
-                        AssetImage("assets/icons/rotate-right.png")),
+                      AssetImage('assets/icons/rotate-right.png'),
+                    ),
+                    padding: const EdgeInsets.all(12),
                     onPressed: () async {
                       cropController.rotateRight();
                       updateCroppedImage();
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
+                Semantics(
+                  label: 'Flip Horizontal',
                   child: IconButton(
                     color: Colors.white,
                     icon: const ImageIcon(
-                        AssetImage("assets/icons/flip-horizontal.png")),
+                      AssetImage('assets/icons/flip-horizontal.png'),
+                    ),
+                    padding: const EdgeInsets.all(12),
                     onPressed: () {
                       flipImage(SlyImageFlipDirection.horizontal);
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
+                Semantics(
+                  label: 'Flip Vertical',
                   child: IconButton(
                     color: Colors.white,
                     icon: const ImageIcon(
-                        AssetImage("assets/icons/flip-vertical.png")),
+                      AssetImage('assets/icons/flip-vertical.png'),
+                    ),
+                    padding: const EdgeInsets.all(12),
                     onPressed: () {
                       flipImage(SlyImageFlipDirection.vertical);
                     },
@@ -494,66 +498,62 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 ),
               ];
 
-              if (constraints.maxWidth > 600) {
-                return ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 80),
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: buttons,
-                  ),
-                );
-              } else {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: buttons,
-                );
-              }
+              return Padding(
+                padding: const EdgeInsets.all(12),
+                child: (constraints.maxWidth > 600)
+                    ? Wrap(
+                        direction: Axis.vertical,
+                        spacing: 6,
+                        children: buttons,
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: buttons,
+                      ),
+              );
             },
           );
 
-          final exportControls = ConstrainedBox(
-            key: const Key('lexportControls'),
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: ListView(
-              physics: constraints.maxWidth > 600
-                  ? null
-                  : const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 20,
-                    bottom: 12,
-                    left: 32,
-                    right: 32,
-                  ),
-                  child: Row(
-                    children: [
-                      const Text('Save Metadata'),
-                      const Spacer(),
-                      SlySwitch(
-                        value: _saveMetadata,
-                        onChanged: (value) {
-                          _saveMetadata = value;
-                        },
-                      ),
-                    ],
-                  ),
+          final exportControls = ListView(
+            key: const Key('exportControls'),
+            physics: constraints.maxWidth > 600
+                ? null
+                : const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  bottom: 12,
+                  left: 32,
+                  right: 32,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 6,
-                    bottom: 40,
-                    left: 32,
-                    right: 32,
-                  ),
-                  child: _saveButton,
+                child: Row(
+                  children: [
+                    const Text('Save Metadata'),
+                    const Spacer(),
+                    SlySwitch(
+                      value: _saveMetadata,
+                      onChanged: (value) {
+                        _saveMetadata = value;
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 6,
+                  bottom: 40,
+                  left: 32,
+                  right: 32,
+                ),
+                child: _saveButton,
+              ),
+            ],
           );
 
-          controlsWidget ??= lightControls;
+          controlsChild ??= lightControls;
 
           void navigationDestinationSelected(int index) {
             if (_selectedPageIndex == index) return;
@@ -562,23 +562,23 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             switch (index) {
               case 0:
                 setState(() {
-                  controlsWidget = lightControls;
+                  controlsChild = lightControls;
                 });
               case 1:
                 setState(() {
-                  controlsWidget = colorControls;
+                  controlsChild = colorControls;
                 });
               case 2:
                 setState(() {
-                  controlsWidget = geometryControls;
+                  controlsChild = geometryControls;
                 });
               case 3:
                 setState(() {
-                  controlsWidget = exportControls;
+                  controlsChild = exportControls;
                 });
               default:
                 setState(() {
-                  controlsWidget = lightControls;
+                  controlsChild = lightControls;
                 });
             }
           }
@@ -597,28 +597,28 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             destinations: const <NavigationRailDestination>[
               NavigationRailDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/light.png"),
+                  AssetImage('assets/icons/light.png'),
                   color: Colors.white,
                 ),
                 label: Text('Light'),
               ),
               NavigationRailDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/color.png"),
+                  AssetImage('assets/icons/color.png'),
                   color: Colors.white,
                 ),
                 label: Text('Color'),
               ),
               NavigationRailDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/geometry.png"),
+                  AssetImage('assets/icons/geometry.png'),
                   color: Colors.white,
                 ),
                 label: Text('Geometry'),
               ),
               NavigationRailDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/export.png"),
+                  AssetImage('assets/icons/export.png'),
                   color: Colors.white,
                 ),
                 label: Text('Export'),
@@ -642,33 +642,59 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             destinations: const <Widget>[
               NavigationDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/light.png"),
+                  AssetImage('assets/icons/light.png'),
                   color: Colors.white,
                 ),
                 label: 'Light',
               ),
               NavigationDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/color.png"),
+                  AssetImage('assets/icons/color.png'),
                   color: Colors.white,
                 ),
                 label: 'Color',
               ),
               NavigationDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/geometry.png"),
+                  AssetImage('assets/icons/geometry.png'),
                   color: Colors.white,
                 ),
                 label: 'Geometry',
               ),
               NavigationDestination(
                 icon: ImageIcon(
-                  AssetImage("assets/icons/export.png"),
+                  AssetImage('assets/icons/export.png'),
                   color: Colors.white,
                 ),
                 label: 'Export',
               ),
             ],
+          );
+
+          final controlsWidget = AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutQuint,
+            child: AnimatedSwitcher(
+                switchInCurve: Curves.easeOutQuint,
+                switchOutCurve: Curves.easeInSine,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return SlideTransition(
+                    key: ValueKey<Key?>(child.key),
+                    position: Tween<Offset>(
+                      begin: (constraints.maxWidth > 600)
+                          ? const Offset(0.07, 0.0)
+                          : const Offset(0.0, 0.07),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: FadeTransition(
+                      key: ValueKey<Key?>(child.key),
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                duration: const Duration(milliseconds: 150),
+                child: controlsChild),
           );
 
           if (constraints.maxWidth > 600) {
@@ -697,29 +723,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           : 0,
                     ),
                     Expanded(
-                      child: AnimatedSize(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutQuint,
-                        child: AnimatedSwitcher(
-                            switchInCurve: Curves.easeOutQuint,
-                            switchOutCurve: Curves.easeInSine,
-                            transitionBuilder:
-                                (Widget child, Animation<double> animation) {
-                              return SlideTransition(
-                                  key: ValueKey<Key?>(child.key),
-                                  position: Tween<Offset>(
-                                    begin: const Offset(0.07, 0.0),
-                                    end: Offset.zero,
-                                  ).animate(animation),
-                                  child: FadeTransition(
-                                    key: ValueKey<Key?>(child.key),
-                                    opacity: animation,
-                                    child: child,
-                                  ));
-                            },
-                            duration: const Duration(milliseconds: 150),
-                            child: controlsWidget),
-                      ),
+                      child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth:
+                                _selectedPageIndex == 2 ? double.infinity : 250,
+                          ),
+                          child: controlsWidget),
                     ),
                   ],
                 ),
@@ -745,9 +754,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     child: ListView(
                       children: <Widget>[
                         imageWidget,
-                        (controlsWidget != null)
-                            ? controlsWidget!
-                            : lightControls
+                        controlsWidget,
                       ],
                     ),
                   ),
