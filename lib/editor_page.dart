@@ -471,7 +471,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         padding: const EdgeInsets.all(12),
                         child: IconButton(
                           color: Colors.white,
-                          icon: const Icon(CupertinoIcons.rotate_left),
+                          icon: const ImageIcon(
+                              AssetImage("assets/icons/rotate-left.png")),
                           onPressed: () async {
                             cropController.rotateLeft();
                             updateCroppedImage();
@@ -482,7 +483,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         padding: const EdgeInsets.all(12),
                         child: IconButton(
                           color: Colors.white,
-                          icon: const Icon(CupertinoIcons.rotate_right),
+                          icon: const ImageIcon(
+                              AssetImage("assets/icons/rotate-right.png")),
                           onPressed: () async {
                             cropController.rotateRight();
                             updateCroppedImage();
@@ -493,8 +495,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         padding: const EdgeInsets.all(12),
                         child: IconButton(
                           color: Colors.white,
-                          icon: const Icon(
-                              CupertinoIcons.arrow_right_arrow_left_square),
+                          icon: const ImageIcon(
+                              AssetImage("assets/icons/flip-horizontal.png")),
                           onPressed: () {
                             flipImage(SlyImageFlipDirection.horizontal);
                           },
@@ -504,7 +506,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         padding: const EdgeInsets.all(12),
                         child: IconButton(
                           color: Colors.white,
-                          icon: const Icon(CupertinoIcons.arrow_up_down_square),
+                          icon: const ImageIcon(
+                              AssetImage("assets/icons/flip-vertical.png")),
                           onPressed: () {
                             flipImage(SlyImageFlipDirection.vertical);
                           },
@@ -611,22 +614,22 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 selectedIndex: _selectedPageIndex,
                 labelType: NavigationRailLabelType.selected,
                 onDestinationSelected: navigationDestinationSelected,
-                destinations: <NavigationRailDestination>[
+                destinations: const <NavigationRailDestination>[
                   NavigationRailDestination(
-                    icon: Icon(context.platformIcons.brightness),
-                    label: const Text('Light'),
+                    icon: ImageIcon(AssetImage("assets/icons/light.png")),
+                    label: Text('Light'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(context.platformIcons.star),
-                    label: const Text('Color'),
+                    icon: ImageIcon(AssetImage("assets/icons/color.png")),
+                    label: Text('Color'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(context.platformIcons.fullscreen),
-                    label: const Text('Geometry'),
+                    icon: ImageIcon(AssetImage("assets/icons/geometry.png")),
+                    label: Text('Geometry'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(context.platformIcons.share),
-                    label: const Text('Export'),
+                    icon: ImageIcon(AssetImage("assets/icons/export.png")),
+                    label: Text('Export'),
                   ),
                 ],
               );
@@ -639,21 +642,21 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 surfaceTintColor: Colors.transparent,
                 selectedIndex: _selectedPageIndex,
                 onDestinationSelected: navigationDestinationSelected,
-                destinations: <Widget>[
+                destinations: const <Widget>[
                   NavigationDestination(
-                    icon: Icon(context.platformIcons.brightness),
+                    icon: ImageIcon(AssetImage("assets/icons/light.png")),
                     label: 'Light',
                   ),
                   NavigationDestination(
-                    icon: Icon(context.platformIcons.star),
+                    icon: ImageIcon(AssetImage("assets/icons/color.png")),
                     label: 'Color',
                   ),
                   NavigationDestination(
-                    icon: Icon(context.platformIcons.fullscreen),
+                    icon: ImageIcon(AssetImage("assets/icons/geometry.png")),
                     label: 'Geometry',
                   ),
                   NavigationDestination(
-                    icon: Icon(context.platformIcons.share),
+                    icon: ImageIcon(AssetImage("assets/icons/export.png")),
                     label: 'Export',
                   ),
                 ],
