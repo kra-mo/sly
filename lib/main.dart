@@ -13,7 +13,7 @@ void main() {
 
   doWhenWindowReady(() {
     appWindow.alignment = Alignment.center;
-    appWindow.minSize = const Size(270, 270);
+    appWindow.minSize = const Size(320, 270);
   });
 }
 
@@ -62,7 +62,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
               const ImageIcon(
                 AssetImage("assets/icons/sly.png"),
                 color: Colors.deepOrangeAccent,
-                size: 128,
+                size: 96,
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),

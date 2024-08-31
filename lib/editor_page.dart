@@ -24,6 +24,8 @@ class SlyEditorPage extends StatefulWidget {
 
 class _SlyEditorPageState extends State<SlyEditorPage> {
   final GlobalKey<SlyButtonState> slyButtonKey = GlobalKey<SlyButtonState>();
+  final GlobalKey imageWidgetKey = GlobalKey();
+  final GlobalKey controlsWidgetKey = GlobalKey();
 
   late SlyImage flippedImage = widget.image;
   late SlyImage thumbnail;
@@ -165,6 +167,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       final croppedImage = SlyImage.fromImage(imgImage);
       croppedImage.lightAttributes = thumbnail.lightAttributes;
       croppedImage.colorAttributes = thumbnail.colorAttributes;
+      croppedImage.effectAttributes = thumbnail.effectAttributes;
       await croppedImage.applyEdits();
 
       if (!(await saveImage(await croppedImage.encode(format: format),
@@ -191,6 +194,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         thumbnail.lightAttributes = croppedThumbnail.lightAttributes;
     flippedImage.colorAttributes =
         thumbnail.colorAttributes = croppedThumbnail.colorAttributes;
+    flippedImage.effectAttributes =
+        thumbnail.effectAttributes = croppedThumbnail.effectAttributes;
 
     thumbnail.encode().then((data) {
       setState(() {
@@ -235,6 +240,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       croppedThumbnail = SlyImage.fromImage(image);
       croppedThumbnail.lightAttributes = thumbnail.lightAttributes;
       croppedThumbnail.colorAttributes = thumbnail.colorAttributes;
+      croppedThumbnail.effectAttributes = thumbnail.effectAttributes;
       updateImage();
     }
 
@@ -296,12 +302,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           );
 
           final imageWidget = Expanded(
-            flex: 7,
+            key: imageWidgetKey,
             child: AnimatedPadding(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 600),
               curve: Curves.easeOutQuint,
-              padding: EdgeInsets.all(_selectedPageIndex == 2 ? 32 : 0),
-              child: _selectedPageIndex == 2 ? cropImageView : imageView,
+              padding: _selectedPageIndex == 3
+                  ? const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    )
+                  : const EdgeInsets.all(0),
+              child: _selectedPageIndex == 3 ? cropImageView : imageView,
             ),
           );
 
@@ -415,6 +426,63 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       onChanged: (value) {},
                       onChangeEnd: (value) {
                         croppedThumbnail.colorAttributes.values
+                            .elementAt(index)
+                            .value = value;
+                        updateImage();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+
+          final effectControls = ListView.builder(
+            key: const Key('effectControls'),
+            physics: constraints.maxWidth > 600
+                ? null
+                : const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: croppedThumbnail.effectAttributes.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  top: index == 0 ? 16 : 0,
+                  bottom: index == croppedThumbnail.effectAttributes.length - 1
+                      ? 28
+                      : 0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 8),
+                      child: Text(
+                        croppedThumbnail.effectAttributes.values
+                            .elementAt(index)
+                            .name,
+                        style: TextStyle(color: Colors.grey.shade400),
+                      ),
+                    ),
+                    SlySlider(
+                      value: croppedThumbnail.effectAttributes.values
+                          .elementAt(index)
+                          .value,
+                      secondaryTrackValue: croppedThumbnail
+                          .effectAttributes.values
+                          .elementAt(index)
+                          .anchor,
+                      min: croppedThumbnail.effectAttributes.values
+                          .elementAt(index)
+                          .min,
+                      max: croppedThumbnail.effectAttributes.values
+                          .elementAt(index)
+                          .max,
+                      onChanged: (value) {},
+                      onChangeEnd: (value) {
+                        croppedThumbnail.effectAttributes.values
                             .elementAt(index)
                             .value = value;
                         updateImage();
@@ -544,7 +612,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
           void navigationDestinationSelected(int index) {
             if (_selectedPageIndex == index) return;
-            if (_selectedPageIndex == 2) updateCroppedImage();
+            if (_selectedPageIndex == 3) updateCroppedImage();
 
             _selectedPageIndex = index;
 
@@ -559,9 +627,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 });
               case 2:
                 setState(() {
-                  controlsChild = geometryControls;
+                  controlsChild = effectControls;
                 });
               case 3:
+                setState(() {
+                  controlsChild = geometryControls;
+                });
+              case 4:
                 setState(() {
                   controlsChild = exportControls;
                 });
@@ -597,6 +669,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   color: Colors.white,
                 ),
                 label: Text('Color'),
+              ),
+              NavigationRailDestination(
+                icon: ImageIcon(
+                  AssetImage('assets/icons/effects.png'),
+                  color: Colors.white,
+                ),
+                label: Text('Effects'),
               ),
               NavigationRailDestination(
                 icon: ImageIcon(
@@ -645,6 +724,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               ),
               NavigationDestination(
                 icon: ImageIcon(
+                  AssetImage('assets/icons/effects.png'),
+                  color: Colors.white,
+                ),
+                label: 'Effects',
+              ),
+              NavigationDestination(
+                icon: ImageIcon(
                   AssetImage('assets/icons/geometry.png'),
                   color: Colors.white,
                 ),
@@ -661,12 +747,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           );
 
           final controlsWidget = AnimatedSize(
+            key: controlsWidgetKey,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutQuint,
             child: AnimatedSwitcher(
                 switchInCurve: Curves.easeOutQuint,
-                switchOutCurve: Curves.easeInSine,
+                // switchOutCurve: Curves.easeInSine,
                 transitionBuilder: (Widget child, Animation<double> animation) {
+                  // Don't transition widgets animating out
+                  // as this causes issues with the geometry page
+                  if (child != controlsChild) return Container();
+
                   return SlideTransition(
                     key: ValueKey<Key?>(child.key),
                     position: Tween<Offset>(
@@ -715,7 +806,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       child: ConstrainedBox(
                           constraints: BoxConstraints(
                             maxWidth:
-                                _selectedPageIndex == 2 ? double.infinity : 250,
+                                _selectedPageIndex == 3 ? double.infinity : 250,
                           ),
                           child: controlsWidget),
                     ),
@@ -740,15 +831,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     child: MoveWindow(),
                   ),
                   Expanded(
-                    child: ListView(
-                      physics: _selectedPageIndex == 2
-                          ? const NeverScrollableScrollPhysics()
-                          : null,
-                      children: <Widget>[
-                        imageWidget,
-                        controlsWidget,
-                      ],
-                    ),
+                    child: _selectedPageIndex == 3
+                        ? Column(
+                            children: <Widget>[
+                              imageWidget,
+                              controlsWidget,
+                            ],
+                          )
+                        : ListView(
+                            children: <Widget>[
+                              imageWidget,
+                              controlsWidget,
+                            ],
+                          ),
                   ),
                 ],
               ),

@@ -36,6 +36,13 @@ class SlyImage {
     // 'hue': SlyImageAttribute('Hue', 0, 0, 0, 360),
   };
 
+  Map<String, SlyImageAttribute> effectAttributes = {
+    'sharpness': SlyImageAttribute('Sharpness', 0, 0, 0, 1),
+    'sepia': SlyImageAttribute('Sepia', 0, 0, 0, 1),
+    'vignette': SlyImageAttribute('Vignette', 0, 0, 0, 1),
+    'border': SlyImageAttribute('Border', 0, 0, -1, 1),
+  };
+
   int get width {
     return image.width;
   }
@@ -95,7 +102,20 @@ class SlyImage {
         red: 50 * colorAttributes['temp']!.value,
         green: 50 * colorAttributes['tint']!.value * -1,
         blue: 50 * colorAttributes['temp']!.value * -1,
-      );
+      )
+      ..sepia(amount: effectAttributes['sepia']!.value)
+      ..convolution(
+        filter: [0, -1, 0, -1, 5, -1, 0, -1, 0],
+        amount: effectAttributes['sharpness']!.value,
+      )
+      ..vignette(amount: effectAttributes['vignette']!.value)
+      ..copyExpandCanvas(
+          backgroundColor: effectAttributes['border']!.value > 0
+              ? img.ColorRgb8(255, 255, 255)
+              : img.ColorRgb8(0, 0, 0),
+          padding: (effectAttributes['border']!.value.abs() *
+                  (_originalImage.width / 3))
+              .toInt());
 
     final editedImage = (await cmd.executeThread()).outputImage;
     if (editedImage == null) return;

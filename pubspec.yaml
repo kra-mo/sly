@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/icons/light.png
     - assets/icons/color.png
+    - assets/icons/effects.png
     - assets/icons/geometry.png
     - assets/icons/export.png
     - assets/icons/rotate-left.png
