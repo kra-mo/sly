@@ -28,8 +28,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   late SlyImage flippedImage = widget.image;
   late SlyImage thumbnail;
   late SlyImage croppedThumbnail;
-  Future<Uint8List>? futureImage;
-  Future<Uint8List>? editedFutureImage;
+  Uint8List? imageData;
+  Uint8List? editedImageData;
   Widget? controlsChild;
   final cropController = CropController();
   int _selectedPageIndex = 0;
@@ -192,10 +192,18 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     flippedImage.colorAttributes =
         thumbnail.colorAttributes = croppedThumbnail.colorAttributes;
 
-    futureImage = thumbnail.encode();
+    thumbnail.encode().then((data) {
+      setState(() {
+        imageData = data;
+      });
+    });
 
-    editedFutureImage = croppedThumbnail.applyEdits().then((value) {
-      return croppedThumbnail.encode();
+    croppedThumbnail.applyEdits().then((value) {
+      croppedThumbnail.encode().then((data) {
+        setState(() {
+          editedImageData = data;
+        });
+      });
     });
 
     super.initState();
@@ -204,18 +212,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   @override
   Widget build(BuildContext context) {
     void updateImage() async {
-      setState(() {
-        editedFutureImage = croppedThumbnail.applyEdits().then((value) {
-          return croppedThumbnail.encode();
+      croppedThumbnail.applyEdits().then((value) {
+        croppedThumbnail.encode().then((data) {
+          setState(() {
+            editedImageData = data;
+          });
         });
       });
     }
 
     Future<void> updateCroppedImage() async {
-      final originalImage = await futureImage;
-      if (originalImage == null) return;
+      if (imageData == null) return;
 
-      cropController.image = await loadUiImage(originalImage);
+      cropController.image = await loadUiImage(imageData!);
       final uiImage = await cropController.croppedBitmap();
       final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
@@ -242,11 +251,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       flippedImage.flip(direction);
       thumbnail.flip(direction);
 
-      setState(() {
-        futureImage = thumbnail.encode();
+      thumbnail.encode().then((data) {
+        setState(() {
+          imageData = data;
+        });
+        updateCroppedImage();
       });
-
-      updateCroppedImage();
     }
 
     return Scaffold(
@@ -257,23 +267,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             child: SizedBox(
               width: thumbnail.width.toDouble(),
               height: thumbnail.height.toDouble(),
-              child: FutureBuilder<Uint8List>(
-                future: editedFutureImage,
-                builder:
-                    (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text('${snapshot.error}');
-                  } else if (snapshot.hasData) {
-                    return Image.memory(snapshot.data!);
-                  } else {
-                    return const Text('Could not Load Image');
-                  }
-                },
-              ),
+              child: editedImageData != null
+                  ? Image.memory(
+                      editedImageData!,
+                      fit: BoxFit.contain,
+                      gaplessPlayback: true,
+                    )
+                  : const CircularProgressIndicator.adaptive(),
             ),
           );
 
@@ -282,29 +282,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             child: SizedBox(
               width: thumbnail.width.toDouble(),
               height: thumbnail.height.toDouble(),
-              child: FutureBuilder<Uint8List>(
-                future: futureImage,
-                builder:
-                    (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text('${snapshot.error}');
-                  } else if (snapshot.hasData) {
-                    return CropImage(
+              child: imageData != null
+                  ? CropImage(
                       controller: cropController,
-                      image: Image.memory(snapshot.data!),
-                      onCrop: (rect) async {
-                        updateCroppedImage();
-                      },
-                    );
-                  } else {
-                    return const Text('Could not Load Image');
-                  }
-                },
-              ),
+                      image: Image.memory(
+                        imageData!,
+                        fit: BoxFit.contain,
+                        gaplessPlayback: true,
+                      ),
+                    )
+                  : const CircularProgressIndicator.adaptive(),
             ),
           );
 
@@ -313,7 +300,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             child: AnimatedPadding(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutQuint,
-              padding: EdgeInsets.all(_selectedPageIndex == 2 ? 16 : 0),
+              padding: EdgeInsets.all(_selectedPageIndex == 2 ? 32 : 0),
               child: _selectedPageIndex == 2 ? cropImageView : imageView,
             ),
           );
@@ -557,6 +544,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
           void navigationDestinationSelected(int index) {
             if (_selectedPageIndex == index) return;
+            if (_selectedPageIndex == 2) updateCroppedImage();
+
             _selectedPageIndex = index;
 
             switch (index) {
@@ -752,6 +741,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                   Expanded(
                     child: ListView(
+                      physics: _selectedPageIndex == 2
+                          ? const NeverScrollableScrollPhysics()
+                          : null,
                       children: <Widget>[
                         imageWidget,
                         controlsWidget,

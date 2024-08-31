@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class SlyButton extends StatefulWidget {
   const SlyButton({
@@ -62,7 +63,10 @@ class SlyButtonState extends State<SlyButton> {
       iconAlignment: widget.iconAlignment,
       child: elevatedButtonChild,
     );
-    return Theme(data: ThemeData.light(), child: elevatedButton!);
+    return CupertinoTheme(
+      data: const CupertinoThemeData(brightness: Brightness.light),
+      child: Theme(data: ThemeData.light(), child: elevatedButton!),
+    );
   }
 
   void setChild(Widget newChild) {
