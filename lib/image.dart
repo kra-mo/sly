@@ -30,6 +30,8 @@ class SlyImage {
 
   Map<String, SlyImageAttribute> colorAttributes = {
     'saturation': SlyImageAttribute('Saturation', 1, 1, 0, 2),
+    'temp': SlyImageAttribute('Temperature', 0, 0, -1, 1),
+    'tint': SlyImageAttribute('Tint', 0, 0, -1, 1),
     // 'gamma': SlyImageAttribute('Gamma', 1, 1, 0, 2),
     // 'hue': SlyImageAttribute('Hue', 0, 0, 0, 360),
   };
@@ -88,6 +90,11 @@ class SlyImage {
         blacks: img.ColorUint8.rgb(blacks, blacks, blacks),
         whites: img.ColorUint8.rgb(whites, whites, whites),
         mids: img.ColorUint8.rgb(mids, mids, mids),
+      )
+      ..colorOffset(
+        red: 50 * colorAttributes['temp']!.value,
+        green: 50 * colorAttributes['tint']!.value * -1,
+        blue: 50 * colorAttributes['temp']!.value * -1,
       );
 
     final editedImage = (await cmd.executeThread()).outputImage;
