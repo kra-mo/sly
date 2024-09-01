@@ -11,6 +11,7 @@ import 'utils.dart';
 import 'image.dart';
 import 'button.dart';
 import 'slider.dart';
+import 'slider_row.dart';
 import 'switch.dart';
 import 'title_bar.dart';
 
@@ -346,48 +347,35 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             itemBuilder: (context, index) {
               return Padding(
                 padding: EdgeInsets.only(
-                  left: 8,
-                  right: 8,
                   top: index == 0 ? 16 : 0,
                   bottom: index == croppedThumbnail.lightAttributes.length - 1
                       ? 28
                       : 0,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 8),
-                      child: Text(
-                        croppedThumbnail.lightAttributes.values
-                            .elementAt(index)
-                            .name,
-                        style: TextStyle(color: Colors.grey.shade400),
-                      ),
-                    ),
-                    SlySlider(
-                      value: croppedThumbnail.lightAttributes.values
-                          .elementAt(index)
-                          .value,
-                      secondaryTrackValue: croppedThumbnail
-                          .lightAttributes.values
-                          .elementAt(index)
-                          .anchor,
-                      min: croppedThumbnail.lightAttributes.values
-                          .elementAt(index)
-                          .min,
-                      max: croppedThumbnail.lightAttributes.values
-                          .elementAt(index)
-                          .max,
-                      onChanged: (value) {},
-                      onChangeEnd: (value) {
-                        croppedThumbnail.lightAttributes.values
-                            .elementAt(index)
-                            .value = value;
-                        updateImage();
-                      },
-                    ),
-                  ],
+                child: SlySliderRow(
+                  label: croppedThumbnail.lightAttributes.values
+                      .elementAt(index)
+                      .name,
+                  value: croppedThumbnail.lightAttributes.values
+                      .elementAt(index)
+                      .value,
+                  secondaryTrackValue: croppedThumbnail.lightAttributes.values
+                      .elementAt(index)
+                      .anchor,
+                  min: croppedThumbnail.lightAttributes.values
+                      .elementAt(index)
+                      .min,
+                  max: croppedThumbnail.lightAttributes.values
+                      .elementAt(index)
+                      .max,
+                  onChanged: (value) {},
+                  onChangeEnd: (value) {
+                    croppedThumbnail.lightAttributes.values
+                        .elementAt(index)
+                        .value = value;
+                    updateImage();
+                    setState(() {});
+                  },
                 ),
               );
             },
@@ -399,59 +387,38 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 ? null
                 : const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: croppedThumbnail.colorAttributes.length + 1,
+            itemCount: croppedThumbnail.colorAttributes.length,
             itemBuilder: (context, index) {
-              // I am adding padding like this here because of some Flutter bug.
-              // If I didn't, the value of the first slider would be messed up.
-              // No idea why.
-              //
-              // Or maybe I'm stupid. In that case, please tell me.
-              if (index == 0) return const SizedBox(height: 16);
-              index--;
-
               return Padding(
                 padding: EdgeInsets.only(
-                  left: 8,
-                  right: 8,
+                  top: index == 0 ? 16 : 0,
                   bottom: index == croppedThumbnail.colorAttributes.length - 1
                       ? 28
                       : 0,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 8),
-                      child: Text(
-                        croppedThumbnail.colorAttributes.values
-                            .elementAt(index)
-                            .name,
-                        style: TextStyle(color: Colors.grey.shade400),
-                      ),
-                    ),
-                    SlySlider(
-                      value: croppedThumbnail.colorAttributes.values
-                          .elementAt(index)
-                          .value,
-                      secondaryTrackValue: croppedThumbnail
-                          .colorAttributes.values
-                          .elementAt(index)
-                          .anchor,
-                      min: croppedThumbnail.colorAttributes.values
-                          .elementAt(index)
-                          .min,
-                      max: croppedThumbnail.colorAttributes.values
-                          .elementAt(index)
-                          .max,
-                      onChanged: (value) {},
-                      onChangeEnd: (value) {
-                        croppedThumbnail.colorAttributes.values
-                            .elementAt(index)
-                            .value = value;
-                        updateImage();
-                      },
-                    ),
-                  ],
+                child: SlySliderRow(
+                  label: croppedThumbnail.colorAttributes.values
+                      .elementAt(index)
+                      .name,
+                  value: croppedThumbnail.colorAttributes.values
+                      .elementAt(index)
+                      .value,
+                  secondaryTrackValue: croppedThumbnail.colorAttributes.values
+                      .elementAt(index)
+                      .anchor,
+                  min: croppedThumbnail.colorAttributes.values
+                      .elementAt(index)
+                      .min,
+                  max: croppedThumbnail.colorAttributes.values
+                      .elementAt(index)
+                      .max,
+                  onChanged: (value) {},
+                  onChangeEnd: (value) {
+                    croppedThumbnail.colorAttributes.values
+                        .elementAt(index)
+                        .value = value;
+                    updateImage();
+                  },
                 ),
               );
             },
@@ -467,48 +434,34 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             itemBuilder: (context, index) {
               return Padding(
                 padding: EdgeInsets.only(
-                  left: 8,
-                  right: 8,
                   top: index == 0 ? 16 : 0,
                   bottom: index == croppedThumbnail.effectAttributes.length - 1
                       ? 28
                       : 0,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 8),
-                      child: Text(
-                        croppedThumbnail.effectAttributes.values
-                            .elementAt(index)
-                            .name,
-                        style: TextStyle(color: Colors.grey.shade400),
-                      ),
-                    ),
-                    SlySlider(
-                      value: croppedThumbnail.effectAttributes.values
-                          .elementAt(index)
-                          .value,
-                      secondaryTrackValue: croppedThumbnail
-                          .effectAttributes.values
-                          .elementAt(index)
-                          .anchor,
-                      min: croppedThumbnail.effectAttributes.values
-                          .elementAt(index)
-                          .min,
-                      max: croppedThumbnail.effectAttributes.values
-                          .elementAt(index)
-                          .max,
-                      onChanged: (value) {},
-                      onChangeEnd: (value) {
-                        croppedThumbnail.effectAttributes.values
-                            .elementAt(index)
-                            .value = value;
-                        updateImage();
-                      },
-                    ),
-                  ],
+                child: SlySliderRow(
+                  label: croppedThumbnail.effectAttributes.values
+                      .elementAt(index)
+                      .name,
+                  value: croppedThumbnail.effectAttributes.values
+                      .elementAt(index)
+                      .value,
+                  secondaryTrackValue: croppedThumbnail.effectAttributes.values
+                      .elementAt(index)
+                      .anchor,
+                  min: croppedThumbnail.effectAttributes.values
+                      .elementAt(index)
+                      .min,
+                  max: croppedThumbnail.effectAttributes.values
+                      .elementAt(index)
+                      .max,
+                  onChanged: (value) {},
+                  onChangeEnd: (value) {
+                    croppedThumbnail.effectAttributes.values
+                        .elementAt(index)
+                        .value = value;
+                    updateImage();
+                  },
                 ),
               );
             },

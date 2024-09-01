@@ -29,7 +29,7 @@ class _SlySwitchState extends State<SlySwitch> {
     return Switch(
       activeTrackColor: Colors.white,
       inactiveTrackColor: Colors.white60,
-      thumbColor: const WidgetStatePropertyAll(Colors.black),
+      thumbColor: WidgetStatePropertyAll(Colors.grey.shade900),
       trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       overlayColor: const WidgetStatePropertyAll(Colors.transparent),
       value: value,
