@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -37,7 +38,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   final cropController = CropController();
   int _selectedPageIndex = 0;
   bool _saveMetadata = true;
-  final String _saveButtonLabel = Platform.isIOS ? 'Save to Photos' : 'Save';
+  final String _saveButtonLabel =
+      !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
     key: saveButtonKey,
     child: Text(_saveButtonLabel),

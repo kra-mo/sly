@@ -2,12 +2,15 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:image/image.dart' as img;
 import 'package:gal/gal.dart';
 import 'package:file_selector/file_selector.dart';
 
 bool isDesktop() {
-  return (Platform.isLinux || Platform.isMacOS || Platform.isWindows);
+  return (!kIsWeb &&
+      (Platform.isLinux || Platform.isMacOS || Platform.isWindows));
 }
 
 Future<img.Image>? loadImage(Uint8List bytes) async {
@@ -45,7 +48,7 @@ Future<ui.Image> loadUiImage(Uint8List bytes) async {
 /// Returns false if the operation was cancelled.
 Future<bool> saveImage(Uint8List imageData,
     {String fileName = 'Edited Image', String fileExtension = 'png'}) async {
-  if (!isDesktop()) {
+  if (!isDesktop() && !kIsWeb) {
     await Gal.putImageBytes(imageData, name: fileName);
     return true;
   }
@@ -54,6 +57,9 @@ Future<bool> saveImage(Uint8List imageData,
       await getSaveLocation(suggestedName: '$fileName.$fileExtension');
   if (result == null) return false;
 
-  XFile.fromData(imageData).saveTo(result.path);
+  XFile.fromData(imageData,
+          // An empty string seems to be returned on the web
+          name: result.path == '' ? '$fileName.$fileExtension' : null)
+      .saveTo(result.path);
   return true;
 }
