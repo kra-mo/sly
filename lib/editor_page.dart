@@ -58,21 +58,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       await showGeneralDialog(
         context: context,
-        pageBuilder: (context, animation1, animation2) {
-          return Container();
-        },
-        transitionDuration: const Duration(milliseconds: 300),
-        transitionBuilder: (context, animation1, animation2, widget) =>
-            ScaleTransition(
-          scale: animation1.drive(
-            Tween(
-              begin: 0.5,
-              end: 1.0,
-            ).chain(
-              CurveTween(curve: Curves.easeOutQuint),
-            ),
-          ),
-          child: SimpleDialog(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return SimpleDialog(
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(18),
@@ -87,32 +74,34 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               left: 24,
               right: 24,
             ),
-            titlePadding: const EdgeInsets.only(
-              top: 24,
-              bottom: 24,
-              left: 12,
-              right: 12,
+            titlePadding: const EdgeInsets.symmetric(
+              vertical: 32,
+              horizontal: 16,
             ),
             title: const Center(
-                child: Text('Choose a Format',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ))),
+              child: Text(
+                'Choose a Format',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             children: <Widget>[
               Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: SlyButton(
-                    onPressed: () {
-                      format = 'JPEG75';
-                      Navigator.pop(context);
-                    },
-                    style: slySubtleButtonStlye,
-                    child: const Text('JPEG Quality 75'),
-                  )),
+                padding: const EdgeInsets.only(bottom: 16),
+                child: SlyButton(
+                  onPressed: () {
+                    format = 'JPEG75';
+                    Navigator.pop(context);
+                  },
+                  style: slySubtleButtonStlye,
+                  child: const Text('JPEG Quality 75'),
+                ),
+              ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: SlyButton(
                   onPressed: () {
                     format = 'JPEG90';
@@ -123,7 +112,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: SlyButton(
                   onPressed: () {
                     format = 'JPEG100';
@@ -134,7 +123,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: SlyButton(
                   onPressed: () {
                     format = 'PNG';
@@ -151,8 +140,38 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 child: const Text('Cancel'),
               ),
             ],
-          ),
-        ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionBuilder: (context, animation, secondaryAnimation, widget) {
+          final animIn = animation.status == AnimationStatus.forward;
+
+          return FadeTransition(
+            opacity: animation.drive(
+              Tween(
+                begin: 0.0,
+                end: 1.0,
+              ).chain(
+                CurveTween(
+                  curve: animIn ? Curves.easeOutExpo : Curves.easeInOutQuint,
+                ),
+              ),
+            ),
+            child: ScaleTransition(
+              scale: animation.drive(
+                Tween(
+                  begin: animIn ? 1.1 : 1.4,
+                  end: 1.0,
+                ).chain(
+                  CurveTween(
+                    curve: animIn ? Curves.easeOutBack : Curves.easeOutQuint,
+                  ),
+                ),
+              ),
+              child: widget,
+            ),
+          );
+        },
       );
 
       // The user cancelled the format selection
