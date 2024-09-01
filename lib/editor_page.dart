@@ -12,6 +12,7 @@ import 'image.dart';
 import 'button.dart';
 import 'slider.dart';
 import 'switch.dart';
+import 'title_bar.dart';
 
 class SlyEditorPage extends StatefulWidget {
   final SlyImage image;
@@ -785,9 +786,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     color: Colors.black,
                     child: Column(
                       children: <Widget>[
-                        SizedBox(
-                          height:
-                              isDesktop() ? (Platform.isLinux ? 42 : 32) : 0,
+                        WindowTitleBarBox(
                           child: MoveWindow(),
                         ),
                         imageWidget,
@@ -795,41 +794,31 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     ),
                   ),
                 ),
-                Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: (isDesktop() && !Platform.isMacOS)
-                          ? (Platform.isLinux ? 42 : 32)
-                          : 0,
+                ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: _selectedPageIndex == 3 ? double.infinity : 250,
                     ),
-                    Expanded(
-                      child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth:
-                                _selectedPageIndex == 3 ? double.infinity : 250,
-                          ),
-                          child: controlsWidget),
-                    ),
-                  ],
-                ),
-                Container(
+                    child: controlsWidget),
+                MoveWindow(
+                  child: Container(
                     color: Colors.white10,
-                    padding: EdgeInsets.only(
-                        top: 6 +
-                            ((isDesktop() && !Platform.isMacOS)
-                                ? (Platform.isLinux ? 42 : 32)
-                                : 0)),
-                    child: navigationRail),
+                    child: Column(
+                      children: <Widget>[
+                        titleBar,
+                        Expanded(
+                          child: navigationRail,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             );
           } else {
             return Scaffold(
               body: Column(
                 children: <Widget>[
-                  SizedBox(
-                    height: isDesktop() ? (Platform.isLinux ? 42 : 32) : 0,
-                    child: MoveWindow(),
-                  ),
+                  titleBar,
                   Expanded(
                     child: _selectedPageIndex == 3
                         ? Column(

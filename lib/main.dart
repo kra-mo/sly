@@ -7,13 +7,15 @@ import 'utils.dart';
 import 'image.dart';
 import 'button.dart';
 import 'editor_page.dart';
+import 'title_bar.dart';
 
 void main() {
   runApp(const SlyApp());
 
   doWhenWindowReady(() {
     appWindow.alignment = Alignment.center;
-    appWindow.minSize = const Size(320, 270);
+    appWindow.minSize = const Size(360, 294);
+    appWindow.size = const Size(900, 600);
   });
 }
 
@@ -55,61 +57,69 @@ class _SlyHomePageState extends State<SlyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: MoveWindow(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const ImageIcon(
-                AssetImage("assets/icons/sly.png"),
-                color: Colors.deepOrangeAccent,
-                size: 96,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'Edit an Image',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Text(
-                  'Choose an image to get started',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 200),
-                child: SlyButton(
-                  child: const Text('Choose File'),
-                  onPressed: () async {
-                    final ImagePicker picker = ImagePicker();
-                    final XFile? file =
-                        await picker.pickImage(source: ImageSource.gallery);
-                    if (file == null) return;
-
-                    final image = await loadImage(await file.readAsBytes());
-                    if (image == null) return;
-
-                    if (!context.mounted) {
-                      throw Exception('Context is not mounted.');
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Scaffold(
-                            body: SlyEditorPage(
-                                image: SlyImage.fromImage(image))),
+        child: Column(
+          children: <Widget>[
+            titleBar,
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const ImageIcon(
+                      AssetImage("assets/icons/sly.png"),
+                      color: Colors.deepOrangeAccent,
+                      size: 96,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'Edit an Image',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
-                    );
-                  },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: Text(
+                        'Choose an image to get started',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: SlyButton(
+                        child: const Text('Choose File'),
+                        onPressed: () async {
+                          final ImagePicker picker = ImagePicker();
+                          final XFile? file = await picker.pickImage(
+                              source: ImageSource.gallery);
+                          if (file == null) return;
+
+                          final image =
+                              await loadImage(await file.readAsBytes());
+                          if (image == null) return;
+
+                          if (!context.mounted) {
+                            throw Exception('Context is not mounted.');
+                          }
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Scaffold(
+                                  body: SlyEditorPage(
+                                      image: SlyImage.fromImage(image))),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

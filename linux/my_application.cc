@@ -7,8 +7,6 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
-#include <bitsdojo_window_linux/bitsdojo_window_plugin.h>
-
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
@@ -29,39 +27,41 @@ static void my_application_activate(GApplication* application) {
   // in case the window manager does more exotic layout, e.g. tiling.
   // If running on Wayland assume the header bar will work (may need changing
   // if future cases occur).
-  gboolean use_header_bar = TRUE;
-#ifdef GDK_WINDOWING_X11
-  GdkScreen* screen = gtk_window_get_screen(window);
-  if (GDK_IS_X11_SCREEN(screen)) {
-    const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
-    if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
-      use_header_bar = FALSE;
-    }
-  }
-#endif
-  if (use_header_bar) {
-    GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
-    gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "Sly");
-    gtk_header_bar_set_show_close_button(header_bar, TRUE);
-    gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
-  } else {
-    gtk_window_set_title(window, "Sly");
-  }
+//   gboolean use_header_bar = TRUE;
+// #ifdef GDK_WINDOWING_X11
+//   GdkScreen* screen = gtk_window_get_screen(window);
+//   if (GDK_IS_X11_SCREEN(screen)) {
+//     const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
+//     if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
+//       use_header_bar = FALSE;
+//     }
+//   }
+// #endif
+//   if (use_header_bar) {
+//     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
+//     gtk_widget_show(GTK_WIDGET(header_bar));
+//     gtk_header_bar_set_title(header_bar, "Sly");
+//     gtk_header_bar_set_show_close_button(header_bar, TRUE);
+//     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
+//   } else {
+//     gtk_window_set_title(window, "Sly");
+//   }
 
-  auto bdw = bitsdojo_window_from(window);
-  bdw->setCustomFrame(true);
-  //gtk_window_set_default_size(window, 1280, 720);
-  gtk_widget_show(GTK_WIDGET(window));
+  gtk_window_set_titlebar(window, NULL);
+  gtk_window_set_default_size(window, 900, 600);
+
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
-  gtk_widget_show(GTK_WIDGET(view));
+
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+
+  gtk_widget_show(GTK_WIDGET(window));
+  gtk_widget_show(GTK_WIDGET(view));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }

@@ -37,6 +37,7 @@ dependencies:
   gal: ^2.3.0
   file_selector: ^1.0.3
   crop_image: ^1.0.13
+  handy_window: ^0.4.0
 
 dev_dependencies:
   flutter_test:
