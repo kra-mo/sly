@@ -788,14 +788,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 Expanded(
                   child: Container(
                     color: Colors.black,
-                    child: Column(
-                      children: <Widget>[
-                        WindowTitleBarBox(
-                          child: MoveWindow(),
-                        ),
-                        imageWidget,
-                      ],
-                    ),
+                    child: isDesktop()
+                        ? Column(
+                            children: <Widget>[
+                              WindowTitleBarBox(
+                                child: MoveWindow(),
+                              ),
+                              imageWidget,
+                            ],
+                          )
+                        : imageWidget,
                   ),
                 ),
                 ConstrainedBox(
