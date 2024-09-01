@@ -83,10 +83,13 @@ class SlyButtonState extends State<SlyButton> {
 
 Widget getCrossfade(Widget widget1, Widget widget2) {
   return AnimatedCrossFade(
-    duration: const Duration(milliseconds: 500),
+    duration: const Duration(milliseconds: 700),
     firstChild: widget1,
     secondChild: widget2,
     crossFadeState: CrossFadeState.showSecond,
+    firstCurve: Curves.easeOutQuint,
+    secondCurve: Curves.easeInQuint,
+    sizeCurve: Curves.easeInOutQuint,
   );
 }
 

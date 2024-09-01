@@ -10,7 +10,6 @@ import 'package:crop_image/crop_image.dart';
 import 'utils.dart';
 import 'image.dart';
 import 'button.dart';
-import 'slider.dart';
 import 'slider_row.dart';
 import 'switch.dart';
 import 'title_bar.dart';
@@ -25,7 +24,7 @@ class SlyEditorPage extends StatefulWidget {
 }
 
 class _SlyEditorPageState extends State<SlyEditorPage> {
-  final GlobalKey<SlyButtonState> slyButtonKey = GlobalKey<SlyButtonState>();
+  final GlobalKey<SlyButtonState> saveButtonKey = GlobalKey<SlyButtonState>();
   final GlobalKey imageWidgetKey = GlobalKey();
   final GlobalKey controlsWidgetKey = GlobalKey();
 
@@ -40,7 +39,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   bool _saveMetadata = true;
   final String _saveButtonLabel = Platform.isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
-    key: slyButtonKey,
+    key: saveButtonKey,
     child: Text(_saveButtonLabel),
     onPressed: () async {
       _saveButton.setChild(

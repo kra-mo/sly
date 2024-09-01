@@ -53,6 +53,56 @@ class SlyHomePage extends StatefulWidget {
 }
 
 class _SlyHomePageState extends State<SlyHomePage> {
+  final GlobalKey<SlyButtonState> pickerButtonKey = GlobalKey<SlyButtonState>();
+
+  final String _pickerButtonLabel = 'Pick Image';
+  late final SlyButton _pickerButton = SlyButton(
+    key: pickerButtonKey,
+    child: const Text('Choose File'),
+    onPressed: () async {
+      _pickerButton.setChild(
+        const Padding(
+          padding: EdgeInsets.all(6),
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator.adaptive(),
+          ),
+        ),
+      );
+
+      final ImagePicker picker = ImagePicker();
+      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+      if (file == null) {
+        _pickerButton.setChild(Text(_pickerButtonLabel));
+        return;
+      }
+
+      final image = await loadImage(await file.readAsBytes());
+      if (image == null) {
+        _pickerButton.setChild(Text(_pickerButtonLabel));
+        return;
+      }
+
+      if (!mounted) {
+        _pickerButton.setChild(Text(_pickerButtonLabel));
+        return;
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Scaffold(body: SlyEditorPage(image: SlyImage.fromImage(image))),
+        ),
+      );
+
+      // Wait for the page transition animation
+      await Future.delayed(const Duration(milliseconds: 2000));
+      _pickerButton.setChild(Text(_pickerButtonLabel));
+    },
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +123,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
-                        'Edit an Image',
+                        'Edit Your Photos',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
@@ -88,32 +138,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                     ),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 200),
-                      child: SlyButton(
-                        child: const Text('Choose File'),
-                        onPressed: () async {
-                          final ImagePicker picker = ImagePicker();
-                          final XFile? file = await picker.pickImage(
-                              source: ImageSource.gallery);
-                          if (file == null) return;
-
-                          final image =
-                              await loadImage(await file.readAsBytes());
-                          if (image == null) return;
-
-                          if (!context.mounted) {
-                            throw Exception('Context is not mounted.');
-                          }
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Scaffold(
-                                  body: SlyEditorPage(
-                                      image: SlyImage.fromImage(image))),
-                            ),
-                          );
-                        },
-                      ),
+                      child: _pickerButton,
                     ),
                   ],
                 ),
