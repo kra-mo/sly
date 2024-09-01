@@ -55,87 +55,102 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       String? format;
 
-      await showDialog(
+      await showGeneralDialog(
         context: context,
-        builder: (context) => SimpleDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(18),
+        pageBuilder: (context, animation1, animation2) {
+          return Container();
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionBuilder: (context, animation1, animation2, widget) =>
+            ScaleTransition(
+          scale: animation1.drive(
+            Tween(
+              begin: 0.5,
+              end: 1.0,
+            ).chain(
+              CurveTween(curve: Curves.easeOutQuint),
             ),
           ),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 24,
-          ),
-          contentPadding: const EdgeInsets.only(
-            bottom: 24,
-            left: 24,
-            right: 24,
-          ),
-          titlePadding: const EdgeInsets.only(
-            top: 24,
-            bottom: 24,
-            left: 12,
-            right: 12,
-          ),
-          title: const Center(
-              child: Text('Choose a Format',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ))),
-          children: <Widget>[
-            Padding(
+          child: SimpleDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(18),
+              ),
+            ),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 24,
+            ),
+            contentPadding: const EdgeInsets.only(
+              bottom: 24,
+              left: 24,
+              right: 24,
+            ),
+            titlePadding: const EdgeInsets.only(
+              top: 24,
+              bottom: 24,
+              left: 12,
+              right: 12,
+            ),
+            title: const Center(
+                child: Text('Choose a Format',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ))),
+            children: <Widget>[
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: SlyButton(
+                    onPressed: () {
+                      format = 'JPEG75';
+                      Navigator.pop(context);
+                    },
+                    style: slySubtleButtonStlye,
+                    child: const Text('JPEG Quality 75'),
+                  )),
+              Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: SlyButton(
                   onPressed: () {
-                    format = 'JPEG75';
+                    format = 'JPEG90';
                     Navigator.pop(context);
                   },
                   style: slySubtleButtonStlye,
-                  child: const Text('JPEG Quality 75'),
-                )),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SlyButton(
+                  child: const Text('JPEG Quality 90'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SlyButton(
+                  onPressed: () {
+                    format = 'JPEG100';
+                    Navigator.pop(context);
+                  },
+                  style: slySubtleButtonStlye,
+                  child: const Text('JPEG Quality 100'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SlyButton(
+                  onPressed: () {
+                    format = 'PNG';
+                    Navigator.pop(context);
+                  },
+                  style: slySubtleButtonStlye,
+                  child: const Text('PNG (Lossless)'),
+                ),
+              ),
+              SlyButton(
                 onPressed: () {
-                  format = 'JPEG90';
                   Navigator.pop(context);
                 },
-                style: slySubtleButtonStlye,
-                child: const Text('JPEG Quality 90'),
+                child: const Text('Cancel'),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SlyButton(
-                onPressed: () {
-                  format = 'JPEG100';
-                  Navigator.pop(context);
-                },
-                style: slySubtleButtonStlye,
-                child: const Text('JPEG Quality 100'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SlyButton(
-                onPressed: () {
-                  format = 'PNG';
-                  Navigator.pop(context);
-                },
-                style: slySubtleButtonStlye,
-                child: const Text('PNG (Lossless)'),
-              ),
-            ),
-            SlyButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
