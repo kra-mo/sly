@@ -303,22 +303,25 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final imageView = FittedBox(
-            key: const Key('imageView'),
-            child: SizedBox(
-              width: thumbnail.width.toDouble(),
-              height: thumbnail.height.toDouble(),
-              child: editedImageData != null
-                  ? Image.memory(
-                      editedImageData!,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    )
-                  : const Center(
+          final imageView = editedImageData != null
+              ? InteractiveViewer(
+                  key: const Key('imageView'),
+                  child: Image.memory(
+                    editedImageData!,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  ),
+                )
+              : FittedBox(
+                  key: const Key('imageView'),
+                  child: SizedBox(
+                    width: thumbnail.width.toDouble(),
+                    height: thumbnail.height.toDouble(),
+                    child: const Center(
                       child: CircularProgressIndicator.adaptive(),
                     ),
-            ),
-          );
+                  ),
+                );
 
           final cropImageView = FittedBox(
             key: const Key('cropImageView'),
