@@ -345,19 +345,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             ),
           );
 
-          final imageWidget = Expanded(
+          final imageWidget = AnimatedPadding(
             key: imageWidgetKey,
-            child: AnimatedPadding(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutQuint,
-              padding: _selectedPageIndex == 3
-                  ? const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 12,
-                    )
-                  : const EdgeInsets.all(0),
-              child: _selectedPageIndex == 3 ? cropImageView : imageView,
-            ),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutQuint,
+            padding: _selectedPageIndex == 3
+                ? const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  )
+                : const EdgeInsets.all(0),
+            child: _selectedPageIndex == 3 ? cropImageView : imageView,
           );
 
           final lightControls = ListView.builder(
@@ -785,7 +783,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               WindowTitleBarBox(
                                 child: MoveWindow(),
                               ),
-                              imageWidget,
+                              Expanded(child: imageWidget),
                             ],
                           )
                         : imageWidget,
