@@ -280,7 +280,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       fit: BoxFit.contain,
                       gaplessPlayback: true,
                     )
-                  : const CircularProgressIndicator.adaptive(),
+                  : const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    ),
             ),
           );
 
@@ -298,7 +300,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         gaplessPlayback: true,
                       ),
                     )
-                  : const CircularProgressIndicator.adaptive(),
+                  : const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    ),
             ),
           );
 
