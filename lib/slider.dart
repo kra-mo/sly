@@ -49,30 +49,22 @@ class SlySlider extends StatefulWidget {
 }
 
 class _SlySliderState extends State<SlySlider> {
-  double value = 0.0;
-  double initial = 0.0;
-
-  @override
-  void initState() {
-    value = initial = widget.value;
-
-    super.initState();
-  }
+  late double value = widget.value;
 
   @override
   Widget build(BuildContext context) {
     return SliderTheme(
       data: SlySliderThemeData(),
       child: GestureDetector(
-        // Reset to initial value on double tap
+        // Reset to secondary track value on double tap
         onDoubleTap: () {
           setState(() {
-            value = initial;
+            value = widget.secondaryTrackValue ?? 0;
           });
 
-          if (widget.onChangeStart != null) widget.onChangeStart!(initial);
-          if (widget.onChanged != null) widget.onChanged!(initial);
-          if (widget.onChangeEnd != null) widget.onChangeEnd!(initial);
+          if (widget.onChangeStart != null) widget.onChangeStart!(value);
+          if (widget.onChanged != null) widget.onChanged!(value);
+          if (widget.onChangeEnd != null) widget.onChangeEnd!(value);
         },
         child: Slider(
           value: value,
