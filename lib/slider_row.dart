@@ -51,7 +51,7 @@ class SlySliderRow extends StatefulWidget {
 }
 
 class _SlySliderRowState extends State<SlySliderRow> {
-  late String? label = getLabel(widget.value);
+  late String? valueLabel = getLabel(widget.value);
 
   String? getLabel(num value) {
     final initial = (widget.secondaryTrackValue ?? 0);
@@ -62,23 +62,23 @@ class _SlySliderRowState extends State<SlySliderRow> {
     final min = widget.min.abs();
     final max = widget.max.abs();
 
-    String valueLabel =
+    String label =
         '${v < i ? '-' : '+'}${(100 * ((v - i) / ((v < i ? min : max) - i))).round().toString()}';
 
-    return (valueLabel == '+0' || valueLabel == "-0") ? null : valueLabel;
+    return (label == '+0' || label == "-0") ? null : label;
   }
 
   late final slider = SlySlider(
     value: widget.value,
     secondaryTrackValue: widget.secondaryTrackValue,
-    onChanged: widget.onChanged,
-    onChangeStart: widget.onChangeStart,
-    onChangeEnd: (value) {
+    onChanged: (value) {
       setState(() {
-        label = getLabel(value);
+        valueLabel = getLabel(value);
       });
-      if (widget.onChangeEnd != null) widget.onChangeEnd!(value);
+      if (widget.onChanged != null) widget.onChanged!(value);
     },
+    onChangeStart: widget.onChangeStart,
+    onChangeEnd: widget.onChangeEnd,
     min: widget.min,
     max: widget.max,
     divisions: widget.divisions,
@@ -112,8 +112,13 @@ class _SlySliderRowState extends State<SlySliderRow> {
                   style: TextStyle(color: Colors.grey.shade200),
                 ),
                 Text(
-                  label ?? '',
-                  style: TextStyle(color: Colors.grey.shade400),
+                  valueLabel ?? '',
+                  style: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontFeatures: const <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
                 ),
               ],
             ),
