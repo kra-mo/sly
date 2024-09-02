@@ -835,7 +835,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 focusElevation: 0,
                 disabledElevation: 0,
                 highlightElevation: 0,
-                child: const Icon(Icons.add),
+                child: const ImageIcon(AssetImage('assets/icons/add.png')),
                 onPressed: () {
                   pickNewImage();
                 },
@@ -897,7 +897,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   focusElevation: 0,
                   disabledElevation: 0,
                   highlightElevation: 0,
-                  child: const Icon(Icons.add),
+                  child: const ImageIcon(AssetImage('assets/icons/add.png')),
                   onPressed: () {
                     pickNewImage();
                   },
