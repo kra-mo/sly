@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:crop_image/crop_image.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'utils.dart';
 import 'image.dart';
@@ -304,6 +305,77 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        Future<void> pickNewImage() async {
+          final ImagePicker picker = ImagePicker();
+
+          final XFile? file =
+              await picker.pickImage(source: ImageSource.gallery);
+          if (file == null) return;
+
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              elevation: 0,
+              padding: const EdgeInsets.only(bottom: 16, right: 16),
+              backgroundColor: Colors.transparent,
+              content: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        left: constraints.maxWidth > 600
+                            ? (constraints.maxWidth - 250)
+                            : 16),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(
+                        ui.Radius.circular(8),
+                      ),
+                      child: Container(
+                        color: Colors.grey.shade700,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator.adaptive(),
+                              ),
+                              SizedBox(width: 12),
+                              Text(
+                                'Loading Image',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+
+          final image = await loadImage(await file.readAsBytes());
+          if (image == null) return;
+
+          if (!context.mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  SlyEditorPage(image: SlyImage.fromImage(image)),
+            ),
+          );
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        }
+
         final imageView = editedImageData != null
             ? InteractiveViewer(
                 clipBehavior:
@@ -504,7 +576,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           },
         );
 
-        final geometryControls = LayoutBuilder(
+        final cropControls = LayoutBuilder(
           builder: (context, constraints) {
             final buttons = <Semantics>[
               Semantics(
@@ -641,7 +713,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               });
             case 3:
               setState(() {
-                controlsChild = geometryControls;
+                controlsChild = cropControls;
               });
             case 4:
               setState(() {
@@ -689,10 +761,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             ),
             NavigationRailDestination(
               icon: ImageIcon(
-                AssetImage('assets/icons/geometry.png'),
+                AssetImage('assets/icons/crop.png'),
                 color: Colors.white,
               ),
-              label: Text('Geometry'),
+              label: Text('Crop'),
             ),
             NavigationRailDestination(
               icon: ImageIcon(
@@ -717,41 +789,57 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Radius.circular(12),
             ),
           ),
-          destinations: const <Widget>[
-            NavigationDestination(
+          destinations: <Widget>[
+            const NavigationDestination(
               icon: ImageIcon(
                 AssetImage('assets/icons/light.png'),
                 color: Colors.white,
               ),
               label: 'Light',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: ImageIcon(
                 AssetImage('assets/icons/color.png'),
                 color: Colors.white,
               ),
               label: 'Color',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: ImageIcon(
                 AssetImage('assets/icons/effects.png'),
                 color: Colors.white,
               ),
               label: 'Effects',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: ImageIcon(
-                AssetImage('assets/icons/geometry.png'),
+                AssetImage('assets/icons/crop.png'),
                 color: Colors.white,
               ),
-              label: 'Geometry',
+              label: 'Crop',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: ImageIcon(
                 AssetImage('assets/icons/export.png'),
                 color: Colors.white,
               ),
               label: 'Export',
+            ),
+            Semantics(
+              label: 'Add Image',
+              child: FloatingActionButton.small(
+                shape: const CircleBorder(),
+                backgroundColor: Colors.grey.shade200,
+                elevation: 0,
+                hoverElevation: 0,
+                focusElevation: 0,
+                disabledElevation: 0,
+                highlightElevation: 0,
+                child: const Icon(Icons.add),
+                onPressed: () {
+                  pickNewImage();
+                },
+              ),
             ),
           ],
         );
@@ -765,7 +853,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               // switchOutCurve: Curves.easeInSine,
               transitionBuilder: (Widget child, Animation<double> animation) {
                 // Don't transition widgets animating out
-                // as this causes issues with the geometry page
+                // as this causes issues with the crop page
                 if (child != controlsChild) return Container();
 
                 return SlideTransition(
@@ -789,6 +877,33 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         if (constraints.maxWidth > 600) {
           return Scaffold(
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Semantics(
+                label: 'Add Image',
+                child: FloatingActionButton.small(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      ui.Radius.circular(8),
+                    ),
+                  ),
+                  backgroundColor: Colors.grey.shade700,
+                  foregroundColor: Colors.white,
+                  focusColor: Colors.white24,
+                  hoverColor: Colors.white10,
+                  splashColor: Colors.white10,
+                  elevation: 0,
+                  hoverElevation: 0,
+                  focusElevation: 0,
+                  disabledElevation: 0,
+                  highlightElevation: 0,
+                  child: const Icon(Icons.add),
+                  onPressed: () {
+                    pickNewImage();
+                  },
+                ),
+              ),
+            ),
             body: Container(
               color: Colors.black,
               child: Row(
@@ -862,7 +977,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Expanded(child: imageWidget),
-                            geometryControls,
+                            cropControls,
                           ],
                         )
                       : ListView(

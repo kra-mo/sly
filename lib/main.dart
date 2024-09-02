@@ -108,8 +108,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              Scaffold(body: SlyEditorPage(image: SlyImage.fromImage(image))),
+          builder: (context) => SlyEditorPage(image: SlyImage.fromImage(image)),
         ),
       );
 
