@@ -307,6 +307,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         builder: (context, constraints) {
           final imageView = editedImageData != null
               ? InteractiveViewer(
+                  clipBehavior:
+                      constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
                   key: const Key('imageView'),
                   child: Image.memory(
                     editedImageData!,
@@ -772,11 +774,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           );
 
           if (constraints.maxWidth > 600) {
-            return Row(
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    color: Colors.black,
+            return Container(
+              color: Colors.black,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
                     child: isDesktop()
                         ? Column(
                             children: <Widget>[
@@ -788,26 +790,51 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           )
                         : imageWidget,
                   ),
-                ),
-                ConstrainedBox(
+                  ConstrainedBox(
                     constraints: BoxConstraints(
                       maxWidth: _selectedPageIndex == 3 ? double.infinity : 250,
                     ),
-                    child: controlsWidget),
-                MoveWindow(
-                  child: Container(
-                    color: Colors.white10,
                     child: Column(
-                      children: <Widget>[
-                        titleBar,
+                      children: [
                         Expanded(
-                          child: navigationRail,
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: ui.Radius.circular(12),
+                              bottomLeft: ui.Radius.circular(12),
+                            ),
+                            child: Container(
+                              color: Colors.grey.shade900,
+                              child: controlsWidget,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  Container(
+                    color: Colors.grey.shade900,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: ui.Radius.circular(12),
+                        bottomLeft: ui.Radius.circular(12),
+                      ),
+                      child: MoveWindow(
+                        child: Container(
+                          color: Colors.white10,
+                          child: Column(
+                            children: <Widget>[
+                              titleBar,
+                              Expanded(
+                                child: navigationRail,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           } else {
             return Scaffold(
@@ -831,7 +858,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                 ],
               ),
-              bottomNavigationBar: navigationBar,
+              bottomNavigationBar: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: ui.Radius.circular(12),
+                  topRight: ui.Radius.circular(12),
+                ),
+                child: navigationBar,
+              ),
             );
           }
         },
