@@ -63,7 +63,7 @@ class _SlySliderRowState extends State<SlySliderRow> {
     final max = widget.max.abs();
 
     String label =
-        '${v < i ? '-' : '+'}${(100 * ((v - i) / ((v < i ? min : max) - i))).round().toString()}';
+        '${value < initial ? '-' : '+'}${(100 * ((v - i) / ((v < i ? min : max) - i))).round().toString()}';
 
     return (label == '+0' || label == "-0") ? null : label;
   }
