@@ -356,7 +356,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     horizontal: 32,
                     vertical: 12,
                   )
-                : const EdgeInsets.all(0),
+                : constraints.maxWidth > 600
+                    ? const EdgeInsets.all(0)
+                    : const EdgeInsets.only(top: 12, left: 12, right: 12),
             child: constraints.maxWidth > 600
                 ? _selectedPageIndex == 3
                     ? cropImageView
@@ -364,7 +366,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 : ConstrainedBox(
                     constraints:
                         BoxConstraints(maxHeight: constraints.maxWidth),
-                    child: _selectedPageIndex == 3 ? cropImageView : imageView,
+                    child: _selectedPageIndex == 3
+                        ? cropImageView
+                        : ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(ui.Radius.circular(6)),
+                            child: imageView,
+                          ),
                   ),
           );
 
