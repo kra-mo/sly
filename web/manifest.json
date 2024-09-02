@@ -4,7 +4,7 @@
   "start_url": ".",
   "display": "standalone",
   "background_color": "#212121",
-  "theme_color": "#FF5233",
+  "theme_color": "#212121",
   "description": "Friendly image editor",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
