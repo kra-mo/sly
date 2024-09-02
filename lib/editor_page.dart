@@ -357,7 +357,15 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     vertical: 12,
                   )
                 : const EdgeInsets.all(0),
-            child: _selectedPageIndex == 3 ? cropImageView : imageView,
+            child: constraints.maxWidth > 600
+                ? _selectedPageIndex == 3
+                    ? cropImageView
+                    : imageView
+                : ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxHeight: constraints.maxWidth),
+                    child: _selectedPageIndex == 3 ? cropImageView : imageView,
+                  ),
           );
 
           final lightControls = ListView.builder(
@@ -844,9 +852,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   Expanded(
                     child: _selectedPageIndex == 3
                         ? Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              imageWidget,
-                              controlsWidget,
+                              Expanded(child: imageWidget),
+                              geometryControls,
                             ],
                           )
                         : ListView(
