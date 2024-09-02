@@ -31,7 +31,11 @@ class _SlySwitchState extends State<SlySwitch> {
       inactiveTrackColor: Colors.white60,
       thumbColor: WidgetStatePropertyAll(Colors.grey.shade900),
       trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
-      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+      overlayColor: WidgetStateProperty.resolveWith((states) {
+        return states.contains(WidgetState.focused)
+            ? Colors.black26
+            : Colors.transparent;
+      }),
       value: value,
       onChanged: (v) {
         setState(() {

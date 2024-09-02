@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -12,11 +13,26 @@ import 'title_bar.dart';
 void main() {
   runApp(const SlyApp());
 
-  doWhenWindowReady(() {
-    appWindow.alignment = Alignment.center;
-    appWindow.minSize = const Size(360, 294);
-    appWindow.size = const Size(900, 600);
-  });
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.grey.shade900,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.light,
+      systemNavigationBarContrastEnforced: false,
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+      systemStatusBarContrastEnforced: false,
+    ),
+  );
+
+  if (isDesktop()) {
+    doWhenWindowReady(() {
+      appWindow.alignment = Alignment.center;
+      appWindow.minSize = const Size(360, 294);
+      appWindow.size = const Size(900, 600);
+    });
+  }
 }
 
 class SlyApp extends StatelessWidget {
@@ -89,11 +105,27 @@ class _SlyHomePageState extends State<SlyHomePage> {
         return;
       }
 
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) =>
               Scaffold(body: SlyEditorPage(image: SlyImage.fromImage(image))),
+        ),
+      );
+
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          systemNavigationBarColor: Color.alphaBlend(
+            Colors.white10,
+            Colors.grey.shade900,
+          ),
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarContrastEnforced: false,
+          statusBarColor: Colors.transparent,
+          statusBarBrightness: Brightness.dark,
+          statusBarIconBrightness: Brightness.light,
+          systemStatusBarContrastEnforced: true,
         ),
       );
 

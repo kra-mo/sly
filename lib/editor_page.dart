@@ -302,495 +302,494 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       });
     }
 
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final imageView = editedImageData != null
-              ? InteractiveViewer(
-                  clipBehavior:
-                      constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
-                  key: const Key('imageView'),
-                  child: Image.memory(
-                    editedImageData!,
-                    fit: BoxFit.contain,
-                    gaplessPlayback: true,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final imageView = editedImageData != null
+            ? InteractiveViewer(
+                clipBehavior:
+                    constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
+                key: const Key('imageView'),
+                child: Image.memory(
+                  editedImageData!,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                ),
+              )
+            : FittedBox(
+                key: const Key('imageView'),
+                child: SizedBox(
+                  width: thumbnail.width.toDouble(),
+                  height: thumbnail.height.toDouble(),
+                  child: const Center(
+                    child: CircularProgressIndicator.adaptive(),
                   ),
-                )
-              : FittedBox(
-                  key: const Key('imageView'),
-                  child: SizedBox(
-                    width: thumbnail.width.toDouble(),
-                    height: thumbnail.height.toDouble(),
-                    child: const Center(
-                      child: CircularProgressIndicator.adaptive(),
+                ),
+              );
+
+        final cropImageView = FittedBox(
+          key: const Key('cropImageView'),
+          child: SizedBox(
+            width: thumbnail.width.toDouble(),
+            height: thumbnail.height.toDouble(),
+            child: imageData != null
+                ? CropImage(
+                    controller: cropController,
+                    image: Image.memory(
+                      imageData!,
+                      fit: BoxFit.contain,
+                      gaplessPlayback: true,
                     ),
+                  )
+                : const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+          ),
+        );
+
+        final imageWidget = AnimatedPadding(
+          key: imageWidgetKey,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutQuint,
+          padding: _selectedPageIndex == 3
+              ? const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                )
+              : constraints.maxWidth > 600
+                  ? const EdgeInsets.all(0)
+                  : const EdgeInsets.only(top: 12, left: 12, right: 12),
+          child: constraints.maxWidth > 600
+              ? _selectedPageIndex == 3
+                  ? cropImageView
+                  : imageView
+              : ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: constraints.maxWidth),
+                  child: _selectedPageIndex == 3
+                      ? cropImageView
+                      : ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(ui.Radius.circular(6)),
+                          child: imageView,
+                        ),
+                ),
+        );
+
+        final lightControls = ListView.builder(
+          key: const Key('lightControls'),
+          physics: constraints.maxWidth > 600
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: croppedThumbnail.lightAttributes.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: index == 0 ? 16 : 0,
+                bottom: index == croppedThumbnail.lightAttributes.length - 1
+                    ? 28
+                    : 0,
+              ),
+              child: SlySliderRow(
+                label: croppedThumbnail.lightAttributes.values
+                    .elementAt(index)
+                    .name,
+                value: croppedThumbnail.lightAttributes.values
+                    .elementAt(index)
+                    .value,
+                secondaryTrackValue: croppedThumbnail.lightAttributes.values
+                    .elementAt(index)
+                    .anchor,
+                min: croppedThumbnail.lightAttributes.values
+                    .elementAt(index)
+                    .min,
+                max: croppedThumbnail.lightAttributes.values
+                    .elementAt(index)
+                    .max,
+                onChanged: (value) {},
+                onChangeEnd: (value) {
+                  croppedThumbnail.lightAttributes.values
+                      .elementAt(index)
+                      .value = value;
+                  updateImage();
+                  setState(() {});
+                },
+              ),
+            );
+          },
+        );
+
+        final colorControls = ListView.builder(
+          key: const Key('colorControls'),
+          physics: constraints.maxWidth > 600
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: croppedThumbnail.colorAttributes.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: index == 0 ? 16 : 0,
+                bottom: index == croppedThumbnail.colorAttributes.length - 1
+                    ? 28
+                    : 0,
+              ),
+              child: SlySliderRow(
+                label: croppedThumbnail.colorAttributes.values
+                    .elementAt(index)
+                    .name,
+                value: croppedThumbnail.colorAttributes.values
+                    .elementAt(index)
+                    .value,
+                secondaryTrackValue: croppedThumbnail.colorAttributes.values
+                    .elementAt(index)
+                    .anchor,
+                min: croppedThumbnail.colorAttributes.values
+                    .elementAt(index)
+                    .min,
+                max: croppedThumbnail.colorAttributes.values
+                    .elementAt(index)
+                    .max,
+                onChanged: (value) {},
+                onChangeEnd: (value) {
+                  croppedThumbnail.colorAttributes.values
+                      .elementAt(index)
+                      .value = value;
+                  updateImage();
+                },
+              ),
+            );
+          },
+        );
+
+        final effectControls = ListView.builder(
+          key: const Key('effectControls'),
+          physics: constraints.maxWidth > 600
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: croppedThumbnail.effectAttributes.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: index == 0 ? 16 : 0,
+                bottom: index == croppedThumbnail.effectAttributes.length - 1
+                    ? 28
+                    : 0,
+              ),
+              child: SlySliderRow(
+                label: croppedThumbnail.effectAttributes.values
+                    .elementAt(index)
+                    .name,
+                value: croppedThumbnail.effectAttributes.values
+                    .elementAt(index)
+                    .value,
+                secondaryTrackValue: croppedThumbnail.effectAttributes.values
+                    .elementAt(index)
+                    .anchor,
+                min: croppedThumbnail.effectAttributes.values
+                    .elementAt(index)
+                    .min,
+                max: croppedThumbnail.effectAttributes.values
+                    .elementAt(index)
+                    .max,
+                onChanged: (value) {},
+                onChangeEnd: (value) {
+                  croppedThumbnail.effectAttributes.values
+                      .elementAt(index)
+                      .value = value;
+                  updateImage();
+                },
+              ),
+            );
+          },
+        );
+
+        final geometryControls = LayoutBuilder(
+          builder: (context, constraints) {
+            final buttons = <Semantics>[
+              Semantics(
+                label: 'Rotate Left',
+                child: IconButton(
+                  color: Colors.white,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/rotate-left.png'),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  onPressed: () async {
+                    cropController.rotateLeft();
+                    updateCroppedImage();
+                  },
+                ),
+              ),
+              Semantics(
+                label: 'Rotate Right',
+                child: IconButton(
+                  color: Colors.white,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/rotate-right.png'),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  onPressed: () async {
+                    cropController.rotateRight();
+                    updateCroppedImage();
+                  },
+                ),
+              ),
+              Semantics(
+                label: 'Flip Horizontal',
+                child: IconButton(
+                  color: Colors.white,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/flip-horizontal.png'),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  onPressed: () {
+                    flipImage(SlyImageFlipDirection.horizontal);
+                  },
+                ),
+              ),
+              Semantics(
+                label: 'Flip Vertical',
+                child: IconButton(
+                  color: Colors.white,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/flip-vertical.png'),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  onPressed: () {
+                    flipImage(SlyImageFlipDirection.vertical);
+                  },
+                ),
+              ),
+            ];
+
+            return Padding(
+              padding: const EdgeInsets.all(12),
+              child: (constraints.maxWidth > 600)
+                  ? Wrap(
+                      direction: Axis.vertical,
+                      spacing: 6,
+                      children: buttons,
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: buttons,
+                    ),
+            );
+          },
+        );
+
+        final exportControls = ListView(
+          key: const Key('exportControls'),
+          physics: constraints.maxWidth > 600
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 20,
+                bottom: 12,
+                left: 32,
+                right: 32,
+              ),
+              child: Row(
+                children: [
+                  const Text('Save Metadata'),
+                  const Spacer(),
+                  SlySwitch(
+                    value: _saveMetadata,
+                    onChanged: (value) {
+                      _saveMetadata = value;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 6,
+                bottom: 40,
+                left: 32,
+                right: 32,
+              ),
+              child: _saveButton,
+            ),
+          ],
+        );
+
+        controlsChild ??= lightControls;
+
+        void navigationDestinationSelected(int index) {
+          if (_selectedPageIndex == index) return;
+          if (_selectedPageIndex == 3) updateCroppedImage();
+
+          _selectedPageIndex = index;
+
+          switch (index) {
+            case 0:
+              setState(() {
+                controlsChild = lightControls;
+              });
+            case 1:
+              setState(() {
+                controlsChild = colorControls;
+              });
+            case 2:
+              setState(() {
+                controlsChild = effectControls;
+              });
+            case 3:
+              setState(() {
+                controlsChild = geometryControls;
+              });
+            case 4:
+              setState(() {
+                controlsChild = exportControls;
+              });
+            default:
+              setState(() {
+                controlsChild = lightControls;
+              });
+          }
+        }
+
+        final navigationRail = NavigationRail(
+          backgroundColor: Colors.transparent,
+          indicatorColor: Colors.white24,
+          selectedIndex: _selectedPageIndex,
+          labelType: NavigationRailLabelType.selected,
+          indicatorShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+          onDestinationSelected: navigationDestinationSelected,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/light.png'),
+                color: Colors.white,
+              ),
+              label: Text('Light'),
+            ),
+            NavigationRailDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/color.png'),
+                color: Colors.white,
+              ),
+              label: Text('Color'),
+            ),
+            NavigationRailDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/effects.png'),
+                color: Colors.white,
+              ),
+              label: Text('Effects'),
+            ),
+            NavigationRailDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/geometry.png'),
+                color: Colors.white,
+              ),
+              label: Text('Geometry'),
+            ),
+            NavigationRailDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/export.png'),
+                color: Colors.white,
+              ),
+              label: Text('Export'),
+            ),
+          ],
+        );
+
+        final navigationBar = NavigationBar(
+          backgroundColor: Colors.white10,
+          shadowColor: Colors.transparent,
+          overlayColor: const WidgetStatePropertyAll(Colors.white12),
+          indicatorColor: Colors.white24,
+          selectedIndex: _selectedPageIndex,
+          onDestinationSelected: navigationDestinationSelected,
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+          indicatorShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/light.png'),
+                color: Colors.white,
+              ),
+              label: 'Light',
+            ),
+            NavigationDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/color.png'),
+                color: Colors.white,
+              ),
+              label: 'Color',
+            ),
+            NavigationDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/effects.png'),
+                color: Colors.white,
+              ),
+              label: 'Effects',
+            ),
+            NavigationDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/geometry.png'),
+                color: Colors.white,
+              ),
+              label: 'Geometry',
+            ),
+            NavigationDestination(
+              icon: ImageIcon(
+                AssetImage('assets/icons/export.png'),
+                color: Colors.white,
+              ),
+              label: 'Export',
+            ),
+          ],
+        );
+
+        final controlsWidget = AnimatedSize(
+          key: controlsWidgetKey,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutQuint,
+          child: AnimatedSwitcher(
+              switchInCurve: Curves.easeOutQuint,
+              // switchOutCurve: Curves.easeInSine,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                // Don't transition widgets animating out
+                // as this causes issues with the geometry page
+                if (child != controlsChild) return Container();
+
+                return SlideTransition(
+                  key: ValueKey<Key?>(child.key),
+                  position: Tween<Offset>(
+                    begin: (constraints.maxWidth > 600)
+                        ? const Offset(0.07, 0.0)
+                        : const Offset(0.0, 0.07),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: FadeTransition(
+                    key: ValueKey<Key?>(child.key),
+                    opacity: animation,
+                    child: child,
                   ),
                 );
+              },
+              duration: const Duration(milliseconds: 150),
+              child: controlsChild),
+        );
 
-          final cropImageView = FittedBox(
-            key: const Key('cropImageView'),
-            child: SizedBox(
-              width: thumbnail.width.toDouble(),
-              height: thumbnail.height.toDouble(),
-              child: imageData != null
-                  ? CropImage(
-                      controller: cropController,
-                      image: Image.memory(
-                        imageData!,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
-                      ),
-                    )
-                  : const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    ),
-            ),
-          );
-
-          final imageWidget = AnimatedPadding(
-            key: imageWidgetKey,
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutQuint,
-            padding: _selectedPageIndex == 3
-                ? const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  )
-                : constraints.maxWidth > 600
-                    ? const EdgeInsets.all(0)
-                    : const EdgeInsets.only(top: 12, left: 12, right: 12),
-            child: constraints.maxWidth > 600
-                ? _selectedPageIndex == 3
-                    ? cropImageView
-                    : imageView
-                : ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxHeight: constraints.maxWidth),
-                    child: _selectedPageIndex == 3
-                        ? cropImageView
-                        : ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(ui.Radius.circular(6)),
-                            child: imageView,
-                          ),
-                  ),
-          );
-
-          final lightControls = ListView.builder(
-            key: const Key('lightControls'),
-            physics: constraints.maxWidth > 600
-                ? null
-                : const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: croppedThumbnail.lightAttributes.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  top: index == 0 ? 16 : 0,
-                  bottom: index == croppedThumbnail.lightAttributes.length - 1
-                      ? 28
-                      : 0,
-                ),
-                child: SlySliderRow(
-                  label: croppedThumbnail.lightAttributes.values
-                      .elementAt(index)
-                      .name,
-                  value: croppedThumbnail.lightAttributes.values
-                      .elementAt(index)
-                      .value,
-                  secondaryTrackValue: croppedThumbnail.lightAttributes.values
-                      .elementAt(index)
-                      .anchor,
-                  min: croppedThumbnail.lightAttributes.values
-                      .elementAt(index)
-                      .min,
-                  max: croppedThumbnail.lightAttributes.values
-                      .elementAt(index)
-                      .max,
-                  onChanged: (value) {},
-                  onChangeEnd: (value) {
-                    croppedThumbnail.lightAttributes.values
-                        .elementAt(index)
-                        .value = value;
-                    updateImage();
-                    setState(() {});
-                  },
-                ),
-              );
-            },
-          );
-
-          final colorControls = ListView.builder(
-            key: const Key('colorControls'),
-            physics: constraints.maxWidth > 600
-                ? null
-                : const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: croppedThumbnail.colorAttributes.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  top: index == 0 ? 16 : 0,
-                  bottom: index == croppedThumbnail.colorAttributes.length - 1
-                      ? 28
-                      : 0,
-                ),
-                child: SlySliderRow(
-                  label: croppedThumbnail.colorAttributes.values
-                      .elementAt(index)
-                      .name,
-                  value: croppedThumbnail.colorAttributes.values
-                      .elementAt(index)
-                      .value,
-                  secondaryTrackValue: croppedThumbnail.colorAttributes.values
-                      .elementAt(index)
-                      .anchor,
-                  min: croppedThumbnail.colorAttributes.values
-                      .elementAt(index)
-                      .min,
-                  max: croppedThumbnail.colorAttributes.values
-                      .elementAt(index)
-                      .max,
-                  onChanged: (value) {},
-                  onChangeEnd: (value) {
-                    croppedThumbnail.colorAttributes.values
-                        .elementAt(index)
-                        .value = value;
-                    updateImage();
-                  },
-                ),
-              );
-            },
-          );
-
-          final effectControls = ListView.builder(
-            key: const Key('effectControls'),
-            physics: constraints.maxWidth > 600
-                ? null
-                : const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: croppedThumbnail.effectAttributes.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  top: index == 0 ? 16 : 0,
-                  bottom: index == croppedThumbnail.effectAttributes.length - 1
-                      ? 28
-                      : 0,
-                ),
-                child: SlySliderRow(
-                  label: croppedThumbnail.effectAttributes.values
-                      .elementAt(index)
-                      .name,
-                  value: croppedThumbnail.effectAttributes.values
-                      .elementAt(index)
-                      .value,
-                  secondaryTrackValue: croppedThumbnail.effectAttributes.values
-                      .elementAt(index)
-                      .anchor,
-                  min: croppedThumbnail.effectAttributes.values
-                      .elementAt(index)
-                      .min,
-                  max: croppedThumbnail.effectAttributes.values
-                      .elementAt(index)
-                      .max,
-                  onChanged: (value) {},
-                  onChangeEnd: (value) {
-                    croppedThumbnail.effectAttributes.values
-                        .elementAt(index)
-                        .value = value;
-                    updateImage();
-                  },
-                ),
-              );
-            },
-          );
-
-          final geometryControls = LayoutBuilder(
-            builder: (context, constraints) {
-              final buttons = <Semantics>[
-                Semantics(
-                  label: 'Rotate Left',
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/rotate-left.png'),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    onPressed: () async {
-                      cropController.rotateLeft();
-                      updateCroppedImage();
-                    },
-                  ),
-                ),
-                Semantics(
-                  label: 'Rotate Right',
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/rotate-right.png'),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    onPressed: () async {
-                      cropController.rotateRight();
-                      updateCroppedImage();
-                    },
-                  ),
-                ),
-                Semantics(
-                  label: 'Flip Horizontal',
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/flip-horizontal.png'),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    onPressed: () {
-                      flipImage(SlyImageFlipDirection.horizontal);
-                    },
-                  ),
-                ),
-                Semantics(
-                  label: 'Flip Vertical',
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/flip-vertical.png'),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    onPressed: () {
-                      flipImage(SlyImageFlipDirection.vertical);
-                    },
-                  ),
-                ),
-              ];
-
-              return Padding(
-                padding: const EdgeInsets.all(12),
-                child: (constraints.maxWidth > 600)
-                    ? Wrap(
-                        direction: Axis.vertical,
-                        spacing: 6,
-                        children: buttons,
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: buttons,
-                      ),
-              );
-            },
-          );
-
-          final exportControls = ListView(
-            key: const Key('exportControls'),
-            physics: constraints.maxWidth > 600
-                ? null
-                : const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 20,
-                  bottom: 12,
-                  left: 32,
-                  right: 32,
-                ),
-                child: Row(
-                  children: [
-                    const Text('Save Metadata'),
-                    const Spacer(),
-                    SlySwitch(
-                      value: _saveMetadata,
-                      onChanged: (value) {
-                        _saveMetadata = value;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 6,
-                  bottom: 40,
-                  left: 32,
-                  right: 32,
-                ),
-                child: _saveButton,
-              ),
-            ],
-          );
-
-          controlsChild ??= lightControls;
-
-          void navigationDestinationSelected(int index) {
-            if (_selectedPageIndex == index) return;
-            if (_selectedPageIndex == 3) updateCroppedImage();
-
-            _selectedPageIndex = index;
-
-            switch (index) {
-              case 0:
-                setState(() {
-                  controlsChild = lightControls;
-                });
-              case 1:
-                setState(() {
-                  controlsChild = colorControls;
-                });
-              case 2:
-                setState(() {
-                  controlsChild = effectControls;
-                });
-              case 3:
-                setState(() {
-                  controlsChild = geometryControls;
-                });
-              case 4:
-                setState(() {
-                  controlsChild = exportControls;
-                });
-              default:
-                setState(() {
-                  controlsChild = lightControls;
-                });
-            }
-          }
-
-          final navigationRail = NavigationRail(
-            backgroundColor: Colors.transparent,
-            indicatorColor: Colors.white24,
-            selectedIndex: _selectedPageIndex,
-            labelType: NavigationRailLabelType.selected,
-            indicatorShape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
-            ),
-            onDestinationSelected: navigationDestinationSelected,
-            destinations: const <NavigationRailDestination>[
-              NavigationRailDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/light.png'),
-                  color: Colors.white,
-                ),
-                label: Text('Light'),
-              ),
-              NavigationRailDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/color.png'),
-                  color: Colors.white,
-                ),
-                label: Text('Color'),
-              ),
-              NavigationRailDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/effects.png'),
-                  color: Colors.white,
-                ),
-                label: Text('Effects'),
-              ),
-              NavigationRailDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/geometry.png'),
-                  color: Colors.white,
-                ),
-                label: Text('Geometry'),
-              ),
-              NavigationRailDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/export.png'),
-                  color: Colors.white,
-                ),
-                label: Text('Export'),
-              ),
-            ],
-          );
-
-          final navigationBar = NavigationBar(
-            backgroundColor: Colors.white10,
-            shadowColor: Colors.transparent,
-            overlayColor: const WidgetStatePropertyAll(Colors.white12),
-            indicatorColor: Colors.white24,
-            selectedIndex: _selectedPageIndex,
-            onDestinationSelected: navigationDestinationSelected,
-            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-            indicatorShape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
-            ),
-            destinations: const <Widget>[
-              NavigationDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/light.png'),
-                  color: Colors.white,
-                ),
-                label: 'Light',
-              ),
-              NavigationDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/color.png'),
-                  color: Colors.white,
-                ),
-                label: 'Color',
-              ),
-              NavigationDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/effects.png'),
-                  color: Colors.white,
-                ),
-                label: 'Effects',
-              ),
-              NavigationDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/geometry.png'),
-                  color: Colors.white,
-                ),
-                label: 'Geometry',
-              ),
-              NavigationDestination(
-                icon: ImageIcon(
-                  AssetImage('assets/icons/export.png'),
-                  color: Colors.white,
-                ),
-                label: 'Export',
-              ),
-            ],
-          );
-
-          final controlsWidget = AnimatedSize(
-            key: controlsWidgetKey,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutQuint,
-            child: AnimatedSwitcher(
-                switchInCurve: Curves.easeOutQuint,
-                // switchOutCurve: Curves.easeInSine,
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  // Don't transition widgets animating out
-                  // as this causes issues with the geometry page
-                  if (child != controlsChild) return Container();
-
-                  return SlideTransition(
-                    key: ValueKey<Key?>(child.key),
-                    position: Tween<Offset>(
-                      begin: (constraints.maxWidth > 600)
-                          ? const Offset(0.07, 0.0)
-                          : const Offset(0.0, 0.07),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: FadeTransition(
-                      key: ValueKey<Key?>(child.key),
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                },
-                duration: const Duration(milliseconds: 150),
-                child: controlsChild),
-          );
-
-          if (constraints.maxWidth > 600) {
-            return Container(
+        if (constraints.maxWidth > 600) {
+          return Scaffold(
+            body: Container(
               color: Colors.black,
               child: Row(
                 children: <Widget>[
@@ -815,7 +814,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         Expanded(
                           child: ClipRRect(
                             borderRadius: const BorderRadius.only(
-                              topLeft: ui.Radius.circular(12),
                               bottomLeft: ui.Radius.circular(12),
                             ),
                             child: Container(
@@ -851,41 +849,41 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                 ],
               ),
-            );
-          } else {
-            return Scaffold(
-              body: Column(
-                children: <Widget>[
-                  titleBar,
-                  Expanded(
-                    child: _selectedPageIndex == 3
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Expanded(child: imageWidget),
-                              geometryControls,
-                            ],
-                          )
-                        : ListView(
-                            children: <Widget>[
-                              imageWidget,
-                              controlsWidget,
-                            ],
-                          ),
-                  ),
-                ],
-              ),
-              bottomNavigationBar: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: ui.Radius.circular(12),
-                  topRight: ui.Radius.circular(12),
+            ),
+          );
+        } else {
+          return Scaffold(
+            body: Column(
+              children: <Widget>[
+                titleBar,
+                Expanded(
+                  child: _selectedPageIndex == 3
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Expanded(child: imageWidget),
+                            geometryControls,
+                          ],
+                        )
+                      : ListView(
+                          children: <Widget>[
+                            imageWidget,
+                            controlsWidget,
+                          ],
+                        ),
                 ),
-                child: navigationBar,
+              ],
+            ),
+            bottomNavigationBar: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: ui.Radius.circular(12),
+                topRight: ui.Radius.circular(12),
               ),
-            );
-          }
-        },
-      ),
+              child: navigationBar,
+            ),
+          );
+        }
+      },
     );
   }
 }
