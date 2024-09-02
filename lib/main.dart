@@ -116,7 +116,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     const ImageIcon(
-                      AssetImage("assets/icons/sly.png"),
+                      AssetImage("assets/sly.png"),
                       color: Colors.deepOrangeAccent,
                       size: 96,
                     ),
