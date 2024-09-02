@@ -334,17 +334,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         color: Colors.grey.shade700,
                         child: const Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 24,
+                            horizontal: 20,
                             vertical: 12,
                           ),
                           child: Row(
                             children: [
                               SizedBox(
-                                width: 20,
-                                height: 20,
+                                width: 16,
+                                height: 16,
                                 child: CircularProgressIndicator.adaptive(),
                               ),
-                              SizedBox(width: 12),
+                              SizedBox(width: 16),
                               Text(
                                 'Loading Image',
                                 style: TextStyle(color: Colors.white),
