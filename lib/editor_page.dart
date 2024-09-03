@@ -826,10 +826,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               label: 'Export',
             ),
             Semantics(
-              label: 'Add Image',
+              label: 'New Image',
               child: FloatingActionButton.small(
                 shape: const CircleBorder(),
                 backgroundColor: Colors.grey.shade200,
+                foregroundColor: Colors.grey.shade800,
                 elevation: 0,
                 hoverElevation: 0,
                 focusElevation: 0,
@@ -880,7 +881,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             floatingActionButton: Padding(
               padding: const EdgeInsets.all(3),
               child: Semantics(
-                label: 'Add Image',
+                label: 'New Image',
                 child: FloatingActionButton.small(
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
