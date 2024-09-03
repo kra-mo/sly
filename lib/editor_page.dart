@@ -162,7 +162,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             child: ScaleTransition(
               scale: animation.drive(
                 Tween(
-                  begin: animIn ? 1.1 : 1.4,
+                  begin: animIn ? 1.2 : 1.6,
                   end: 1.0,
                 ).chain(
                   CurveTween(
