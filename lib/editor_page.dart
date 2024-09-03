@@ -183,7 +183,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       }
 
       final image = SlyImage.from(flippedImage);
-      flippedImage.applyEdits();
 
       if (!_saveMetadata) {
         image.removeMetadata;
