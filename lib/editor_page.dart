@@ -449,7 +449,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       ? cropImageView
                       : ClipRRect(
                           borderRadius:
-                              const BorderRadius.all(ui.Radius.circular(6)),
+                              const BorderRadius.all(ui.Radius.circular(8)),
                           child: imageView,
                         ),
                 ),
