@@ -862,6 +862,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         if (constraints.maxWidth > 600) {
           return Scaffold(
+            floatingActionButtonAnimator:
+                FloatingActionButtonAnimator.noAnimation,
             floatingActionButtonLocation: constraints.maxHeight > 380
                 ? null
                 : FloatingActionButtonLocation.startFloat,
