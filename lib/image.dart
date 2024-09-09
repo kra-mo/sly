@@ -23,9 +23,9 @@ class SlyImage {
     'exposure': SlyImageAttribute('Exposure', 0, 0, 0, 1),
     'brightness': SlyImageAttribute('Brightness', 1, 1, 0.2, 1.8),
     'contrast': SlyImageAttribute('Contrast', 1, 1, 0.4, 1.6),
-    'blacks': SlyImageAttribute('Blacks', 0, 0, 0, 0.5),
-    'whites': SlyImageAttribute('Whites', 1, 1, 0.3, 1),
-    'mids': SlyImageAttribute('Midtones', 0.5, 0.5, 0.1, 0.9),
+    'blacks': SlyImageAttribute('Blacks', 0, 0, 0, 127.5),
+    'whites': SlyImageAttribute('Whites', 255, 255, 76.5, 255),
+    'mids': SlyImageAttribute('Midtones', 127.5, 127.5, 25.5, 229.5),
   };
 
   Map<String, SlyImageAttribute> colorAttributes = {
@@ -80,9 +80,9 @@ class SlyImage {
 
   /// Applies changes to the image's attrubutes.
   Future<void> applyEdits() async {
-    int blacks = (255 * lightAttributes['blacks']!.value).toInt();
-    int whites = (255 * lightAttributes['whites']!.value).toInt();
-    int mids = (255 * lightAttributes['mids']!.value).toInt();
+    int blacks = lightAttributes['blacks']!.value.toInt();
+    int whites = lightAttributes['whites']!.value.toInt();
+    int mids = lightAttributes['mids']!.value.toInt();
 
     final cmd = img.Command()
       ..image(_originalImage)
