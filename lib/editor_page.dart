@@ -44,6 +44,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   final cropController = CropController();
   bool cropChanged = false;
+  bool cropEverChanged = false;
 
   int _selectedPageIndex = 0;
 
@@ -135,20 +136,28 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         image.removeMetadata;
       }
 
-      final fullSizeCropController = CropController(
-        defaultCrop: cropController.crop,
-        rotation: cropController.rotation,
-      );
-      fullSizeCropController.image = await loadUiImage(await image.encode());
+      final SlyImage croppedImage;
 
-      final uiImage = await fullSizeCropController.croppedBitmap();
-      final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
+      if (cropEverChanged) {
+        final fullSizeCropController = CropController(
+          defaultCrop: cropController.crop,
+          rotation: cropController.rotation,
+        );
+        fullSizeCropController.image = await loadUiImage(await image.encode());
 
-      final imgImage = await loadImage(byteData.buffer.asUint8List());
-      if (imgImage == null) return;
+        final uiImage = await fullSizeCropController.croppedBitmap();
+        final byteData =
+            await uiImage.toByteData(format: ui.ImageByteFormat.png);
+        if (byteData == null) return;
 
-      final croppedImage = SlyImage.fromImage(imgImage);
+        final imgImage = await loadImage(byteData.buffer.asUint8List());
+        if (imgImage == null) return;
+
+        croppedImage = SlyImage.fromImage(imgImage);
+      } else {
+        croppedImage = image;
+      }
+
       croppedImage.lightAttributes = thumbnail.lightAttributes;
       croppedImage.colorAttributes = thumbnail.colorAttributes;
       croppedImage.effectAttributes = thumbnail.effectAttributes;
@@ -358,7 +367,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       gaplessPlayback: true,
                     ),
                     onCrop: (rect) {
-                      cropChanged = true;
+                      cropChanged = cropEverChanged = true;
                     },
                   )
                 : const Center(
