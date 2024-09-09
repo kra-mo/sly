@@ -216,6 +216,9 @@ class _SlyHomePageState extends State<SlyHomePage> {
                                                   const TextSpan(
                                                     text:
                                                         'Sly is an open source application licensed under the',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
                                                   ),
                                                   const TextSpan(text: ' '),
                                                   TextSpan(
@@ -234,10 +237,19 @@ class _SlyHomePageState extends State<SlyHomePage> {
                                                             );
                                                           },
                                                   ),
-                                                  const TextSpan(text: '. '),
                                                   const TextSpan(
-                                                      text:
-                                                          'The source code is available'),
+                                                    text: '. ',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  const TextSpan(
+                                                    text:
+                                                        'The source code is available',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                                   const TextSpan(text: ' '),
                                                   TextSpan(
                                                     text: 'on GitHub',
@@ -255,7 +267,12 @@ class _SlyHomePageState extends State<SlyHomePage> {
                                                             );
                                                           },
                                                   ),
-                                                  const TextSpan(text: '.'),
+                                                  const TextSpan(
+                                                    text: '.',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -267,6 +284,9 @@ class _SlyHomePageState extends State<SlyHomePage> {
                                                   const TextSpan(
                                                     text:
                                                         'If you want to support my work, consider donating to me on',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
                                                   ),
                                                   const TextSpan(text: ' '),
                                                   TextSpan(
@@ -285,7 +305,12 @@ class _SlyHomePageState extends State<SlyHomePage> {
                                                             );
                                                           },
                                                   ),
-                                                  const TextSpan(text: '.'),
+                                                  const TextSpan(
+                                                    text: '.',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
