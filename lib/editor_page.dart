@@ -893,7 +893,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         if (constraints.maxWidth > 600) {
           return Scaffold(
-            floatingActionButtonLocation: constraints.maxHeight > 360
+            floatingActionButtonLocation: constraints.maxHeight > 380
                 ? null
                 : FloatingActionButtonLocation.startFloat,
             floatingActionButton: Padding(
@@ -906,7 +906,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       ui.Radius.circular(8),
                     ),
                   ),
-                  backgroundColor: constraints.maxHeight > 360
+                  backgroundColor: constraints.maxHeight > 380
                       ? Colors.grey.shade700
                       : Colors.black87,
                   foregroundColor: Colors.white,

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -47,6 +49,7 @@ class SlyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
         useMaterial3: true,
+        fontFamily: 'Geist',
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         colorScheme: ColorScheme.fromSwatch(
@@ -76,7 +79,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
   final String _pickerButtonLabel = 'Pick Image';
   late final SlyButton _pickerButton = SlyButton(
     key: pickerButtonKey,
-    child: const Text('Choose File'),
+    child: Text(_pickerButtonLabel),
     onPressed: () async {
       _pickerButton.setChild(
         const Padding(
@@ -149,24 +152,29 @@ class _SlyHomePageState extends State<SlyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     const ImageIcon(
-                      AssetImage("assets/sly.png"),
+                      AssetImage('assets/sly.png'),
                       color: Colors.deepOrangeAccent,
                       size: 96,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 4),
                       child: Text(
                         'Edit Your Photos',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: ui.FontWeight.w800,
+                        ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 24),
                       child: Text(
                         'Choose an image to get started',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     ConstrainedBox(

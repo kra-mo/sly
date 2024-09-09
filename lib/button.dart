@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -94,6 +96,9 @@ Widget getCrossfade(Widget widget1, Widget widget2) {
 }
 
 const ButtonStyle slyElevatedButtonStlye = ButtonStyle(
+  textStyle: WidgetStatePropertyAll(
+    TextStyle(fontWeight: ui.FontWeight.w600),
+  ),
   shape: WidgetStatePropertyAll(
     RoundedRectangleBorder(
       borderRadius: BorderRadius.all(
