@@ -581,7 +581,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Semantics(
                 label: 'Rotate Left',
                 child: IconButton(
-                  color: Colors.white,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   icon: const ImageIcon(
                     AssetImage('assets/icons/rotate-left.png'),
                   ),
@@ -595,7 +596,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Semantics(
                 label: 'Rotate Right',
                 child: IconButton(
-                  color: Colors.white,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   icon: const ImageIcon(
                     AssetImage('assets/icons/rotate-right.png'),
                   ),
@@ -609,7 +611,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Semantics(
                 label: 'Flip Horizontal',
                 child: IconButton(
-                  color: Colors.white,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   icon: const ImageIcon(
                     AssetImage('assets/icons/flip-horizontal.png'),
                   ),
@@ -622,7 +625,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Semantics(
                 label: 'Flip Vertical',
                 child: IconButton(
-                  color: Colors.white,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   icon: const ImageIcon(
                     AssetImage('assets/icons/flip-vertical.png'),
                   ),
@@ -727,49 +731,44 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         final navigationRail = NavigationRail(
           backgroundColor: Colors.transparent,
-          indicatorColor: Colors.white24,
+          indicatorColor: Colors.transparent,
           selectedIndex: _selectedPageIndex,
           labelType: NavigationRailLabelType.selected,
           indicatorShape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(
-              Radius.circular(12),
+              Radius.circular(8),
             ),
           ),
           onDestinationSelected: navigationDestinationSelected,
+          selectedIconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
+          unselectedIconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
           destinations: const <NavigationRailDestination>[
             NavigationRailDestination(
-              icon: ImageIcon(
-                AssetImage('assets/icons/light.png'),
-                color: Colors.white,
-              ),
+              icon: ImageIcon(AssetImage('assets/icons/light.png')),
               label: Text('Light'),
+              padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(
-                AssetImage('assets/icons/color.png'),
-                color: Colors.white,
-              ),
+              icon: ImageIcon(AssetImage('assets/icons/color.png')),
               label: Text('Color'),
+              padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(
-                AssetImage('assets/icons/effects.png'),
-                color: Colors.white,
-              ),
+              icon: ImageIcon(AssetImage('assets/icons/effects.png')),
               label: Text('Effects'),
+              padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(
-                AssetImage('assets/icons/crop.png'),
-                color: Colors.white,
-              ),
+              icon: ImageIcon(AssetImage('assets/icons/crop.png')),
               label: Text('Crop'),
+              padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(
-                AssetImage('assets/icons/export.png'),
-                color: Colors.white,
-              ),
+              icon: ImageIcon(AssetImage('assets/icons/export.png')),
               label: Text('Export'),
             ),
           ],
@@ -777,17 +776,20 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         final navigationBar = NavigationBar(
           backgroundColor: Colors.white10,
-          shadowColor: Colors.transparent,
-          overlayColor: const WidgetStatePropertyAll(Colors.white12),
-          indicatorColor: Colors.white24,
+          indicatorColor: Colors.transparent,
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            return states.contains(WidgetState.focused)
+                ? Colors.white12
+                : Colors.transparent;
+          }),
+          indicatorShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(8),
+            ),
+          ),
           selectedIndex: _selectedPageIndex,
           onDestinationSelected: navigationDestinationSelected,
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-          indicatorShape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-          ),
           destinations: <Widget>[
             const NavigationDestination(
               icon: ImageIcon(
@@ -830,6 +832,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 shape: const CircleBorder(),
                 backgroundColor: Colors.grey.shade200,
                 foregroundColor: Colors.grey.shade800,
+                splashColor: Colors.transparent,
                 elevation: 0,
                 hoverElevation: 0,
                 focusElevation: 0,
@@ -877,6 +880,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         if (constraints.maxWidth > 600) {
           return Scaffold(
+            floatingActionButtonLocation: constraints.maxHeight > 360
+                ? null
+                : FloatingActionButtonLocation.startFloat,
             floatingActionButton: Padding(
               padding: const EdgeInsets.all(3),
               child: Semantics(
@@ -887,11 +893,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       ui.Radius.circular(8),
                     ),
                   ),
-                  backgroundColor: Colors.grey.shade700,
+                  backgroundColor: constraints.maxHeight > 360
+                      ? Colors.grey.shade700
+                      : Colors.black87,
                   foregroundColor: Colors.white,
                   focusColor: Colors.white24,
                   hoverColor: Colors.white10,
-                  splashColor: Colors.white10,
+                  splashColor: Colors.transparent,
                   elevation: 0,
                   hoverElevation: 0,
                   focusElevation: 0,

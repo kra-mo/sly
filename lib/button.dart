@@ -101,6 +101,7 @@ const ButtonStyle slyElevatedButtonStlye = ButtonStyle(
       ),
     ),
   ),
+  splashFactory: NoSplash.splashFactory,
   overlayColor: WidgetStatePropertyAll(Colors.black12),
   surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
   foregroundColor: WidgetStatePropertyAll(Colors.black),

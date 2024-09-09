@@ -47,6 +47,8 @@ class SlyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
         useMaterial3: true,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.grey,
           accentColor: Colors.white,
