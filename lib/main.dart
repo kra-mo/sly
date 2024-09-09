@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -163,7 +161,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24,
-                          fontWeight: ui.FontWeight.w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),

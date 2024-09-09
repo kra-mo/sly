@@ -14,6 +14,7 @@ import 'image.dart';
 import 'button.dart';
 import 'slider_row.dart';
 import 'switch.dart';
+import 'dialog.dart';
 import 'title_bar.dart';
 
 class SlyEditorPage extends StatefulWidget {
@@ -65,122 +66,61 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       String? format;
 
-      await showGeneralDialog(
-        context: context,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return SimpleDialog(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(18),
-              ),
+      await showSlyDialog(
+        context,
+        'Choose a Format',
+        <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SlyButton(
+              onPressed: () {
+                format = 'JPEG75';
+                Navigator.pop(context);
+              },
+              style: slySubtleButtonStlye,
+              child: const Text('JPEG Quality 75'),
             ),
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 24,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SlyButton(
+              onPressed: () {
+                format = 'JPEG90';
+                Navigator.pop(context);
+              },
+              style: slySubtleButtonStlye,
+              child: const Text('JPEG Quality 90'),
             ),
-            contentPadding: const EdgeInsets.only(
-              bottom: 24,
-              left: 24,
-              right: 24,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SlyButton(
+              onPressed: () {
+                format = 'JPEG100';
+                Navigator.pop(context);
+              },
+              style: slySubtleButtonStlye,
+              child: const Text('JPEG Quality 100'),
             ),
-            titlePadding: const EdgeInsets.symmetric(
-              vertical: 32,
-              horizontal: 16,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SlyButton(
+              onPressed: () {
+                format = 'PNG';
+                Navigator.pop(context);
+              },
+              style: slySubtleButtonStlye,
+              child: const Text('PNG (Lossless)'),
             ),
-            title: const Center(
-              child: Text(
-                'Choose a Format',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SlyButton(
-                  onPressed: () {
-                    format = 'JPEG75';
-                    Navigator.pop(context);
-                  },
-                  style: slySubtleButtonStlye,
-                  child: const Text('JPEG Quality 75'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SlyButton(
-                  onPressed: () {
-                    format = 'JPEG90';
-                    Navigator.pop(context);
-                  },
-                  style: slySubtleButtonStlye,
-                  child: const Text('JPEG Quality 90'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SlyButton(
-                  onPressed: () {
-                    format = 'JPEG100';
-                    Navigator.pop(context);
-                  },
-                  style: slySubtleButtonStlye,
-                  child: const Text('JPEG Quality 100'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SlyButton(
-                  onPressed: () {
-                    format = 'PNG';
-                    Navigator.pop(context);
-                  },
-                  style: slySubtleButtonStlye,
-                  child: const Text('PNG (Lossless)'),
-                ),
-              ),
-              SlyButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Cancel'),
-              ),
-            ],
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 300),
-        transitionBuilder: (context, animation, secondaryAnimation, widget) {
-          final animIn = animation.status == AnimationStatus.forward;
-
-          return FadeTransition(
-            opacity: animation.drive(
-              Tween(
-                begin: 0.0,
-                end: 1.0,
-              ).chain(
-                CurveTween(
-                  curve: animIn ? Curves.easeOutExpo : Curves.easeInOutQuint,
-                ),
-              ),
-            ),
-            child: ScaleTransition(
-              scale: animation.drive(
-                Tween(
-                  begin: animIn ? 1.2 : 1.6,
-                  end: 1.0,
-                ).chain(
-                  CurveTween(
-                    curve: animIn ? Curves.easeOutBack : Curves.easeOutQuint,
-                  ),
-                ),
-              ),
-              child: widget,
-            ),
-          );
-        },
+          ),
+          SlyButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
       );
 
       // The user cancelled the format selection
@@ -761,27 +701,47 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           ),
           destinations: const <NavigationRailDestination>[
             NavigationRailDestination(
-              icon: ImageIcon(AssetImage('assets/icons/light.png')),
+              icon: Tooltip(
+                message: 'Light',
+                child: ImageIcon(AssetImage('assets/icons/light.png')),
+              ),
+              selectedIcon: ImageIcon(AssetImage('assets/icons/light.png')),
               label: Text('Light'),
               padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(AssetImage('assets/icons/color.png')),
+              icon: Tooltip(
+                message: 'Color',
+                child: ImageIcon(AssetImage('assets/icons/color.png')),
+              ),
+              selectedIcon: ImageIcon(AssetImage('assets/icons/color.png')),
               label: Text('Color'),
               padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(AssetImage('assets/icons/effects.png')),
+              icon: Tooltip(
+                message: 'Effects',
+                child: ImageIcon(AssetImage('assets/icons/effects.png')),
+              ),
+              selectedIcon: ImageIcon(AssetImage('assets/icons/effects.png')),
               label: Text('Effects'),
               padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(AssetImage('assets/icons/crop.png')),
+              icon: Tooltip(
+                message: 'Crop',
+                child: ImageIcon(AssetImage('assets/icons/crop.png')),
+              ),
+              selectedIcon: ImageIcon(AssetImage('assets/icons/crop.png')),
               label: Text('Crop'),
               padding: EdgeInsets.only(bottom: 4),
             ),
             NavigationRailDestination(
-              icon: ImageIcon(AssetImage('assets/icons/export.png')),
+              icon: Tooltip(
+                message: 'Export',
+                child: ImageIcon(AssetImage('assets/icons/export.png')),
+              ),
+              selectedIcon: ImageIcon(AssetImage('assets/icons/export.png')),
               label: Text('Export'),
             ),
           ],
