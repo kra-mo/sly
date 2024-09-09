@@ -106,7 +106,7 @@ class SlySliderThemeData extends SliderThemeData {
   SlySliderThemeData()
       : super(
           activeTrackColor: Colors.white,
-          secondaryActiveTrackColor: Colors.grey.shade700,
+          secondaryActiveTrackColor: Colors.grey.shade600,
           inactiveTrackColor: Colors.grey.shade800,
           thumbColor: Colors.white,
           trackHeight: 18,
