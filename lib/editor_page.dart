@@ -30,15 +30,22 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   final GlobalKey imageWidgetKey = GlobalKey();
   final GlobalKey controlsWidgetKey = GlobalKey();
 
+  Widget? controlsChild;
+
   late SlyImage flippedImage = widget.image;
   late SlyImage thumbnail;
   late SlyImage croppedThumbnail;
+
   Uint8List? imageData;
   Uint8List? editedImageData;
-  Widget? controlsChild;
-  final cropController = CropController();
-  int _selectedPageIndex = 0;
+
   bool _saveMetadata = true;
+
+  final cropController = CropController();
+  bool cropChanged = false;
+
+  int _selectedPageIndex = 0;
+
   final String _saveButtonLabel =
       !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
@@ -410,6 +417,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       fit: BoxFit.contain,
                       gaplessPlayback: true,
                     ),
+                    onCrop: (rect) {
+                      cropChanged = true;
+                    },
                   )
                 : const Center(
                     child: CircularProgressIndicator.adaptive(),
@@ -697,7 +707,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         void navigationDestinationSelected(int index) {
           if (_selectedPageIndex == index) return;
-          if (_selectedPageIndex == 3) updateCroppedImage();
+          if (_selectedPageIndex == 3 && cropChanged == true) {
+            updateCroppedImage();
+            cropChanged = false;
+          }
 
           _selectedPageIndex = index;
 
