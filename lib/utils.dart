@@ -13,25 +13,41 @@ bool isDesktop() {
       (Platform.isLinux || Platform.isMacOS || Platform.isWindows));
 }
 
-Future<img.Image>? loadImage(Uint8List bytes) async {
+Future<img.Image?> loadImage(Uint8List bytes) async {
   var cmd = img.Command()..decodeImage(bytes);
-  var image = (await cmd.executeThread()).outputImage;
+
+  img.Image? image;
+
+  try {
+    image = (await cmd.executeThread()).outputImage;
+  } on img.ImageException {
+    // We will try loading a ui.Image afterwards
+  }
 
   if (image != null) return image;
 
-  final uiImage = await loadUiImage(bytes);
-  final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+  final ui.Image uiImage;
+
+  try {
+    uiImage = await loadUiImage(bytes);
+  } catch (e) {
+    return null;
+  }
+
+  final byteData = await uiImage.toByteData(
+    format: ui.ImageByteFormat.rawRgba,
+  );
 
   if (byteData == null) {
     throw Exception("Cannot decode image.");
   }
 
-  cmd = img.Command()..decodeImage(byteData.buffer.asUint8List());
-  image = (await cmd.executeThread()).outputImage;
-
-  if (image == null) {
-    throw Exception("Cannot decode image.");
-  }
+  image = img.Image.fromBytes(
+    numChannels: 4,
+    width: uiImage.width,
+    height: uiImage.height,
+    bytes: byteData.buffer,
+  );
 
   return image;
 }

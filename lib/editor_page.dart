@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import 'package:image/image.dart' as img;
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:crop_image/crop_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +16,7 @@ import 'button.dart';
 import 'slider_row.dart';
 import 'switch.dart';
 import 'dialog.dart';
+import 'snack_bar.dart';
 import 'title_bar.dart';
 
 class SlyEditorPage extends StatefulWidget {
@@ -132,10 +134,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       final image = SlyImage.from(flippedImage);
 
-      if (!_saveMetadata) {
-        image.removeMetadata;
-      }
-
       final SlyImage croppedImage;
 
       if (cropEverChanged) {
@@ -143,15 +141,24 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           defaultCrop: cropController.crop,
           rotation: cropController.rotation,
         );
-        fullSizeCropController.image = await loadUiImage(await image.encode());
+
+        fullSizeCropController.image = await loadUiImage(
+          await image.encode(format: 'PNG'),
+        );
 
         final uiImage = await fullSizeCropController.croppedBitmap();
-        final byteData =
-            await uiImage.toByteData(format: ui.ImageByteFormat.png);
+        final byteData = await uiImage.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        );
+
         if (byteData == null) return;
 
-        final imgImage = await loadImage(byteData.buffer.asUint8List());
-        if (imgImage == null) return;
+        final imgImage = img.Image.fromBytes(
+          numChannels: 4,
+          width: uiImage.width,
+          height: uiImage.height,
+          bytes: byteData.buffer,
+        );
 
         croppedImage = SlyImage.fromImage(imgImage);
       } else {
@@ -162,6 +169,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       croppedImage.colorAttributes = thumbnail.colorAttributes;
       croppedImage.effectAttributes = thumbnail.effectAttributes;
       await croppedImage.applyEdits();
+
+      if (_saveMetadata) {
+        croppedImage.image.exif = flippedImage.image.exif;
+      } else {
+        image.removeMetadata();
+      }
 
       if (!(await saveImage(await croppedImage.encode(format: format),
           fileExtension: format == 'PNG' ? 'png' : 'jpg'))) {
@@ -190,14 +203,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     flippedImage.effectAttributes =
         thumbnail.effectAttributes = croppedThumbnail.effectAttributes;
 
-    thumbnail.encode().then((data) {
+    thumbnail.encode(format: 'PNG').then((data) {
       setState(() {
         imageData = data;
       });
     });
 
     croppedThumbnail.applyEdits().then((value) {
-      croppedThumbnail.encode().then((data) {
+      croppedThumbnail.encode(format: 'JPEG75').then((data) {
         setState(() {
           editedImageData = data;
         });
@@ -211,7 +224,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   Widget build(BuildContext context) {
     void updateImage() async {
       croppedThumbnail.applyEdits().then((value) {
-        croppedThumbnail.encode().then((data) {
+        croppedThumbnail.encode(format: 'JPEG75').then((data) {
           setState(() {
             editedImageData = data;
           });
@@ -250,7 +263,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       flippedImage.flip(direction);
       thumbnail.flip(direction);
 
-      thumbnail.encode().then((data) {
+      thumbnail.encode(format: 'PNG').then((data) {
         setState(() {
           imageData = data;
         });
@@ -269,54 +282,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
           if (!context.mounted) return;
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              elevation: 0,
-              padding: const EdgeInsets.only(bottom: 16, right: 16),
-              backgroundColor: Colors.transparent,
-              content: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        left: constraints.maxWidth > 600
-                            ? (constraints.maxWidth - 250)
-                            : 16),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.all(
-                        ui.Radius.circular(8),
-                      ),
-                      child: Container(
-                        color: Colors.grey.shade700,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator.adaptive(),
-                              ),
-                              SizedBox(width: 16),
-                              Text(
-                                'Loading Image',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          );
+          showSlySnackBar(context, 'Loading Image', loading: true);
 
           final image = await loadImage(await file.readAsBytes());
-          if (image == null) return;
+          if (image == null) {
+            if (!context.mounted) return;
+
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            showSlySnackBar(context, 'Couldn’t Load Image');
+            return;
+          }
 
           if (!context.mounted) return;
 

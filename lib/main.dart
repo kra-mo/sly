@@ -11,6 +11,7 @@ import 'image.dart';
 import 'button.dart';
 import 'dialog.dart';
 import 'editor_page.dart';
+import 'snack_bar.dart';
 import 'title_bar.dart';
 
 void main() {
@@ -103,6 +104,10 @@ class _SlyHomePageState extends State<SlyHomePage> {
       final image = await loadImage(await file.readAsBytes());
       if (image == null) {
         _pickerButton.setChild(Text(_pickerButtonLabel));
+
+        if (!mounted) return;
+
+        showSlySnackBar(context, 'Couldn’t Load Image');
         return;
       }
 
