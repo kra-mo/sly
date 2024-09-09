@@ -121,6 +121,7 @@ const ButtonStyle slySubtleButtonStlye = ButtonStyle(
       ),
     ),
   ),
+  splashFactory: NoSplash.splashFactory,
   overlayColor: WidgetStatePropertyAll(Colors.white10),
   surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
   foregroundColor: WidgetStatePropertyAll(Colors.white),
