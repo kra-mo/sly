@@ -70,7 +70,7 @@ static void my_application_activate(GApplication* application) {
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 
   gtk_window_set_title(window, "Sly");
-  g_signal_connect(window, "key-pressed", G_CALLBACK(on_key_press), NULL);
+  g_signal_connect(window, "key-press-event", G_CALLBACK(on_key_press), NULL);
 
   gtk_widget_show(GTK_WIDGET(window));
   gtk_widget_show(GTK_WIDGET(view));
