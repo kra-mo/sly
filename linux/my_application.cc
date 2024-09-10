@@ -7,6 +7,15 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+gboolean on_key_press(GtkWidget *window, GdkEventKey *event, gpointer user_data) {
+    if ((event->keyval == GDK_KEY_q && (event->state & GDK_CONTROL_MASK)) ||
+        (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK))) {
+        gtk_widget_destroy(window);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
@@ -59,6 +68,9 @@ static void my_application_activate(GApplication* application) {
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+
+  gtk_window_set_title(window, "Sly");
+  g_signal_connect(window, "key-pressed", G_CALLBACK(on_key_press), NULL);
 
   gtk_widget_show(GTK_WIDGET(window));
   gtk_widget_show(GTK_WIDGET(view));
