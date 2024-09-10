@@ -35,7 +35,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   Widget? controlsChild;
 
-  late SlyImage flippedImage = widget.image;
+  late SlyImage originalImage = widget.image;
   late SlyImage thumbnail;
   late SlyImage croppedThumbnail;
 
@@ -43,6 +43,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   Uint8List? editedImageData;
 
   bool _saveMetadata = true;
+
+  bool hflip = false;
+  bool vflip = false;
 
   final cropController = CropController();
   bool cropChanged = false;
@@ -132,7 +135,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return;
       }
 
-      final image = SlyImage.from(flippedImage);
+      final image = SlyImage.from(originalImage);
 
       final SlyImage croppedImage;
 
@@ -165,13 +168,21 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         croppedImage = image;
       }
 
+      if (hflip && vflip) {
+        croppedImage.flip(SlyImageFlipDirection.both);
+      } else if (hflip) {
+        croppedImage.flip(SlyImageFlipDirection.horizontal);
+      } else if (vflip) {
+        croppedImage.flip(SlyImageFlipDirection.vertical);
+      }
+
       croppedImage.lightAttributes = thumbnail.lightAttributes;
       croppedImage.colorAttributes = thumbnail.colorAttributes;
       croppedImage.effectAttributes = thumbnail.effectAttributes;
       await croppedImage.applyEdits();
 
       if (_saveMetadata) {
-        croppedImage.image.exif = flippedImage.image.exif;
+        croppedImage.image.exif = originalImage.image.exif;
       } else {
         image.removeMetadata();
       }
@@ -193,14 +204,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   void initState() {
-    thumbnail = flippedImage.getThumbnail();
-    croppedThumbnail = flippedImage.getThumbnail();
+    thumbnail = originalImage.getThumbnail();
+    croppedThumbnail = originalImage.getThumbnail();
 
-    flippedImage.lightAttributes =
+    originalImage.lightAttributes =
         thumbnail.lightAttributes = croppedThumbnail.lightAttributes;
-    flippedImage.colorAttributes =
+    originalImage.colorAttributes =
         thumbnail.colorAttributes = croppedThumbnail.colorAttributes;
-    flippedImage.effectAttributes =
+    originalImage.effectAttributes =
         thumbnail.effectAttributes = croppedThumbnail.effectAttributes;
 
     thumbnail.encode(format: 'PNG').then((data) {
@@ -250,25 +261,22 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       updateImage();
     }
 
-    void flipImage(SlyImageFlipDirection direction) async {
-      if (cropController.rotation == CropRotation.left ||
-          cropController.rotation == CropRotation.right) {
-        if (direction == SlyImageFlipDirection.horizontal) {
-          direction = SlyImageFlipDirection.vertical;
-        } else if (direction == SlyImageFlipDirection.vertical) {
-          direction = SlyImageFlipDirection.horizontal;
-        }
+    void flipImage(SlyImageFlipDirection direction) {
+      switch (direction) {
+        case SlyImageFlipDirection.horizontal:
+          setState(() {
+            hflip = !hflip;
+          });
+        case SlyImageFlipDirection.vertical:
+          setState(() {
+            vflip = !vflip;
+          });
+        case SlyImageFlipDirection.both:
+          setState(() {
+            hflip = !hflip;
+            vflip = !vflip;
+          });
       }
-
-      flippedImage.flip(direction);
-      thumbnail.flip(direction);
-
-      thumbnail.encode(format: 'PNG').then((data) {
-        setState(() {
-          imageData = data;
-        });
-        updateCroppedImage();
-      });
     }
 
     return LayoutBuilder(
@@ -363,20 +371,25 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               : constraints.maxWidth > 600
                   ? const EdgeInsets.all(0)
                   : const EdgeInsets.only(top: 12, left: 12, right: 12),
-          child: constraints.maxWidth > 600
-              ? _selectedPageIndex == 3
-                  ? cropImageView
-                  : imageView
-              : ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: constraints.maxWidth),
-                  child: _selectedPageIndex == 3
-                      ? cropImageView
-                      : ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(ui.Radius.circular(8)),
-                          child: imageView,
-                        ),
-                ),
+          child: Transform.flip(
+            flipX: hflip,
+            flipY: vflip,
+            child: constraints.maxWidth > 600
+                ? _selectedPageIndex == 3
+                    ? cropImageView
+                    : imageView
+                : ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxHeight: constraints.maxWidth),
+                    child: _selectedPageIndex == 3
+                        ? cropImageView
+                        : ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(ui.Radius.circular(8)),
+                            child: imageView,
+                          ),
+                  ),
+          ),
         );
 
         final lightControls = ListView.builder(
