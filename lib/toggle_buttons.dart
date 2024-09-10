@@ -42,9 +42,9 @@ class _SlyToggleButtonsState extends State<SlyToggleButtons> {
         selectedBorderColor: Colors.white12,
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-        borderWidth: 2,
-        constraints: const BoxConstraints(minHeight: 32, minWidth: 120),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderWidth: 3,
+        constraints: const BoxConstraints(minHeight: 34, minWidth: 120),
         isSelected: selections,
         children: widget.children,
         onPressed: (int index) {
