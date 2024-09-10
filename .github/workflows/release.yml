@@ -1,0 +1,87 @@
+# https://github.com/localsend/localsend/blob/135939850291f6d15c984307cc9186f2ac5c9b36/.github/workflows/release.yml
+
+name: Publish Release
+on:
+  push:
+    tags: ["*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(sed -n 's/^version: \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' pubspec.yaml)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  build_tar_x86_64:
+    needs: build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake libgtk-3-dev ninja-build libhandy-1-0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Compile Linux
+        run: flutter build linux
+
+      - name: Create tar.gz archive
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czvf ../../../../../result.tar.gz *
+
+      - name: Upload tar.gz archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: tar-gz-x86-64-result
+          path: ./*.tar.gz
+
+  release:
+    needs:
+      - build
+      - build_tar_x86_64
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download workflow artifact
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: tar-gz-x86-64-result
+          path: tar-gz-x86-64-result
+
+      - name: List files in tar.gz-directory
+        run: ls -l tar-gz-x86-64-result
+
+      - name: Copy tar.gz file to root
+        run: cp tar-gz-x86-64-result/* Sly-${{ needs.build.outputs.version }}-linux-x86-64.tar.gz
+
+      - name: Get tag name
+        id: get_tag_name
+        run: echo tag_name=${GITHUB_REF#refs/tags/} >> $GITHUB_OUTPUT
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          files: Sly-${{ needs.build.outputs.version }}-linux-x86-64.tar.gz
+          fail_on_unmatched_files: true
+          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
