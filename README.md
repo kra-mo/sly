@@ -5,6 +5,6 @@
 
   Friendly image editor
 
-  <img src="screenshot.png">
+  <img src="packaging/screenshot.png">
 
 </div>
