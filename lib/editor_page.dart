@@ -15,6 +15,7 @@ import 'image.dart';
 import 'button.dart';
 import 'slider_row.dart';
 import 'switch.dart';
+import 'toggle_buttons.dart';
 import 'dialog.dart';
 import 'snack_bar.dart';
 import 'title_bar.dart';
@@ -29,34 +30,35 @@ class SlyEditorPage extends StatefulWidget {
 }
 
 class _SlyEditorPageState extends State<SlyEditorPage> {
-  final GlobalKey<SlyButtonState> saveButtonKey = GlobalKey<SlyButtonState>();
-  final GlobalKey imageWidgetKey = GlobalKey();
-  final GlobalKey controlsWidgetKey = GlobalKey();
+  final GlobalKey<SlyButtonState> _saveButtonKey = GlobalKey<SlyButtonState>();
+  final GlobalKey _imageWidgetKey = GlobalKey();
+  final GlobalKey _controlsWidgetKey = GlobalKey();
 
-  Widget? controlsChild;
+  Widget? _controlsChild;
 
-  late SlyImage originalImage = widget.image;
-  late SlyImage thumbnail;
-  late SlyImage croppedThumbnail;
+  late final SlyImage _originalImage = widget.image;
+  late SlyImage _thumbnail;
+  late SlyImage _croppedThumbnail;
 
-  Uint8List? imageData;
-  Uint8List? editedImageData;
+  Uint8List? _imageData;
+  Uint8List? _editedImageData;
 
   bool _saveMetadata = true;
 
-  bool hflip = false;
-  bool vflip = false;
+  bool _hflip = false;
+  bool _vflip = false;
 
-  final cropController = CropController();
-  bool cropChanged = false;
-  bool cropEverChanged = false;
+  final _cropController = CropController();
+  bool _cropChanged = false;
+  bool _cropEverChanged = false;
+  bool _portraitCrop = false;
 
   int _selectedPageIndex = 0;
 
   final String _saveButtonLabel =
       !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
-    key: saveButtonKey,
+    key: _saveButtonKey,
     child: Text(_saveButtonLabel),
     onPressed: () async {
       _saveButton.setChild(
@@ -77,36 +79,36 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         'Choose a Format',
         <Widget>[
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 12),
             child: SlyButton(
               onPressed: () {
                 format = 'JPEG75';
                 Navigator.pop(context);
               },
               style: slySubtleButtonStlye,
-              child: const Text('JPEG Quality 75'),
+              child: const Text('JPEG - Quality 75'),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 12),
             child: SlyButton(
               onPressed: () {
                 format = 'JPEG90';
                 Navigator.pop(context);
               },
               style: slySubtleButtonStlye,
-              child: const Text('JPEG Quality 90'),
+              child: const Text('JPEG - Quality 90'),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 12),
             child: SlyButton(
               onPressed: () {
                 format = 'JPEG100';
                 Navigator.pop(context);
               },
               style: slySubtleButtonStlye,
-              child: const Text('JPEG Quality 100'),
+              child: const Text('JPEG - Quality 100'),
             ),
           ),
           Padding(
@@ -135,14 +137,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return;
       }
 
-      final image = SlyImage.from(originalImage);
+      final image = SlyImage.from(_originalImage);
 
       final SlyImage croppedImage;
 
-      if (cropEverChanged) {
+      if (_cropEverChanged) {
         final fullSizeCropController = CropController(
-          defaultCrop: cropController.crop,
-          rotation: cropController.rotation,
+          defaultCrop: _cropController.crop,
+          rotation: _cropController.rotation,
         );
 
         fullSizeCropController.image = await loadUiImage(
@@ -168,21 +170,21 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         croppedImage = image;
       }
 
-      if (hflip && vflip) {
+      if (_hflip && _vflip) {
         croppedImage.flip(SlyImageFlipDirection.both);
-      } else if (hflip) {
+      } else if (_hflip) {
         croppedImage.flip(SlyImageFlipDirection.horizontal);
-      } else if (vflip) {
+      } else if (_vflip) {
         croppedImage.flip(SlyImageFlipDirection.vertical);
       }
 
-      croppedImage.lightAttributes = thumbnail.lightAttributes;
-      croppedImage.colorAttributes = thumbnail.colorAttributes;
-      croppedImage.effectAttributes = thumbnail.effectAttributes;
+      croppedImage.lightAttributes = _thumbnail.lightAttributes;
+      croppedImage.colorAttributes = _thumbnail.colorAttributes;
+      croppedImage.effectAttributes = _thumbnail.effectAttributes;
       await croppedImage.applyEdits();
 
       if (_saveMetadata) {
-        croppedImage.image.exif = originalImage.image.exif;
+        croppedImage.image.exif = _originalImage.image.exif;
       } else {
         image.removeMetadata();
       }
@@ -204,26 +206,26 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   void initState() {
-    thumbnail = originalImage.getThumbnail();
-    croppedThumbnail = originalImage.getThumbnail();
+    _thumbnail = _originalImage.getThumbnail();
+    _croppedThumbnail = _originalImage.getThumbnail();
 
-    originalImage.lightAttributes =
-        thumbnail.lightAttributes = croppedThumbnail.lightAttributes;
-    originalImage.colorAttributes =
-        thumbnail.colorAttributes = croppedThumbnail.colorAttributes;
-    originalImage.effectAttributes =
-        thumbnail.effectAttributes = croppedThumbnail.effectAttributes;
+    _originalImage.lightAttributes =
+        _thumbnail.lightAttributes = _croppedThumbnail.lightAttributes;
+    _originalImage.colorAttributes =
+        _thumbnail.colorAttributes = _croppedThumbnail.colorAttributes;
+    _originalImage.effectAttributes =
+        _thumbnail.effectAttributes = _croppedThumbnail.effectAttributes;
 
-    thumbnail.encode(format: 'PNG').then((data) {
+    _thumbnail.encode(format: 'PNG').then((data) {
       setState(() {
-        imageData = data;
+        _imageData = data;
       });
     });
 
-    croppedThumbnail.applyEdits().then((value) {
-      croppedThumbnail.encode(format: 'JPEG75').then((data) {
+    _croppedThumbnail.applyEdits().then((value) {
+      _croppedThumbnail.encode(format: 'JPEG75').then((data) {
         setState(() {
-          editedImageData = data;
+          _editedImageData = data;
         });
       });
     });
@@ -234,30 +236,30 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   @override
   Widget build(BuildContext context) {
     void updateImage() async {
-      croppedThumbnail.applyEdits().then((value) {
-        croppedThumbnail.encode(format: 'JPEG75').then((data) {
+      _croppedThumbnail.applyEdits().then((value) {
+        _croppedThumbnail.encode(format: 'JPEG75').then((data) {
           setState(() {
-            editedImageData = data;
+            _editedImageData = data;
           });
         });
       });
     }
 
     Future<void> updateCroppedImage() async {
-      if (imageData == null) return;
+      if (_imageData == null) return;
 
-      cropController.image = await loadUiImage(imageData!);
-      final uiImage = await cropController.croppedBitmap();
+      _cropController.image = await loadUiImage(_imageData!);
+      final uiImage = await _cropController.croppedBitmap();
       final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
 
       final image = await loadImage(byteData.buffer.asUint8List());
       if (image == null) return;
 
-      croppedThumbnail = SlyImage.fromImage(image);
-      croppedThumbnail.lightAttributes = thumbnail.lightAttributes;
-      croppedThumbnail.colorAttributes = thumbnail.colorAttributes;
-      croppedThumbnail.effectAttributes = thumbnail.effectAttributes;
+      _croppedThumbnail = SlyImage.fromImage(image);
+      _croppedThumbnail.lightAttributes = _thumbnail.lightAttributes;
+      _croppedThumbnail.colorAttributes = _thumbnail.colorAttributes;
+      _croppedThumbnail.effectAttributes = _thumbnail.effectAttributes;
       updateImage();
     }
 
@@ -265,16 +267,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       switch (direction) {
         case SlyImageFlipDirection.horizontal:
           setState(() {
-            hflip = !hflip;
+            _hflip = !_hflip;
           });
         case SlyImageFlipDirection.vertical:
           setState(() {
-            vflip = !vflip;
+            _vflip = !_vflip;
           });
         case SlyImageFlipDirection.both:
           setState(() {
-            hflip = !hflip;
-            vflip = !vflip;
+            _hflip = !_hflip;
+            _vflip = !_vflip;
           });
       }
     }
@@ -314,13 +316,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         }
 
-        final imageView = editedImageData != null
+        final imageView = _editedImageData != null
             ? InteractiveViewer(
                 clipBehavior:
                     constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
                 key: const Key('imageView'),
                 child: Image.memory(
-                  editedImageData!,
+                  _editedImageData!,
                   fit: BoxFit.contain,
                   gaplessPlayback: true,
                 ),
@@ -328,8 +330,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             : FittedBox(
                 key: const Key('imageView'),
                 child: SizedBox(
-                  width: thumbnail.width.toDouble(),
-                  height: thumbnail.height.toDouble(),
+                  width: _thumbnail.width.toDouble(),
+                  height: _thumbnail.height.toDouble(),
                   child: const Center(
                     child: CircularProgressIndicator.adaptive(),
                   ),
@@ -339,18 +341,18 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         final cropImageView = FittedBox(
           key: const Key('cropImageView'),
           child: SizedBox(
-            width: thumbnail.width.toDouble(),
-            height: thumbnail.height.toDouble(),
-            child: imageData != null
+            width: _thumbnail.width.toDouble(),
+            height: _thumbnail.height.toDouble(),
+            child: _imageData != null
                 ? CropImage(
-                    controller: cropController,
+                    controller: _cropController,
                     image: Image.memory(
-                      imageData!,
+                      _imageData!,
                       fit: BoxFit.contain,
                       gaplessPlayback: true,
                     ),
                     onCrop: (rect) {
-                      cropChanged = cropEverChanged = true;
+                      _cropChanged = _cropEverChanged = true;
                     },
                   )
                 : const Center(
@@ -360,7 +362,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         );
 
         final imageWidget = AnimatedPadding(
-          key: imageWidgetKey,
+          key: _imageWidgetKey,
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeOutQuint,
           padding: _selectedPageIndex == 3
@@ -372,8 +374,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ? const EdgeInsets.all(0)
                   : const EdgeInsets.only(top: 12, left: 12, right: 12),
           child: Transform.flip(
-            flipX: hflip,
-            flipY: vflip,
+            flipX: _hflip,
+            flipY: _vflip,
             child: constraints.maxWidth > 600
                 ? _selectedPageIndex == 3
                     ? cropImageView
@@ -398,34 +400,34 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               ? null
               : const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: croppedThumbnail.lightAttributes.length,
+          itemCount: _croppedThumbnail.lightAttributes.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(
                 top: index == 0 ? 16 : 0,
-                bottom: index == croppedThumbnail.lightAttributes.length - 1
+                bottom: index == _croppedThumbnail.lightAttributes.length - 1
                     ? 28
                     : 0,
               ),
               child: SlySliderRow(
-                label: croppedThumbnail.lightAttributes.values
+                label: _croppedThumbnail.lightAttributes.values
                     .elementAt(index)
                     .name,
-                value: croppedThumbnail.lightAttributes.values
+                value: _croppedThumbnail.lightAttributes.values
                     .elementAt(index)
                     .value,
-                secondaryTrackValue: croppedThumbnail.lightAttributes.values
+                secondaryTrackValue: _croppedThumbnail.lightAttributes.values
                     .elementAt(index)
                     .anchor,
-                min: croppedThumbnail.lightAttributes.values
+                min: _croppedThumbnail.lightAttributes.values
                     .elementAt(index)
                     .min,
-                max: croppedThumbnail.lightAttributes.values
+                max: _croppedThumbnail.lightAttributes.values
                     .elementAt(index)
                     .max,
                 onChanged: (value) {},
                 onChangeEnd: (value) {
-                  croppedThumbnail.lightAttributes.values
+                  _croppedThumbnail.lightAttributes.values
                       .elementAt(index)
                       .value = value;
                   updateImage();
@@ -442,34 +444,34 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               ? null
               : const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: croppedThumbnail.colorAttributes.length,
+          itemCount: _croppedThumbnail.colorAttributes.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(
                 top: index == 0 ? 16 : 0,
-                bottom: index == croppedThumbnail.colorAttributes.length - 1
+                bottom: index == _croppedThumbnail.colorAttributes.length - 1
                     ? 28
                     : 0,
               ),
               child: SlySliderRow(
-                label: croppedThumbnail.colorAttributes.values
+                label: _croppedThumbnail.colorAttributes.values
                     .elementAt(index)
                     .name,
-                value: croppedThumbnail.colorAttributes.values
+                value: _croppedThumbnail.colorAttributes.values
                     .elementAt(index)
                     .value,
-                secondaryTrackValue: croppedThumbnail.colorAttributes.values
+                secondaryTrackValue: _croppedThumbnail.colorAttributes.values
                     .elementAt(index)
                     .anchor,
-                min: croppedThumbnail.colorAttributes.values
+                min: _croppedThumbnail.colorAttributes.values
                     .elementAt(index)
                     .min,
-                max: croppedThumbnail.colorAttributes.values
+                max: _croppedThumbnail.colorAttributes.values
                     .elementAt(index)
                     .max,
                 onChanged: (value) {},
                 onChangeEnd: (value) {
-                  croppedThumbnail.colorAttributes.values
+                  _croppedThumbnail.colorAttributes.values
                       .elementAt(index)
                       .value = value;
                   updateImage();
@@ -485,34 +487,34 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               ? null
               : const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: croppedThumbnail.effectAttributes.length,
+          itemCount: _croppedThumbnail.effectAttributes.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(
                 top: index == 0 ? 16 : 0,
-                bottom: index == croppedThumbnail.effectAttributes.length - 1
+                bottom: index == _croppedThumbnail.effectAttributes.length - 1
                     ? 28
                     : 0,
               ),
               child: SlySliderRow(
-                label: croppedThumbnail.effectAttributes.values
+                label: _croppedThumbnail.effectAttributes.values
                     .elementAt(index)
                     .name,
-                value: croppedThumbnail.effectAttributes.values
+                value: _croppedThumbnail.effectAttributes.values
                     .elementAt(index)
                     .value,
-                secondaryTrackValue: croppedThumbnail.effectAttributes.values
+                secondaryTrackValue: _croppedThumbnail.effectAttributes.values
                     .elementAt(index)
                     .anchor,
-                min: croppedThumbnail.effectAttributes.values
+                min: _croppedThumbnail.effectAttributes.values
                     .elementAt(index)
                     .min,
-                max: croppedThumbnail.effectAttributes.values
+                max: _croppedThumbnail.effectAttributes.values
                     .elementAt(index)
                     .max,
                 onChanged: (value) {},
                 onChangeEnd: (value) {
-                  croppedThumbnail.effectAttributes.values
+                  _croppedThumbnail.effectAttributes.values
                       .elementAt(index)
                       .value = value;
                   updateImage();
@@ -522,9 +524,107 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           },
         );
 
+        void onAspectRatioSelected(double? ratio) {
+          if (_cropController.aspectRatio != ratio) {
+            _cropChanged = _cropEverChanged = true;
+            _cropController.aspectRatio = ratio;
+          }
+          Navigator.pop(context);
+        }
+
         final cropControls = LayoutBuilder(
           builder: (context, constraints) {
             final buttons = <Semantics>[
+              Semantics(
+                label: 'Aspect Ratio',
+                child: IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: const ImageIcon(
+                    AssetImage('assets/icons/aspect-ratio.png'),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  onPressed: () {
+                    showSlyDialog(context, 'Select Aspect Ratio', <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: SlyToggleButtons(
+                          defaultItem: _portraitCrop ? 1 : 0,
+                          onSelected: (index) {
+                            _portraitCrop = index == 1;
+                          },
+                          children: const <Widget>[
+                            Text('Landscape'),
+                            Text('Portrait'),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: SlyButton(
+                          onPressed: () {
+                            onAspectRatioSelected(null);
+                          },
+                          style: slySubtleButtonStlye,
+                          child: const Text('Free'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: SlyButton(
+                          onPressed: () {
+                            onAspectRatioSelected(1);
+                          },
+                          style: slySubtleButtonStlye,
+                          child: const Text('Square'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: SlyButton(
+                          onPressed: () {
+                            onAspectRatioSelected(
+                              _portraitCrop ? 3 / 4 : 4 / 3,
+                            );
+                          },
+                          style: slySubtleButtonStlye,
+                          child: const Text('4:3'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: SlyButton(
+                          onPressed: () {
+                            onAspectRatioSelected(
+                              _portraitCrop ? 2 / 3 : 3 / 2,
+                            );
+                          },
+                          style: slySubtleButtonStlye,
+                          child: const Text('3:2'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: SlyButton(
+                          onPressed: () {
+                            onAspectRatioSelected(
+                              _portraitCrop ? 9 / 16 : 16 / 9,
+                            );
+                          },
+                          style: slySubtleButtonStlye,
+                          child: const Text('16:9'),
+                        ),
+                      ),
+                      SlyButton(
+                        onPressed: () {
+                          onAspectRatioSelected(_cropController.aspectRatio);
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                    ]);
+                  },
+                ),
+              ),
               Semantics(
                 label: 'Rotate Left',
                 child: IconButton(
@@ -535,7 +635,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                   padding: const EdgeInsets.all(12),
                   onPressed: () async {
-                    cropController.rotateLeft();
+                    _cropController.rotateLeft();
                     updateCroppedImage();
                   },
                 ),
@@ -550,7 +650,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                   padding: const EdgeInsets.all(12),
                   onPressed: () async {
-                    cropController.rotateRight();
+                    _cropController.rotateRight();
                     updateCroppedImage();
                   },
                 ),
@@ -640,13 +740,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           ],
         );
 
-        controlsChild ??= lightControls;
+        _controlsChild ??= lightControls;
 
         void navigationDestinationSelected(int index) {
           if (_selectedPageIndex == index) return;
-          if (_selectedPageIndex == 3 && cropChanged == true) {
+          if (_selectedPageIndex == 3 && _cropChanged == true) {
             updateCroppedImage();
-            cropChanged = false;
+            _cropChanged = false;
           }
 
           _selectedPageIndex = index;
@@ -654,27 +754,27 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           switch (index) {
             case 0:
               setState(() {
-                controlsChild = lightControls;
+                _controlsChild = lightControls;
               });
             case 1:
               setState(() {
-                controlsChild = colorControls;
+                _controlsChild = colorControls;
               });
             case 2:
               setState(() {
-                controlsChild = effectControls;
+                _controlsChild = effectControls;
               });
             case 3:
               setState(() {
-                controlsChild = cropControls;
+                _controlsChild = cropControls;
               });
             case 4:
               setState(() {
-                controlsChild = exportControls;
+                _controlsChild = exportControls;
               });
             default:
               setState(() {
-                controlsChild = lightControls;
+                _controlsChild = lightControls;
               });
           }
         }
@@ -818,7 +918,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         );
 
         final controlsWidget = AnimatedSize(
-          key: controlsWidgetKey,
+          key: _controlsWidgetKey,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutQuint,
           child: AnimatedSwitcher(
@@ -827,7 +927,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               transitionBuilder: (Widget child, Animation<double> animation) {
                 // Don't transition widgets animating out
                 // as this causes issues with the crop page
-                if (child != controlsChild) return Container();
+                if (child != _controlsChild) return Container();
 
                 return SlideTransition(
                   key: ValueKey<Key?>(child.key),
@@ -845,7 +945,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 );
               },
               duration: const Duration(milliseconds: 150),
-              child: controlsChild),
+              child: _controlsChild),
         );
 
         if (constraints.maxWidth > 600) {

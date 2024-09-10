@@ -24,9 +24,11 @@ Future<void> showSlyDialog(
             left: 24,
             right: 24,
           ),
-          titlePadding: const EdgeInsets.symmetric(
-            vertical: 32,
-            horizontal: 16,
+          titlePadding: const EdgeInsets.only(
+            top: 32,
+            bottom: 24,
+            left: 16,
+            right: 16,
           ),
           title: Center(
             child: Text(
@@ -90,9 +92,11 @@ Future<void> showSlyDialog(
           shrinkWrap: true,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 32,
+              padding: const EdgeInsets.only(
+                top: 32,
+                bottom: 24,
+                left: 16,
+                right: 16,
               ),
               child: Center(
                 child: Text(
