@@ -7,4 +7,5 @@ Icon=page.kramo.Sly
 Terminal=false
 Type=Application
 Categories=Utility;Graphics;2DGraphics;RasterGraphics;
+Keywords=image;photo;editor;
 StartupNotify=true
