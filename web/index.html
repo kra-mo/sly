@@ -51,6 +51,11 @@
 
         <title>Sly</title>
         <link rel="manifest" href="manifest.json" />
+
+        <!-- Ask the user to confirm before closing the page -->
+        <script type="text/javascript">
+            window.onbeforeunload = () => true;
+        </script>
     </head>
     <body>
         <script src="flutter_bootstrap.js" async></script>
