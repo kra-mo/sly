@@ -32,11 +32,14 @@ void main() {
     ),
   );
 
-  if (isDesktop() && !Platform.isLinux) {
+  if (isDesktop()) {
     doWhenWindowReady(() {
-      appWindow.alignment = Alignment.center;
       appWindow.minSize = const Size(360, 294);
-      appWindow.size = const Size(900, 600);
+
+      if (!Platform.isLinux) {
+        appWindow.size = const Size(900, 600);
+        appWindow.alignment = Alignment.center;
+      }
     });
   }
 }
