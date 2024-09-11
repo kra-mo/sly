@@ -2,19 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'utils.dart';
 import 'image.dart';
 import 'button.dart';
-import 'dialog.dart';
 import 'editor_page.dart';
 import 'snack_bar.dart';
 import 'title_bar.dart';
+import 'about.dart';
 
 void main() {
   runApp(const SlyApp());
@@ -202,141 +200,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: SlyButton(
                                 onPressed: () {
-                                  showSlyDialog(
-                                    context,
-                                    'Sly',
-                                    <Widget>[
-                                      ConstrainedBox(
-                                        constraints:
-                                            const BoxConstraints(maxWidth: 240),
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              'A Friendly Image Editor',
-                                              textAlign: TextAlign.center,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium,
-                                            ),
-                                            const SizedBox(height: 24),
-                                            RichText(
-                                              textAlign: TextAlign.center,
-                                              text: TextSpan(
-                                                children: [
-                                                  const TextSpan(
-                                                    text:
-                                                        'Sly is an open source application licensed under the',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  const TextSpan(text: ' '),
-                                                  TextSpan(
-                                                    text: 'GPLv3',
-                                                    style: const TextStyle(
-                                                      color: Colors
-                                                          .deepOrangeAccent,
-                                                    ),
-                                                    recognizer:
-                                                        TapGestureRecognizer()
-                                                          ..onTap = () {
-                                                            launchUrl(
-                                                              Uri.parse(
-                                                                'https://www.gnu.org/licenses/gpl-3.0.en.html',
-                                                              ),
-                                                            );
-                                                          },
-                                                  ),
-                                                  const TextSpan(
-                                                    text: '. ',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  const TextSpan(
-                                                    text:
-                                                        'The source code is available',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  const TextSpan(text: ' '),
-                                                  TextSpan(
-                                                    text: 'on GitHub',
-                                                    style: const TextStyle(
-                                                      color: Colors
-                                                          .deepOrangeAccent,
-                                                    ),
-                                                    recognizer:
-                                                        TapGestureRecognizer()
-                                                          ..onTap = () {
-                                                            launchUrl(
-                                                              Uri.parse(
-                                                                'https://github.com/kra-mo/sly',
-                                                              ),
-                                                            );
-                                                          },
-                                                  ),
-                                                  const TextSpan(
-                                                    text: '.',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 18),
-                                            RichText(
-                                              textAlign: TextAlign.center,
-                                              text: TextSpan(
-                                                children: [
-                                                  const TextSpan(
-                                                    text:
-                                                        'If you want to support my work, consider donating to me on',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  const TextSpan(text: ' '),
-                                                  TextSpan(
-                                                    text: 'GitHub Sponsors',
-                                                    style: const TextStyle(
-                                                      color: Colors
-                                                          .deepOrangeAccent,
-                                                    ),
-                                                    recognizer:
-                                                        TapGestureRecognizer()
-                                                          ..onTap = () {
-                                                            launchUrl(
-                                                              Uri.parse(
-                                                                'https://github.com/sponsors/kra-mo',
-                                                              ),
-                                                            );
-                                                          },
-                                                  ),
-                                                  const TextSpan(
-                                                    text: '.',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 40),
-                                            SlyButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              style: slySubtleButtonStlye,
-                                              child: const Text('Done'),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
+                                  showSlyAboutDialog(context);
                                 },
                                 style: slySubtleButtonStlye,
                                 child: const Text('About Sly'),
