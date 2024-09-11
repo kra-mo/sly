@@ -65,7 +65,14 @@ class SlyButtonState extends State<SlyButton> {
     );
     return CupertinoTheme(
       data: const CupertinoThemeData(brightness: Brightness.light),
-      child: Theme(data: ThemeData.light(), child: elevatedButton!),
+      child: Theme(
+          data: ThemeData(
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.grey,
+              brightness: Brightness.light,
+            ),
+          ),
+          child: elevatedButton!),
     );
   }
 

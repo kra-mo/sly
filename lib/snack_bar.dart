@@ -2,6 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'spinner.dart';
+
 void showSlySnackBar(
   BuildContext context,
   String message, {
@@ -36,7 +38,7 @@ void showSlySnackBar(
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator.adaptive(),
+                              child: SlySpinner(),
                             )
                           : Container(),
                       loading ? const SizedBox(width: 16) : Container(),

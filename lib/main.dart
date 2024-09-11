@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'utils.dart';
 import 'image.dart';
 import 'button.dart';
+import 'spinner.dart';
 import 'editor_page.dart';
 import 'snack_bar.dart';
 import 'title_bar.dart';
@@ -92,7 +93,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
           child: SizedBox(
             width: 24,
             height: 24,
-            child: CircularProgressIndicator.adaptive(),
+            child: SlySpinner(),
           ),
         ),
       );

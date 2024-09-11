@@ -16,6 +16,7 @@ import 'button.dart';
 import 'slider_row.dart';
 import 'switch.dart';
 import 'toggle_buttons.dart';
+import 'spinner.dart';
 import 'dialog.dart';
 import 'snack_bar.dart';
 import 'title_bar.dart';
@@ -67,7 +68,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           child: SizedBox(
             width: 24,
             height: 24,
-            child: CircularProgressIndicator.adaptive(),
+            child: SlySpinner(),
           ),
         ),
       );
@@ -333,7 +334,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   width: _thumbnail.width.toDouble(),
                   height: _thumbnail.height.toDouble(),
                   child: const Center(
-                    child: CircularProgressIndicator.adaptive(),
+                    child: SlySpinner(),
                   ),
                 ),
               );
@@ -356,7 +357,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     },
                   )
                 : const Center(
-                    child: CircularProgressIndicator.adaptive(),
+                    child: SlySpinner(),
                   ),
           ),
         );
