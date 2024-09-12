@@ -29,7 +29,7 @@ The app is available on Flathub.
 
 I'm planning to make the app available for all other major platforms (Android, iOS, macOS, Windows) in the near future.
 
-For now, if you want to try out the app, you can do so at [sly.kramo.page](https://sly.kramo.page). Be aware that this version is unstable and the performance will probably be worse than that of the native app.
+For now, if you want to try out the app, you can do so at [sly.kramo.page](https://sly.kramo.page). Be aware that this version is unstable and the performance will probably be significantly worse than that of the native app.
 
 **Issues for each platform can be found here:**
 
