@@ -79,9 +79,23 @@ jobs:
         id: get_tag_name
         run: echo tag_name=${GITHUB_REF#refs/tags/} >> $GITHUB_OUTPUT
 
+      - name: Get release notes
+        shell: python
+        run: |
+          import re, textwrap
+          open_file = open("./packaging/linux/page.kramo.Sly.metainfo.xml", "r", encoding="utf-8")
+          string = open_file.read()
+          open_file.close()
+          string = re.findall("<release.*>\s*<description.*>\n([\s\S]*?)\s*</description>\s*<\/release>", string)[0]
+          string = textwrap.dedent(string)
+          open_file = open("release_notes", "w", encoding="utf-8")
+          open_file.write(string)
+          open_file.close()
+
       - name: Publish release
         uses: softprops/action-gh-release@v2.0.8
         with:
           files: Sly-${{ needs.build.outputs.version }}-linux-x86-64.tar.gz
           fail_on_unmatched_files: true
           tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+          body_path: release_notes
