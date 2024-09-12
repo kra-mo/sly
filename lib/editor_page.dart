@@ -144,7 +144,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       _saveFormat = format!;
 
-      if (_editedImage.loading > 0) {
+      if (_editedImage.loading) {
         _saveOnLoad = true;
       } else {
         _save();
@@ -168,7 +168,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     }
 
     if (_saveMetadata) {
-      image.image.exif = _originalImage.image.exif;
+      image.copyMetadataFrom(_originalImage);
     } else {
       image.removeMetadata();
     }

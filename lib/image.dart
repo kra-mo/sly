@@ -16,11 +16,12 @@ class SlyImageAttribute {
 }
 
 class SlyImage {
-  img.Image _originalImage;
-  img.Image image;
   StreamController<String> controller = StreamController<String>();
+
+  img.Image _originalImage;
+  img.Image _image;
   int _editsApplied = 0;
-  int loading = 0;
+  int _loading = 0;
 
   Map<String, SlyImageAttribute> lightAttributes = {
     'exposure': SlyImageAttribute('Exposure', 0, 0, 0, 1),
@@ -47,11 +48,15 @@ class SlyImage {
   };
 
   int get width {
-    return image.width;
+    return _image.width;
   }
 
   int get height {
-    return image.height;
+    return _image.height;
+  }
+
+  bool get loading {
+    return _loading > 0;
   }
 
   /// Creates a new `SlyImage` from `image`.
@@ -59,35 +64,35 @@ class SlyImage {
   /// The `image` object is not reused, so calling `.from`
   /// before invoking this constructor is not necessary.
   SlyImage.fromImage(img.Image original)
-      : image = img.Image.from(original),
+      : _image = img.Image.from(original),
         _originalImage = img.Image.from(original);
 
   /// Creates a new `SlyImage` from another `image`.
   SlyImage.from(SlyImage original)
-      : image = img.Image.from(original.image),
+      : _image = img.Image.from(original._image),
         _originalImage = img.Image.from(original._originalImage);
 
   /// Applies changes to the image's attrubutes.
   Future<void> applyEdits() async {
-    loading += 1;
+    _loading += 1;
     final applied = DateTime.now().millisecondsSinceEpoch;
     _editsApplied = applied;
 
     final editedImage =
         (await _buildEditCommand(_originalImage).executeThread()).outputImage;
     if (editedImage == null) {
-      loading -= 1;
+      _loading -= 1;
       return;
     }
 
     if (_editsApplied > applied) {
-      loading -= 1;
+      _loading -= 1;
       return;
     }
 
-    image = editedImage;
+    _image = editedImage;
     controller.add('updated');
-    loading -= 1;
+    _loading -= 1;
   }
 
   /// Applies changes to the image's attrubutes, progressively.
@@ -98,7 +103,7 @@ class SlyImage {
   ///
   /// Finally, when ready, the image will be returned at the original size.
   Future<void> applyEditsProgressive() async {
-    loading += 1;
+    _loading += 1;
     final applied = DateTime.now().millisecondsSinceEpoch;
     _editsApplied = applied;
 
@@ -122,32 +127,38 @@ class SlyImage {
 
     for (img.Image editableImage in images) {
       if (_editsApplied > applied) {
-        loading -= 1;
+        _loading -= 1;
         return;
       }
 
       final editedImage =
           (await _buildEditCommand(editableImage).executeThread()).outputImage;
       if (editedImage == null) {
-        loading -= 1;
+        _loading -= 1;
         return;
       }
 
       if (_editsApplied > applied) {
-        loading -= 1;
+        _loading -= 1;
         return;
       }
 
-      image = editedImage;
+      _image = editedImage;
       controller.add('updated');
     }
 
-    loading -= 1;
+    _loading -= 1;
   }
 
-  /// Removes EXIF metadata from the image.
+  /// Copies Exif metadata from `src` to the image.
+  void copyMetadataFrom(SlyImage src) {
+    _image.exif = img.ExifData.from(src._image.exif);
+    _originalImage.exif = img.ExifData.from(src._originalImage.exif);
+  }
+
+  /// Removes Exif metadata from the image.
   void removeMetadata() {
-    image.exif = img.ExifData();
+    _image.exif = img.ExifData();
     _originalImage.exif = img.ExifData();
   }
 
@@ -164,7 +175,7 @@ class SlyImage {
         imgFlipDirection = img.FlipDirection.both;
     }
 
-    img.flip(image, direction: imgFlipDirection);
+    img.flip(_image, direction: imgFlipDirection);
     img.flip(_originalImage, direction: imgFlipDirection);
   }
 
@@ -172,8 +183,8 @@ class SlyImage {
   void rotate(num degree) {
     if (degree == 360) return;
 
-    image = img.copyRotate(
-      image,
+    _image = img.copyRotate(
+      _image,
       angle: degree,
       interpolation: img.Interpolation.cubic,
     );
@@ -193,7 +204,7 @@ class SlyImage {
   /// - `'JPEG75'` - 'Quality' 75
   /// - `'TIFF'`
   Future<Uint8List> encode({String? format = 'PNG'}) async {
-    final cmd = img.Command()..image(image);
+    final cmd = img.Command()..image(_image);
 
     switch (format) {
       case 'PNG':
