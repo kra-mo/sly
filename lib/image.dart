@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'dart:math';
+import 'dart:async';
 
 import 'package:image/image.dart' as img;
 
@@ -16,8 +16,11 @@ class SlyImageAttribute {
 }
 
 class SlyImage {
-  final img.Image _originalImage;
+  img.Image _originalImage;
   img.Image image;
+  StreamController<String> controller = StreamController<String>();
+  int _editsApplied = 0;
+  int loading = 0;
 
   Map<String, SlyImageAttribute> lightAttributes = {
     'exposure': SlyImageAttribute('Exposure', 0, 0, 0, 1),
@@ -64,63 +67,82 @@ class SlyImage {
       : image = img.Image.from(original.image),
         _originalImage = img.Image.from(original._originalImage);
 
-  /// Returns a lower resolution `SlyImage` to be used as a thumbnail.
-  ///
-  /// Note that the thumbnail does not necessarily take up less storage space,
-  /// but should be faster to load.
-  ///
-  /// If the image is already low resolution, the image will likely be identical.
-  SlyImage getThumbnail() {
-    return SlyImage.fromImage(
-      img.copyResize(image,
-          width: min(image.height, 500),
-          interpolation: img.Interpolation.average),
-    );
-  }
-
   /// Applies changes to the image's attrubutes.
   Future<void> applyEdits() async {
-    int blacks = lightAttributes['blacks']!.value.toInt();
-    int whites = lightAttributes['whites']!.value.toInt();
-    int mids = lightAttributes['mids']!.value.toInt();
+    loading += 1;
+    final applied = DateTime.now().millisecondsSinceEpoch;
+    _editsApplied = applied;
 
-    final cmd = img.Command()
-      ..image(_originalImage)
-      ..copy()
-      ..adjustColor(
-        exposure: lightAttributes['exposure']!.value,
-        brightness: lightAttributes['brightness']!.value,
-        contrast: lightAttributes['contrast']!.value,
-        saturation: colorAttributes['saturation']!.value,
-        // gamma: colorAttributes['gamma']!.value,
-        // hue: colorAttributes['hue']!.value,
-        blacks: img.ColorUint8.rgb(blacks, blacks, blacks),
-        whites: img.ColorUint8.rgb(whites, whites, whites),
-        mids: img.ColorUint8.rgb(mids, mids, mids),
-      )
-      ..colorOffset(
-        red: 50 * colorAttributes['temp']!.value,
-        green: 50 * colorAttributes['tint']!.value * -1,
-        blue: 50 * colorAttributes['temp']!.value * -1,
-      )
-      ..sepia(amount: effectAttributes['sepia']!.value)
-      ..convolution(
-        filter: [0, -1, 0, -1, 5, -1, 0, -1, 0],
-        amount: effectAttributes['sharpness']!.value,
-      )
-      ..vignette(amount: effectAttributes['vignette']!.value)
-      ..copyExpandCanvas(
-          backgroundColor: effectAttributes['border']!.value > 0
-              ? img.ColorRgb8(255, 255, 255)
-              : img.ColorRgb8(0, 0, 0),
-          padding: (effectAttributes['border']!.value.abs() *
-                  (_originalImage.width / 3))
-              .toInt());
+    final editedImage =
+        (await _buildEditCommand(_originalImage).executeThread()).outputImage;
+    if (editedImage == null) {
+      loading -= 1;
+      return;
+    }
 
-    final editedImage = (await cmd.executeThread()).outputImage;
-    if (editedImage == null) return;
+    if (_editsApplied > applied) {
+      loading -= 1;
+      return;
+    }
 
     image = editedImage;
+    controller.add('updated');
+    loading -= 1;
+  }
+
+  /// Applies changes to the image's attrubutes, progressively.
+  ///
+  /// The edits will first be applied to a <=100px tall thumbnail for fast preview.
+  ///
+  /// After that, a <=500px tall one.
+  ///
+  /// Finally, when ready, the image will be returned at the original size.
+  Future<void> applyEditsProgressive() async {
+    loading += 1;
+    final applied = DateTime.now().millisecondsSinceEpoch;
+    _editsApplied = applied;
+
+    final images = [];
+
+    if (_originalImage.height > 300) {
+      images.add(
+        img.copyResize(_originalImage,
+            width: 100, interpolation: img.Interpolation.average),
+      );
+    }
+
+    if (_originalImage.height > 700) {
+      images.add(
+        img.copyResize(_originalImage,
+            width: 500, interpolation: img.Interpolation.average),
+      );
+    }
+
+    images.add(_originalImage);
+
+    for (img.Image editableImage in images) {
+      if (_editsApplied > applied) {
+        loading -= 1;
+        return;
+      }
+
+      final editedImage =
+          (await _buildEditCommand(editableImage).executeThread()).outputImage;
+      if (editedImage == null) {
+        loading -= 1;
+        return;
+      }
+
+      if (_editsApplied > applied) {
+        loading -= 1;
+        return;
+      }
+
+      image = editedImage;
+      controller.add('updated');
+    }
+
+    loading -= 1;
   }
 
   /// Removes EXIF metadata from the image.
@@ -144,6 +166,22 @@ class SlyImage {
 
     img.flip(image, direction: imgFlipDirection);
     img.flip(_originalImage, direction: imgFlipDirection);
+  }
+
+  /// Rotates the image by `degree`
+  void rotate(num degree) {
+    if (degree == 360) return;
+
+    image = img.copyRotate(
+      image,
+      angle: degree,
+      interpolation: img.Interpolation.cubic,
+    );
+    _originalImage = img.copyRotate(
+      _originalImage,
+      angle: degree,
+      interpolation: img.Interpolation.cubic,
+    );
   }
 
   /// Returns the image encoded as `format`.
@@ -175,5 +213,55 @@ class SlyImage {
     }
 
     return (await cmd.executeThread()).outputBytes!;
+  }
+
+  img.Command _buildEditCommand(editableImage) {
+    final exposure = lightAttributes['exposure']!.value;
+    final brightness = lightAttributes['brightness']!.value;
+    final contrast = lightAttributes['contrast']!.value;
+    final saturation = colorAttributes['saturation']!.value;
+    final blacks = lightAttributes['blacks']!.value.round();
+    final whites = lightAttributes['whites']!.value.round();
+    final mids = lightAttributes['mids']!.value.round();
+
+    final red = 50 * colorAttributes['temp']!.value;
+    final green = 50 * colorAttributes['tint']!.value * -1;
+    final blue = 50 * colorAttributes['temp']!.value * -1;
+
+    final sepia = effectAttributes['sepia']!.value;
+    final sharpness = effectAttributes['sharpness']!.value;
+    final vignette = effectAttributes['vignette']!.value;
+    final border = effectAttributes['border']!.value;
+
+    return img.Command()
+      ..image(editableImage)
+      ..copy()
+      ..adjustColor(
+        exposure: exposure,
+        brightness: brightness,
+        contrast: contrast,
+        saturation: saturation,
+        // gamma: colorAttributes['gamma']!.value,
+        // hue: colorAttributes['hue']!.value,
+        blacks: img.ColorUint8.rgb(blacks, blacks, blacks),
+        whites: img.ColorUint8.rgb(whites, whites, whites),
+        mids: img.ColorUint8.rgb(mids, mids, mids),
+      )
+      ..colorOffset(
+        red: red,
+        green: green,
+        blue: blue,
+      )
+      ..sepia(amount: sepia)
+      ..convolution(
+        filter: [0, -1, 0, -1, 5, -1, 0, -1, 0],
+        amount: sharpness,
+      )
+      ..vignette(amount: vignette)
+      ..copyExpandCanvas(
+          backgroundColor: border > 0
+              ? img.ColorRgb8(255, 255, 255)
+              : img.ColorRgb8(0, 0, 0),
+          padding: (border.abs() * (editableImage.width / 3)).round());
   }
 }
