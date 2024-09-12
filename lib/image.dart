@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:image/image.dart' as img;
 
 enum SlyImageFlipDirection { horizontal, vertical, both }
@@ -109,21 +111,20 @@ class SlyImage {
 
     final images = [];
 
-    if (_originalImage.height > 300) {
+    if (_originalImage.height > 700 ||
+        (kIsWeb && _originalImage.height > 500)) {
       images.add(
-        img.copyResize(_originalImage,
-            width: 100, interpolation: img.Interpolation.average),
+        img.copyResize(
+          _originalImage,
+          height: 500,
+          interpolation: img.Interpolation.average,
+        ),
       );
     }
 
-    if (_originalImage.height > 700) {
-      images.add(
-        img.copyResize(_originalImage,
-            width: 500, interpolation: img.Interpolation.average),
-      );
+    if (!kIsWeb || _originalImage.height <= 500) {
+      images.add(_originalImage);
     }
-
-    images.add(_originalImage);
 
     for (img.Image editableImage in images) {
       if (_editsApplied > applied) {
@@ -203,7 +204,17 @@ class SlyImage {
   /// - `'JPEG'`/`'JPEG90'` - Quality 90
   /// - `'JPEG75'` - 'Quality' 75
   /// - `'TIFF'`
-  Future<Uint8List> encode({String? format = 'PNG'}) async {
+  ///
+  /// If `fullRes` is not true, a lower resolution image might be returned
+  /// if it looks like the device could not handle loading the entire image.
+  Future<Uint8List> encode({
+    String? format = 'PNG',
+    bool fullRes = false,
+  }) async {
+    if (fullRes && kIsWeb && _originalImage.height > 500) {
+      await applyEdits();
+    }
+
     final cmd = img.Command()..image(_image);
 
     switch (format) {

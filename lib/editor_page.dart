@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:crop_image/crop_image.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 import 'utils.dart';
 import 'image.dart';
@@ -56,6 +57,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   final _cropController = CropController();
   bool _cropChanged = false;
+  bool _cropEverChanged = false;
   bool _portraitCrop = false;
 
   int _selectedPageIndex = 0;
@@ -144,36 +146,75 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       _saveFormat = format!;
 
+      if (_cropEverChanged && kIsWeb && _originalImage.height > 500) {
+        final fullSizeCropController = CropController(
+          defaultCrop: _cropController.crop,
+          rotation: _cropController.rotation,
+        );
+
+        fullSizeCropController.image = await loadUiImage(
+          await _originalImage.encode(format: 'PNG'),
+        );
+
+        final uiImage = await fullSizeCropController.croppedBitmap();
+        final byteData = await uiImage.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        );
+
+        if (byteData == null) return;
+
+        final imgImage = img.Image.fromBytes(
+          numChannels: 4,
+          width: uiImage.width,
+          height: uiImage.height,
+          bytes: byteData.buffer,
+        );
+
+        final croppedImage = SlyImage.fromImage(imgImage);
+
+        croppedImage.lightAttributes = _editedImage.lightAttributes;
+        croppedImage.colorAttributes = _editedImage.colorAttributes;
+        croppedImage.effectAttributes = _editedImage.effectAttributes;
+        await croppedImage.applyEdits();
+
+        _save(croppedImage);
+        return;
+      }
+
       if (_editedImage.loading) {
         _saveOnLoad = true;
       } else {
-        _save();
+        _save(_editedImage);
       }
     },
   );
 
-  void _save() async {
-    final image = SlyImage.from(_editedImage);
+  void _save(SlyImage image) async {
+    final copyImage = SlyImage.from(image);
+    copyImage.lightAttributes = image.lightAttributes;
+    copyImage.colorAttributes = image.colorAttributes;
+    copyImage.effectAttributes = image.effectAttributes;
 
     if (_rotationAngle != 0 && _rotationAngle != (math.pi * 2)) {
-      image.rotate(_rotationAngle * (180 / math.pi));
+      copyImage.rotate(_rotationAngle * (180 / math.pi));
     }
 
     if (_hflip && _vflip) {
-      image.flip(SlyImageFlipDirection.both);
+      copyImage.flip(SlyImageFlipDirection.both);
     } else if (_hflip) {
-      image.flip(SlyImageFlipDirection.horizontal);
+      copyImage.flip(SlyImageFlipDirection.horizontal);
     } else if (_vflip) {
-      image.flip(SlyImageFlipDirection.vertical);
+      copyImage.flip(SlyImageFlipDirection.vertical);
     }
 
     if (_saveMetadata) {
-      image.copyMetadataFrom(_originalImage);
+      copyImage.copyMetadataFrom(_originalImage);
     } else {
-      image.removeMetadata();
+      copyImage.removeMetadata();
     }
 
-    if (!(await saveImage(await image.encode(format: _saveFormat),
+    if (!(await saveImage(
+        await copyImage.encode(format: _saveFormat, fullRes: true),
         fileExtension: _saveFormat == 'PNG' ? 'png' : 'jpg'))) {
       _saveButton.setChild(Text(_saveButtonLabel));
       return;
@@ -191,7 +232,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     switch (event) {
       case 'updated':
         if (_saveOnLoad) {
-          _save();
+          _save(_editedImage);
           _saveOnLoad = false;
         }
 
@@ -351,7 +392,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       gaplessPlayback: true,
                     ),
                     onCrop: (rect) {
-                      _cropChanged = true;
+                      _cropChanged = _cropEverChanged = true;
                     },
                   )
                 : const Center(
@@ -502,7 +543,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         void onAspectRatioSelected(double? ratio) {
           if (_cropController.aspectRatio != ratio) {
-            _cropChanged = true;
+            _cropChanged = _cropEverChanged = true;
             _cropController.aspectRatio = ratio;
           }
           Navigator.pop(context);
