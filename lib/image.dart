@@ -22,7 +22,7 @@ class SlyImage {
 
   img.Image _originalImage;
   img.Image _image;
-  int _editsApplied = 0;
+  num _editsApplied = 0;
   int _loading = 0;
 
   Map<String, SlyImageAttribute> lightAttributes = {
@@ -82,19 +82,17 @@ class SlyImage {
 
     final editedImage =
         (await _buildEditCommand(_originalImage).executeThread()).outputImage;
-    if (editedImage == null) {
-      _loading -= 1;
-      return;
-    }
 
-    if (_editsApplied > applied) {
-      _loading -= 1;
-      return;
-    }
+    _loading -= 1;
+
+    if (editedImage == null) return;
+
+    if (_editsApplied > applied) return;
+
+    if (controller.isClosed) return;
 
     _image = editedImage;
     controller.add('updated');
-    _loading -= 1;
   }
 
   /// Applies changes to the image's attrubutes, progressively.
@@ -109,7 +107,7 @@ class SlyImage {
     final applied = DateTime.now().millisecondsSinceEpoch;
     _editsApplied = applied;
 
-    final images = [];
+    final List<img.Image> images = [];
 
     if (_originalImage.height > 700 ||
         (kIsWeb && _originalImage.height > 500)) {
@@ -140,6 +138,11 @@ class SlyImage {
       }
 
       if (_editsApplied > applied) {
+        _loading -= 1;
+        return;
+      }
+
+      if (controller.isClosed) {
         _loading -= 1;
         return;
       }
@@ -235,6 +238,11 @@ class SlyImage {
     }
 
     return (await cmd.executeThread()).outputBytes!;
+  }
+
+  void dispose() {
+    controller.close();
+    _editsApplied = double.infinity;
   }
 
   img.Command _buildEditCommand(editableImage) {

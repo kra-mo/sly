@@ -55,7 +55,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   bool _hflip = false;
   bool _vflip = false;
 
-  final _cropController = CropController();
+  CropController? _cropController = CropController();
   bool _cropChanged = false;
   bool _cropEverChanged = false;
   bool _portraitCrop = false;
@@ -147,9 +147,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       _saveFormat = format!;
 
       if (_cropEverChanged && kIsWeb && _originalImage.height > 500) {
-        final fullSizeCropController = CropController(
-          defaultCrop: _cropController.crop,
-          rotation: _cropController.rotation,
+        if (_cropController == null) {
+          _saveButton.setChild(Text(_saveButtonLabel));
+          return;
+        }
+
+        CropController? fullSizeCropController = CropController(
+          defaultCrop: _cropController!.crop,
+          rotation: _cropController!.rotation,
         );
 
         fullSizeCropController.image = await loadUiImage(
@@ -157,6 +162,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         );
 
         final uiImage = await fullSizeCropController.croppedBitmap();
+
+        fullSizeCropController = null;
+
         final byteData = await uiImage.toByteData(
           format: ui.ImageByteFormat.rawRgba,
         );
@@ -177,7 +185,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         croppedImage.effectAttributes = _editedImage.effectAttributes;
         await croppedImage.applyEdits();
 
-        _save(croppedImage);
+        await _save(croppedImage);
+        croppedImage.dispose();
         return;
       }
 
@@ -189,7 +198,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     },
   );
 
-  void _save(SlyImage image) async {
+  Future<void> _save(SlyImage image) async {
     final copyImage = SlyImage.from(image);
     copyImage.lightAttributes = image.lightAttributes;
     copyImage.colorAttributes = image.colorAttributes;
@@ -217,8 +226,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         await copyImage.encode(format: _saveFormat, fullRes: true),
         fileExtension: _saveFormat == 'PNG' ? 'png' : 'jpg'))) {
       _saveButton.setChild(Text(_saveButtonLabel));
+      copyImage.dispose();
       return;
     }
+
+    copyImage.dispose();
 
     if (mounted) {
       _saveButton.setChild(const Icon(Icons.check));
@@ -229,6 +241,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   }
 
   void _onImageUpdate(event) {
+    if (!mounted) return;
+
     switch (event) {
       case 'updated':
         if (_saveOnLoad) {
@@ -269,6 +283,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   void dispose() {
     subscription?.cancel();
 
+    _originalImage.dispose();
+    _editedImage.dispose();
+
+    _originalImageData = null;
+    _editedImageData = null;
+
+    _cropController = null;
+
     super.dispose();
   }
 
@@ -279,7 +301,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     }
 
     Future<void> updateCroppedImage() async {
-      final uiImage = await _cropController.croppedBitmap();
+      if (_cropController == null) return;
+
+      final uiImage = await _cropController!.croppedBitmap();
       final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
 
@@ -291,6 +315,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       newImage.colorAttributes = _editedImage.colorAttributes;
       newImage.effectAttributes = _editedImage.effectAttributes;
 
+      _editedImage.dispose();
       _editedImage = newImage;
 
       subscription?.cancel();
@@ -299,6 +324,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     }
 
     void flipImage(SlyImageFlipDirection direction) {
+      if (!mounted) return;
+
       switch (direction) {
         case SlyImageFlipDirection.horizontal:
           setState(() {
@@ -465,7 +492,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   _editedImage.lightAttributes.values.elementAt(index).value =
                       value;
                   updateImage();
-                  setState(() {});
                 },
               ),
             );
@@ -542,9 +568,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         );
 
         void onAspectRatioSelected(double? ratio) {
-          if (_cropController.aspectRatio != ratio) {
+          if ((_cropController != null) &&
+              (_cropController!.aspectRatio != ratio)) {
             _cropChanged = _cropEverChanged = true;
-            _cropController.aspectRatio = ratio;
+            _cropController!.aspectRatio = ratio;
           }
           Navigator.pop(context);
         }
@@ -634,7 +661,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       ),
                       SlyButton(
                         onPressed: () {
-                          onAspectRatioSelected(_cropController.aspectRatio);
+                          if (_cropController == null) return;
+                          onAspectRatioSelected(_cropController!.aspectRatio);
                         },
                         child: const Text('Cancel'),
                       ),
@@ -651,7 +679,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     AssetImage('assets/icons/rotate-left.png'),
                   ),
                   padding: const EdgeInsets.all(12),
-                  onPressed: () async {
+                  onPressed: () {
                     double newAngle = _rotationAngle - (math.pi / 2);
                     if (newAngle < 0) {
                       newAngle = (math.pi * 2) + newAngle;
@@ -676,7 +704,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     AssetImage('assets/icons/rotate-right.png'),
                   ),
                   padding: const EdgeInsets.all(12),
-                  onPressed: () async {
+                  onPressed: () {
                     double newAngle = _rotationAngle + (math.pi / 2);
                     if (newAngle > (math.pi * 2)) {
                       newAngle = newAngle - (math.pi * 2);
