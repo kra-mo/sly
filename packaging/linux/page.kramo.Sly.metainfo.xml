@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-	<id>page.kramo.Sly</id>
-	<metadata_license>CC0-1.0</metadata_license>
-	<project_license>GPL-3.0-or-later</project_license>
-	<name>Sly</name>
-	<summary>Edit your images easily</summary>
-	<description>
-	  <p>A friendly image editor that requires no internet connection or preexisting expertise. Just open a photo and have at it.</p>
-	  <p>The app  allows you to adjust simple attributes like brightness or contrast as well as effects like a vignette or a border. It also allows you to flip, rotate and crop the image to your heart's desire.</p>
-	  <p>When you're done, just export the photo as a JPEG or a PNG with the quality settings of your choosing. You also get a choice in whether or not to keep metadata such as location information.</p>
-	</description>
-	<launchable type="desktop-id">page.kramo.Sly.desktop</launchable>
-	<branding>
-		<color type="primary" scheme_preference="light">#88C9ff</color>
-		<color type="primary" scheme_preference="dark">#131328</color>
-	</branding>
-	<developer id="page.kramo">
-		<name translate="no">kramo</name>
-	</developer>
-	<url type="homepage">https://github.com/kra-mo/sly</url>
-	<url type="bugtracker">https://github.com/kra-mo/sly/issues</url>
-	<url type="vcs-browser">https://github.com/kra-mo/sly</url>
-	<content_rating type="oars-1.1" />
-	<supports>
-		<control>pointing</control>
-		<control>keyboard</control>
-		<control>touch</control>
-	</supports>
-	<requires>
-		<display_length compare="ge">360</display_length>
-	</requires>
-	<screenshots>
+    <id>page.kramo.Sly</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0-or-later</project_license>
+    <name>Sly</name>
+    <summary>Edit your images easily</summary>
+    <description>
+      <p>A friendly image editor that requires no internet connection or preexisting expertise. Just open a photo and have at it.</p>
+      <p>The app  allows you to adjust simple attributes like brightness or contrast as well as effects like a vignette or a border. It also allows you to flip, rotate and crop the image to your heart's desire.</p>
+      <p>When you're done, just export the photo as a JPEG or a PNG with the quality settings of your choosing. You also get a choice in whether or not to keep metadata such as location information.</p>
+    </description>
+    <launchable type="desktop-id">page.kramo.Sly.desktop</launchable>
+    <branding>
+        <color type="primary" scheme_preference="light">#88C9ff</color>
+        <color type="primary" scheme_preference="dark">#131328</color>
+    </branding>
+    <developer id="page.kramo">
+        <name translate="no">kramo</name>
+    </developer>
+    <url type="homepage">https://github.com/kra-mo/sly</url>
+    <url type="bugtracker">https://github.com/kra-mo/sly/issues</url>
+    <url type="vcs-browser">https://github.com/kra-mo/sly</url>
+    <content_rating type="oars-1.1" />
+    <supports>
+        <control>pointing</control>
+        <control>keyboard</control>
+        <control>touch</control>
+    </supports>
+    <requires>
+        <display_length compare="ge">360</display_length>
+    </requires>
+    <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/kra-mo/sly/main/packaging/linux/screenshots/1.png</image>
       <caption>Editing an image</caption>
@@ -44,20 +44,20 @@
       <caption>Exporting an image</caption>
     </screenshot>
   </screenshots>
-	<releases>
-    	<release version="0.1.4" date="2024-09-12">
-    	    <description>
-    			<ul>
+    <releases>
+        <release version="0.1.4" date="2024-09-12">
+            <description>
+                <ul>
                     <li>A minimum window size is now always enforced</li>
                     <li>User interface improvements</li>
                     <li>Updated metadata</li>
                 </ul>
-    		</description>
-    	</release>
-		<release version="0.1.3" date="2024-09-10">
-		    <description>
-				<p>Initital release</p>
-			</description>
-		</release>
-	</releases>
+            </description>
+        </release>
+        <release version="0.1.3" date="2024-09-10">
+            <description>
+                <p>Initital release</p>
+            </description>
+        </release>
+    </releases>
 </component>
