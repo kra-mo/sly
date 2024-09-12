@@ -31,6 +31,13 @@ I'm planning to make the app available for all other major platforms (Android, i
 
 For now, if you want to try out the app, you can do so at [sly.kramo.page](https://sly.kramo.page). Be aware that this version is unstable and the performance will probably be worse than that of the native app.
 
+**Issues for each platform can be found here:**
+
+- Android - https://github.com/kra-mo/sly/issues/12
+- iOS - https://github.com/kra-mo/sly/issues/11
+- macOS - https://github.com/kra-mo/sly/issues/9
+- Windows - https://github.com/kra-mo/sly/issues/10
+
 # Contributing
 
 If you would like to contribute a feature or an enhancement, please open an issue or [reach out](https://kramo.page/about/) before doing so, so that we can discuss details before an implementation.
