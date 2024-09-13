@@ -35,7 +35,7 @@ class SlyEditorPage extends StatefulWidget {
 class _SlyEditorPageState extends State<SlyEditorPage> {
   final GlobalKey<SlyButtonState> _saveButtonKey = GlobalKey<SlyButtonState>();
   final GlobalKey _imageWidgetKey = GlobalKey();
-  final GlobalKey _controlsWidgetKey = GlobalKey();
+  int _controlsWidgetKeyValue = 0;
 
   Widget? _controlsChild;
 
@@ -59,6 +59,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   bool _cropChanged = false;
   bool _cropEverChanged = false;
   bool _portraitCrop = false;
+
+  final List<List<Map<String, SlyImageAttribute>>> _undoList = [];
+  final List<List<Map<String, SlyImageAttribute>>> _redoList = [];
+  bool _canUndo = false;
+  bool _canRedo = false;
 
   int _selectedPageIndex = 0;
 
@@ -146,7 +151,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       _saveFormat = format!;
 
-      if (_cropEverChanged && kIsWeb && _originalImage.height > 500) {
+      if (_cropEverChanged && !_originalImage.canLoadFullRes) {
         if (_cropController == null) {
           _saveButton.setChild(Text(_saveButtonLabel));
           return;
@@ -294,55 +299,113 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    void updateImage() async {
-      _editedImage.applyEditsProgressive();
+  void updateImage() async {
+    _editedImage.applyEditsProgressive();
+  }
+
+  Future<void> updateCroppedImage() async {
+    if (_cropController == null) return;
+
+    final uiImage = await _cropController!.croppedBitmap();
+    final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) return;
+
+    final image = await loadImage(byteData.buffer.asUint8List());
+    if (image == null) return;
+
+    final newImage = SlyImage.fromImage(image);
+    newImage.lightAttributes = _editedImage.lightAttributes;
+    newImage.colorAttributes = _editedImage.colorAttributes;
+    newImage.effectAttributes = _editedImage.effectAttributes;
+
+    _editedImage.dispose();
+    _editedImage = newImage;
+
+    subscription?.cancel();
+    subscription = _editedImage.controller.stream.listen(_onImageUpdate);
+    updateImage();
+  }
+
+  void flipImage(SlyImageFlipDirection direction) {
+    if (!mounted) return;
+
+    switch (direction) {
+      case SlyImageFlipDirection.horizontal:
+        setState(() {
+          _hflip = !_hflip;
+        });
+      case SlyImageFlipDirection.vertical:
+        setState(() {
+          _vflip = !_vflip;
+        });
+      case SlyImageFlipDirection.both:
+        setState(() {
+          _hflip = !_hflip;
+          _vflip = !_vflip;
+        });
     }
+  }
 
-    Future<void> updateCroppedImage() async {
-      if (_cropController == null) return;
+  void undo() {
+    _undoOrRedo(redo: false);
+  }
 
-      final uiImage = await _cropController!.croppedBitmap();
-      final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
+  void redo() {
+    _undoOrRedo(redo: true);
+  }
 
-      final image = await loadImage(byteData.buffer.asUint8List());
-      if (image == null) return;
+  void _undoOrRedo({required bool redo}) {
+    final list = redo ? _redoList : _undoList;
+    final last = list.lastOrNull;
+    if (last == null) return;
 
-      final newImage = SlyImage.fromImage(image);
-      newImage.lightAttributes = _editedImage.lightAttributes;
-      newImage.colorAttributes = _editedImage.colorAttributes;
-      newImage.effectAttributes = _editedImage.effectAttributes;
+    list.removeLast();
 
-      _editedImage.dispose();
-      _editedImage = newImage;
+    _addToUndoOrRedo(redo: !redo, clearRedo: false);
 
-      subscription?.cancel();
-      subscription = _editedImage.controller.stream.listen(_onImageUpdate);
-      updateImage();
-    }
+    for (int index in [0, 1, 2]) {
+      Map<String, SlyImageAttribute> attributes = index == 0
+          ? _editedImage.lightAttributes
+          : index == 1
+              ? _editedImage.colorAttributes
+              : _editedImage.effectAttributes;
 
-    void flipImage(SlyImageFlipDirection direction) {
-      if (!mounted) return;
-
-      switch (direction) {
-        case SlyImageFlipDirection.horizontal:
-          setState(() {
-            _hflip = !_hflip;
-          });
-        case SlyImageFlipDirection.vertical:
-          setState(() {
-            _vflip = !_vflip;
-          });
-        case SlyImageFlipDirection.both:
-          setState(() {
-            _hflip = !_hflip;
-            _vflip = !_vflip;
-          });
+      for (MapEntry<String, SlyImageAttribute> entry in last[index].entries) {
+        attributes[entry.key] = entry.value;
       }
     }
 
+    updateImage();
+    _controlsWidgetKeyValue++;
+  }
+
+  void _addToUndoOrRedo({bool redo = false, bool clearRedo = true}) {
+    List<Map<String, SlyImageAttribute>> newItem = [];
+
+    for (final attributes in [
+      _editedImage.lightAttributes,
+      _editedImage.colorAttributes,
+      _editedImage.effectAttributes,
+    ]) {
+      final Map<String, SlyImageAttribute> newMap = {};
+
+      for (MapEntry<String, SlyImageAttribute> entry in attributes.entries) {
+        newMap[entry.key] = SlyImageAttribute.copy(entry.value);
+      }
+      newItem.add(newMap);
+    }
+
+    (redo ? _redoList : _undoList).add(newItem);
+    if (!redo && clearRedo) _redoList.clear();
+
+    setState(() {
+      _canUndo = _undoList.isNotEmpty;
+      _canRedo = _redoList.isNotEmpty;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         Future<void> pickNewImage() async {
@@ -489,6 +552,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 max: _editedImage.lightAttributes.values.elementAt(index).max,
                 onChanged: (value) {},
                 onChangeEnd: (value) {
+                  _addToUndoOrRedo();
                   _editedImage.lightAttributes.values.elementAt(index).value =
                       value;
                   updateImage();
@@ -523,6 +587,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 max: _editedImage.colorAttributes.values.elementAt(index).max,
                 onChanged: (value) {},
                 onChangeEnd: (value) {
+                  _addToUndoOrRedo();
                   _editedImage.colorAttributes.values.elementAt(index).value =
                       value;
                   updateImage();
@@ -558,6 +623,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 max: _editedImage.effectAttributes.values.elementAt(index).max,
                 onChanged: (value) {},
                 onChangeEnd: (value) {
+                  _addToUndoOrRedo();
                   _editedImage.effectAttributes.values.elementAt(index).value =
                       value;
                   updateImage();
@@ -983,7 +1049,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         );
 
         final controlsWidget = AnimatedSize(
-          key: _controlsWidgetKey,
+          key: Key("controlsWidget $_controlsWidgetKeyValue"),
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutQuint,
           child: AnimatedSwitcher(
@@ -1012,6 +1078,94 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               duration: const Duration(milliseconds: 150),
               child: _controlsChild),
         );
+
+        final toolbar = _selectedPageIndex == 3 || _selectedPageIndex == 4
+            ? Container()
+            : Padding(
+                padding: constraints.maxWidth > 600
+                    ? const EdgeInsets.only(
+                        left: 12,
+                        right: 12,
+                        top: 4,
+                        bottom: 12,
+                      )
+                    : const EdgeInsets.only(
+                        left: 4,
+                        right: 4,
+                        top: 8,
+                        bottom: 0,
+                      ),
+                child: Wrap(
+                  alignment: constraints.maxWidth > 600
+                      ? WrapAlignment.start
+                      : WrapAlignment.center,
+                  children: <Widget>[
+                    Tooltip(
+                      message: 'Show Original',
+                      child: IconButton(
+                        icon: const ImageIcon(
+                          color: Colors.white54,
+                          AssetImage('assets/icons/show.png'),
+                        ),
+                        onPressed: () async {
+                          if (_editedImageData == _originalImageData) {
+                            return;
+                          }
+
+                          Uint8List? previous;
+                          if (_editedImageData != null) {
+                            previous = Uint8List.fromList(_editedImageData!);
+                          } else {
+                            previous = null;
+                          }
+                          setState(() {
+                            _editedImageData = _originalImageData;
+                          });
+
+                          await Future.delayed(
+                            const Duration(milliseconds: 1500),
+                          );
+
+                          if (_editedImageData != _originalImageData) {
+                            previous = null;
+                            return;
+                          }
+
+                          setState(() {
+                            _editedImageData = previous;
+                          });
+
+                          previous = null;
+                        },
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Undo',
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.undo,
+                          color: _canUndo ? Colors.white60 : Colors.white24,
+                        ),
+                        onPressed: () {
+                          undo();
+                        },
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Redo',
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.redo,
+                          color: _canRedo ? Colors.white60 : Colors.white24,
+                        ),
+                        onPressed: () {
+                          redo();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
 
         if (constraints.maxWidth > 600) {
           return Scaffold(
@@ -1060,7 +1214,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               WindowTitleBarBox(
                                 child: MoveWindow(),
                               ),
-                              Expanded(child: imageWidget),
+                              Expanded(
+                                child: imageWidget,
+                              ),
                             ],
                           )
                         : imageWidget,
@@ -1078,7 +1234,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                             ),
                             child: Container(
                               color: Colors.grey.shade900,
-                              child: controlsWidget,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Expanded(child: controlsWidget),
+                                  toolbar,
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -1122,12 +1284,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Expanded(child: imageWidget),
+                            toolbar,
                             cropControls,
                           ],
                         )
                       : ListView(
                           children: <Widget>[
                             imageWidget,
+                            toolbar,
                             controlsWidget,
                           ],
                         ),

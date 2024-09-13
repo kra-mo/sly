@@ -15,6 +15,15 @@ class SlyImageAttribute {
   final double max;
 
   SlyImageAttribute(this.name, this.value, this.anchor, this.min, this.max);
+
+  SlyImageAttribute.copy(SlyImageAttribute imageAttribute)
+      : this(
+          imageAttribute.name,
+          imageAttribute.value,
+          imageAttribute.anchor,
+          imageAttribute.min,
+          imageAttribute.max,
+        );
 }
 
 class SlyImage {
@@ -61,6 +70,12 @@ class SlyImage {
     return _loading > 0;
   }
 
+  /// True if the image is small enough and the device is powerful enough to load it.
+  bool get canLoadFullRes {
+    return (!kIsWeb && _originalImage.height <= 2000) ||
+        _originalImage.height <= 500;
+  }
+
   /// Creates a new `SlyImage` from `image`.
   ///
   /// The `image` object is not reused, so calling `.from`
@@ -97,11 +112,12 @@ class SlyImage {
 
   /// Applies changes to the image's attrubutes, progressively.
   ///
-  /// The edits will first be applied to a <=100px tall thumbnail for fast preview.
+  /// The edits will first be applied to a <=500px tall thumbnail for fast preview.
   ///
-  /// After that, a <=500px tall one.
+  /// Finally, when ready, the image will be returned at the original size
+  /// if the device can render such a large image.
   ///
-  /// Finally, when ready, the image will be returned at the original size.
+  /// You can check this with `this.canLoadFullRes`.
   Future<void> applyEditsProgressive() async {
     _loading += 1;
     final applied = DateTime.now().millisecondsSinceEpoch;
@@ -120,8 +136,16 @@ class SlyImage {
       );
     }
 
-    if (!kIsWeb || _originalImage.height <= 500) {
+    if (canLoadFullRes) {
       images.add(_originalImage);
+    } else if (!kIsWeb) {
+      images.add(
+        img.copyResize(
+          _originalImage,
+          height: 1500,
+          interpolation: img.Interpolation.average,
+        ),
+      );
     }
 
     for (img.Image editableImage in images) {
@@ -210,11 +234,13 @@ class SlyImage {
   ///
   /// If `fullRes` is not true, a lower resolution image might be returned
   /// if it looks like the device could not handle loading the entire image.
+  ///
+  /// You can check this with `this.canLoadFullRes`.
   Future<Uint8List> encode({
     String? format = 'PNG',
     bool fullRes = false,
   }) async {
-    if (fullRes && kIsWeb && _originalImage.height > 500) {
+    if (fullRes && !canLoadFullRes) {
       await applyEdits();
     }
 
