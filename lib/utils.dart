@@ -29,7 +29,7 @@ Future<img.Image?> loadImage(Uint8List bytes) async {
   final ui.Image uiImage;
 
   try {
-    uiImage = await loadUiImage(bytes);
+    uiImage = await _loadUiImage(bytes);
   } catch (e) {
     return null;
   }
@@ -52,7 +52,7 @@ Future<img.Image?> loadImage(Uint8List bytes) async {
   return image;
 }
 
-Future<ui.Image> loadUiImage(Uint8List bytes) async {
+Future<ui.Image> _loadUiImage(Uint8List bytes) async {
   final codec = await ui.instantiateImageCodec(bytes);
   final frameInfo = await codec.getNextFrame();
   return frameInfo.image;

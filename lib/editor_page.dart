@@ -1011,93 +1011,91 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               child: _controlsChild),
         );
 
-        final toolbar = _selectedPageIndex == 3 || _selectedPageIndex == 4
-            ? Container()
-            : Padding(
-                padding: constraints.maxWidth > 600
-                    ? const EdgeInsets.only(
-                        left: 12,
-                        right: 12,
-                        top: 4,
-                        bottom: 12,
-                      )
-                    : const EdgeInsets.only(
-                        left: 4,
-                        right: 4,
-                        top: 8,
-                        bottom: 0,
-                      ),
-                child: Wrap(
-                  alignment: constraints.maxWidth > 600
-                      ? WrapAlignment.start
-                      : WrapAlignment.center,
-                  children: <Widget>[
-                    Tooltip(
-                      message: 'Show Original',
-                      child: IconButton(
-                        icon: const ImageIcon(
-                          color: Colors.white54,
-                          AssetImage('assets/icons/show.png'),
-                        ),
-                        onPressed: () async {
-                          if (_editedImageData == _originalImageData) {
-                            return;
-                          }
-
-                          Uint8List? previous;
-                          if (_editedImageData != null) {
-                            previous = Uint8List.fromList(_editedImageData!);
-                          } else {
-                            previous = null;
-                          }
-                          setState(() {
-                            _editedImageData = _originalImageData;
-                          });
-
-                          await Future.delayed(
-                            const Duration(milliseconds: 1500),
-                          );
-
-                          if (_editedImageData != _originalImageData) {
-                            previous = null;
-                            return;
-                          }
-
-                          setState(() {
-                            _editedImageData = previous;
-                          });
-
-                          previous = null;
-                        },
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'Undo',
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.undo,
-                          color: _canUndo ? Colors.white60 : Colors.white24,
-                        ),
-                        onPressed: () {
-                          undo();
-                        },
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'Redo',
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.redo,
-                          color: _canRedo ? Colors.white60 : Colors.white24,
-                        ),
-                        onPressed: () {
-                          redo();
-                        },
-                      ),
-                    ),
-                  ],
+        final toolbar = Padding(
+          padding: constraints.maxWidth > 600
+              ? const EdgeInsets.only(
+                  left: 12,
+                  right: 12,
+                  top: 4,
+                  bottom: 12,
+                )
+              : const EdgeInsets.only(
+                  left: 4,
+                  right: 4,
+                  top: 8,
+                  bottom: 0,
                 ),
-              );
+          child: Wrap(
+            alignment: constraints.maxWidth > 600
+                ? WrapAlignment.start
+                : WrapAlignment.center,
+            children: <Widget>[
+              Tooltip(
+                message: 'Show Original',
+                child: IconButton(
+                  icon: const ImageIcon(
+                    color: Colors.white54,
+                    AssetImage('assets/icons/show.png'),
+                  ),
+                  onPressed: () async {
+                    if (_editedImageData == _originalImageData) {
+                      return;
+                    }
+
+                    Uint8List? previous;
+                    if (_editedImageData != null) {
+                      previous = Uint8List.fromList(_editedImageData!);
+                    } else {
+                      previous = null;
+                    }
+                    setState(() {
+                      _editedImageData = _originalImageData;
+                    });
+
+                    await Future.delayed(
+                      const Duration(milliseconds: 1500),
+                    );
+
+                    if (_editedImageData != _originalImageData) {
+                      previous = null;
+                      return;
+                    }
+
+                    setState(() {
+                      _editedImageData = previous;
+                    });
+
+                    previous = null;
+                  },
+                ),
+              ),
+              Tooltip(
+                message: 'Undo',
+                child: IconButton(
+                  icon: Icon(
+                    Icons.undo,
+                    color: _canUndo ? Colors.white60 : Colors.white24,
+                  ),
+                  onPressed: () {
+                    undo();
+                  },
+                ),
+              ),
+              Tooltip(
+                message: 'Redo',
+                child: IconButton(
+                  icon: Icon(
+                    Icons.redo,
+                    color: _canRedo ? Colors.white60 : Colors.white24,
+                  ),
+                  onPressed: () {
+                    redo();
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
 
         if (constraints.maxWidth > 600) {
           return Scaffold(
@@ -1168,10 +1166,15 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               color: Colors.grey.shade900,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Expanded(child: controlsWidget),
-                                  toolbar,
-                                ],
+                                children: _selectedPageIndex == 3 ||
+                                        _selectedPageIndex == 4
+                                    ? [
+                                        Expanded(child: controlsWidget),
+                                      ]
+                                    : [
+                                        Expanded(child: controlsWidget),
+                                        toolbar,
+                                      ],
                               ),
                             ),
                           ),
@@ -1216,16 +1219,20 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Expanded(child: imageWidget),
-                            toolbar,
                             cropControls,
                           ],
                         )
                       : ListView(
-                          children: <Widget>[
-                            imageWidget,
-                            toolbar,
-                            controlsWidget,
-                          ],
+                          children: _selectedPageIndex == 4
+                              ? <Widget>[
+                                  imageWidget,
+                                  controlsWidget,
+                                ]
+                              : <Widget>[
+                                  imageWidget,
+                                  toolbar,
+                                  controlsWidget,
+                                ],
                         ),
                 ),
               ],
