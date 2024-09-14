@@ -191,7 +191,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     copyImage.dispose();
 
     if (mounted) {
-      _saveButton.setChild(const Icon(Icons.check));
+      _saveButton.setChild(
+        const ImageIcon(
+          AssetImage('assets/icons/checkmark.png'),
+        ),
+      );
       await Future.delayed(const Duration(milliseconds: 1500));
     }
 
@@ -469,7 +473,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(
-                top: index == 0 ? 16 : 0,
+                top: index == 0 && constraints.maxWidth > 600 ? 16 : 0,
                 bottom:
                     index == _editedImage.lightAttributes.length - 1 ? 28 : 0,
               ),
@@ -504,7 +508,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(
-                top: index == 0 ? 16 : 0,
+                top: index == 0 && constraints.maxWidth > 600 ? 16 : 0,
                 bottom:
                     index == _editedImage.colorAttributes.length - 1 ? 28 : 0,
               ),
@@ -539,7 +543,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           itemBuilder: (context, index) {
             return Padding(
               padding: EdgeInsets.only(
-                top: index == 0 ? 16 : 0,
+                top: index == 0 && constraints.maxWidth > 600 ? 16 : 0,
                 bottom:
                     index == _editedImage.effectAttributes.length - 1 ? 28 : 0,
               ),
@@ -1033,6 +1037,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Tooltip(
                 message: 'Show Original',
                 child: IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   icon: const ImageIcon(
                     color: Colors.white54,
                     AssetImage('assets/icons/show.png'),
@@ -1072,9 +1078,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Tooltip(
                 message: 'Undo',
                 child: IconButton(
-                  icon: Icon(
-                    Icons.undo,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: ImageIcon(
                     color: _canUndo ? Colors.white60 : Colors.white24,
+                    const AssetImage('assets/icons/undo.png'),
                   ),
                   onPressed: () {
                     undo();
@@ -1084,9 +1092,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               Tooltip(
                 message: 'Redo',
                 child: IconButton(
-                  icon: Icon(
-                    Icons.redo,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: ImageIcon(
                     color: _canRedo ? Colors.white60 : Colors.white24,
+                    const AssetImage('assets/icons/redo.png'),
                   ),
                   onPressed: () {
                     redo();
