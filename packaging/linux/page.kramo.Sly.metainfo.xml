@@ -45,6 +45,19 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.2.0" date="2024-09-15">
+            <description>
+                <ul>
+                    <li>Added the ability to undo/redo your edits</li>
+                    <li>You can now quickly preview the original image</li>
+                    <li>The preview should now load at a higher resolution</li>
+                    <li>The default filename for saving is now based on the original</li>
+                    <li>Increased the size of handles for cropping</li>
+                    <li>User interface improvements</li>
+                    <li>Various performance improvements</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.1.4" date="2024-09-12">
             <description>
                 <ul>
