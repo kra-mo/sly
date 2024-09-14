@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -80,14 +81,21 @@ class SlyImage {
   ///
   /// The `image` object is not reused, so calling `.from`
   /// before invoking this constructor is not necessary.
-  SlyImage.fromImage(img.Image original)
-      : _image = img.Image.from(original),
-        _originalImage = img.Image.from(original);
+  SlyImage.fromImage(img.Image image)
+      : _image = img.Image.from(image),
+        _originalImage = img.Image.from(image);
 
-  /// Creates a new `SlyImage` from another `image`.
-  SlyImage.from(SlyImage original)
-      : _image = img.Image.from(original._image),
-        _originalImage = img.Image.from(original._originalImage);
+  /// Creates a new `SlyImage` from another `src`.
+  ///
+  /// Note that if `src` is in the process of loading, the copied image might stay at a lower resolution
+  /// until `applyEdits` or `applyEditsProgressive` is called on `this`.
+  SlyImage.from(SlyImage src)
+      : _image = img.Image.from(src._image),
+        _originalImage = img.Image.from(src._originalImage) {
+    lightAttributes = Map.from(src.lightAttributes);
+    colorAttributes = Map.from(src.colorAttributes);
+    effectAttributes = Map.from(src.effectAttributes);
+  }
 
   /// Applies changes to the image's attrubutes.
   Future<void> applyEdits() async {
@@ -221,6 +229,29 @@ class SlyImage {
       angle: degree,
       interpolation: img.Interpolation.cubic,
     );
+  }
+
+  /// Crops the image to `rect`, normalized between 0 and 1.
+  ///
+  /// Note that the original image can never be recovered after this method call
+  /// so it is recommended to make a copy of it if that is needed.
+  ///
+  /// Also note that if you want to see the changes,
+  /// you need to call `applyEdits` or `applyEditsProgressive` yourself.
+  Future<void> crop(Rect rect) async {
+    final cmd = img.Command()
+      ..image(_originalImage)
+      ..copyCrop(
+        x: (rect.left * width).round(),
+        y: (rect.top * height).round(),
+        width: (rect.width * width).round(),
+        height: (rect.height * height).round(),
+      );
+
+    final croppedImage = (await cmd.executeThread()).outputImage;
+    if (croppedImage == null) return;
+
+    _originalImage = croppedImage;
   }
 
   /// Returns the image encoded as `format`.

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'dart:async';
+import 'dart:ui';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -151,63 +151,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       _saveFormat = format!;
 
-      if (_cropEverChanged && !_originalImage.canLoadFullRes) {
-        if (_cropController == null) {
-          _saveButton.setChild(Text(_saveButtonLabel));
-          return;
-        }
-
-        CropController? fullSizeCropController = CropController(
-          defaultCrop: _cropController!.crop,
-          rotation: _cropController!.rotation,
-        );
-
-        fullSizeCropController.image = await loadUiImage(
-          await _originalImage.encode(format: 'PNG'),
-        );
-
-        final uiImage = await fullSizeCropController.croppedBitmap();
-
-        fullSizeCropController = null;
-
-        final byteData = await uiImage.toByteData(
-          format: ui.ImageByteFormat.rawRgba,
-        );
-
-        if (byteData == null) return;
-
-        final imgImage = img.Image.fromBytes(
-          numChannels: 4,
-          width: uiImage.width,
-          height: uiImage.height,
-          bytes: byteData.buffer,
-        );
-
-        final croppedImage = SlyImage.fromImage(imgImage);
-
-        croppedImage.lightAttributes = _editedImage.lightAttributes;
-        croppedImage.colorAttributes = _editedImage.colorAttributes;
-        croppedImage.effectAttributes = _editedImage.effectAttributes;
-        await croppedImage.applyEdits();
-
-        await _save(croppedImage);
-        croppedImage.dispose();
-        return;
-      }
-
       if (_editedImage.loading) {
         _saveOnLoad = true;
       } else {
-        _save(_editedImage);
+        _save();
       }
     },
   );
 
-  Future<void> _save(SlyImage image) async {
-    final copyImage = SlyImage.from(image);
-    copyImage.lightAttributes = image.lightAttributes;
-    copyImage.colorAttributes = image.colorAttributes;
-    copyImage.effectAttributes = image.effectAttributes;
+  Future<void> _save() async {
+    final copyImage = SlyImage.from(_editedImage);
 
     if (_rotationAngle != 0 && _rotationAngle != (math.pi * 2)) {
       copyImage.rotate(_rotationAngle * (180 / math.pi));
@@ -251,7 +204,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     switch (event) {
       case 'updated':
         if (_saveOnLoad) {
-          _save(_editedImage);
+          _save();
           _saveOnLoad = false;
         }
 
@@ -266,10 +219,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   @override
   void initState() {
     _editedImage = SlyImage.from(_originalImage);
-
-    _originalImage.lightAttributes = _editedImage.lightAttributes;
-    _originalImage.colorAttributes = _editedImage.colorAttributes;
-    _originalImage.effectAttributes = _editedImage.effectAttributes;
 
     subscription = _editedImage.controller.stream.listen(_onImageUpdate);
 
@@ -304,25 +253,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   }
 
   Future<void> updateCroppedImage() async {
-    if (_cropController == null) return;
+    if (_cropController?.crop == null) return;
 
-    final uiImage = await _cropController!.croppedBitmap();
-    final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) return;
-
-    final image = await loadImage(byteData.buffer.asUint8List());
-    if (image == null) return;
-
-    final newImage = SlyImage.fromImage(image);
-    newImage.lightAttributes = _editedImage.lightAttributes;
-    newImage.colorAttributes = _editedImage.colorAttributes;
-    newImage.effectAttributes = _editedImage.effectAttributes;
-
-    _editedImage.dispose();
-    _editedImage = newImage;
+    final croppedImage = SlyImage.from(_originalImage);
+    await croppedImage.crop(_cropController!.crop);
 
     subscription?.cancel();
+    _editedImage.dispose();
+    _editedImage = croppedImage;
     subscription = _editedImage.controller.stream.listen(_onImageUpdate);
+
     updateImage();
   }
 
@@ -452,44 +392,36 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   gaplessPlayback: true,
                 ),
               )
-            : FittedBox(
-                key: const Key('imageView'),
+            : const Center(
                 child: SizedBox(
-                  width: _editedImage.width.toDouble(),
-                  height: _editedImage.height.toDouble(),
-                  child: const Center(
-                    child: SlySpinner(),
-                  ),
+                  width: 24,
+                  height: 24,
+                  child: SlySpinner(),
                 ),
               );
 
-        final cropImageView = FittedBox(
-          key: const Key('cropImageView'),
-          child: SizedBox(
-            width: _originalImage.width.toDouble(),
-            height: _originalImage.height.toDouble(),
-            child: _originalImageData != null
-                ? CropImage(
-                    gridCornerSize: _originalImage.height / 20,
-                    gridThinWidth: _originalImage.height / 300,
-                    gridThickWidth: _originalImage.height / 80,
-                    minimumImageSize: _originalImage.height / 15,
-                    gridCornerColor: Colors.white,
-                    controller: _cropController,
-                    image: Image.memory(
-                      _originalImageData!,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    ),
-                    onCrop: (rect) {
-                      _cropChanged = _cropEverChanged = true;
-                    },
-                  )
-                : const Center(
-                    child: SlySpinner(),
-                  ),
-          ),
-        );
+        final cropImageView = _originalImageData != null
+            ? CropImage(
+                key: const Key('cropImageView'),
+                gridThickWidth: constraints.maxWidth > 600 ? 6 : 8,
+                gridCornerColor: Colors.white,
+                controller: _cropController,
+                image: Image.memory(
+                  _originalImageData!,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                ),
+                onCrop: (rect) {
+                  _cropChanged = _cropEverChanged = true;
+                },
+              )
+            : const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SlySpinner(),
+                ),
+              );
 
         final imageWidget = AnimatedPadding(
           key: _imageWidgetKey,
@@ -519,7 +451,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           ? cropImageView
                           : ClipRRect(
                               borderRadius:
-                                  const BorderRadius.all(ui.Radius.circular(8)),
+                                  const BorderRadius.all(Radius.circular(8)),
                               child: imageView,
                             ),
                     ),
@@ -1181,7 +1113,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 child: FloatingActionButton.small(
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
-                      ui.Radius.circular(8),
+                      Radius.circular(8),
                     ),
                   ),
                   backgroundColor: constraints.maxHeight > 380
@@ -1230,7 +1162,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         Expanded(
                           child: ClipRRect(
                             borderRadius: const BorderRadius.only(
-                              bottomLeft: ui.Radius.circular(12),
+                              bottomLeft: Radius.circular(12),
                             ),
                             child: Container(
                               color: Colors.grey.shade900,
@@ -1251,8 +1183,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     color: Colors.grey.shade900,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
-                        topLeft: ui.Radius.circular(12),
-                        bottomLeft: ui.Radius.circular(12),
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
                       ),
                       child: MoveWindow(
                         child: Container(
@@ -1300,8 +1232,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             ),
             bottomNavigationBar: ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: ui.Radius.circular(12),
-                topRight: ui.Radius.circular(12),
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
               ),
               child: navigationBar,
             ),
