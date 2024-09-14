@@ -31,7 +31,7 @@ void main() {
     ),
   );
 
-  if (isDesktop()) {
+  if (isDesktop() && !Platform.isMacOS) {
     doWhenWindowReady(() {
       appWindow.minSize = const Size(360, 294);
 
@@ -123,7 +123,10 @@ class _SlyHomePageState extends State<SlyHomePage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => SlyEditorPage(image: SlyImage.fromImage(image)),
+          builder: (context) => SlyEditorPage(
+            image: SlyImage.fromImage(image),
+            suggestedFileName: '${file.name.split('.').first} Edited',
+          ),
         ),
       );
 

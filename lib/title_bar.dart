@@ -14,10 +14,21 @@ final slyWindowButtonColors = WindowButtonColors(
   iconMouseDown: Colors.white,
 );
 
+class SlyTitleBarBox extends SizedBox {
+  SlyTitleBarBox({super.key, required super.child})
+      : super(
+          height: isDesktop()
+              ? Platform.isMacOS
+                  ? 28
+                  : 32
+              : 0,
+        );
+}
+
 final titleBar = isDesktop()
     ? Padding(
         padding: EdgeInsets.all(Platform.isLinux ? 8 : 0),
-        child: WindowTitleBarBox(
+        child: SlyTitleBarBox(
           child: MoveWindow(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
