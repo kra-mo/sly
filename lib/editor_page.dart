@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:crop_image/crop_image.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -1238,7 +1237,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               ? Column(
                                   children: <Widget>[
                                     SlyTitleBarBox(
-                                      child: MoveWindow(),
+                                      child: SlyDragWindowBox(),
                                     ),
                                     Expanded(
                                       child: imageWidget,
@@ -1287,12 +1286,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               topLeft: Radius.circular(12),
                               bottomLeft: Radius.circular(12),
                             ),
-                            child: MoveWindow(
+                            child: SlyDragWindowBox(
                               child: Container(
                                 color: Colors.white10,
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: <Widget>[
-                                    titleBar,
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom:
+                                            !kIsWeb && Platform.isLinux ? 8 : 0,
+                                      ),
+                                      child: titleBar,
+                                    ),
                                     Expanded(
                                       child: navigationRail,
                                     ),

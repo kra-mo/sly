@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'utils.dart';
@@ -30,17 +27,6 @@ void main() {
       systemStatusBarContrastEnforced: false,
     ),
   );
-
-  if (isDesktop() && !Platform.isMacOS) {
-    doWhenWindowReady(() {
-      appWindow.minSize = const Size(360, 294);
-
-      if (!Platform.isLinux) {
-        appWindow.size = const Size(900, 600);
-        appWindow.alignment = Alignment.center;
-      }
-    });
-  }
 }
 
 class SlyApp extends StatelessWidget {
@@ -155,7 +141,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MoveWindow(
+      body: SlyDragWindowBox(
         child: Column(
           children: <Widget>[
             titleBar,

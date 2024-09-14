@@ -6,6 +6,10 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 
 import 'utils.dart';
 
+class SlyDragWindowBox extends MoveWindow {
+  SlyDragWindowBox({super.key, super.child});
+}
+
 final slyWindowButtonColors = WindowButtonColors(
   iconNormal: Colors.white,
   mouseOver: Colors.white10,
@@ -27,20 +31,41 @@ class SlyTitleBarBox extends SizedBox {
 
 final titleBar = isDesktop()
     ? Padding(
-        padding: EdgeInsets.all(Platform.isLinux ? 8 : 0),
+        padding: Platform.isLinux
+            ? const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 6,
+              )
+            : const EdgeInsets.all(0),
         child: SlyTitleBarBox(
           child: MoveWindow(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: Platform.isLinux
                   ? <Widget>[
-                      ClipOval(
-                        child: Container(
-                          color: Colors.white10,
-                          child: CloseWindowButton(
-                            animate: true,
-                            colors: slyWindowButtonColors,
+                      Semantics(
+                        label: 'Close Window',
+                        child: IconButton(
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          style: const ButtonStyle(
+                            backgroundColor:
+                                WidgetStatePropertyAll(Colors.white10),
                           ),
+                          iconSize: 16,
+                          padding: const EdgeInsets.all(0),
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                            maxWidth: 24,
+                            maxHeight: 24,
+                          ),
+                          icon: const ImageIcon(
+                            AssetImage('assets/icons/window-close.png'),
+                          ),
+                          onPressed: () {
+                            exit(0);
+                          },
                         ),
                       ),
                     ]
