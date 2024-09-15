@@ -31,14 +31,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-  bitsdojo_window: ^0.1.6
-  handy_window: ^0.4.0
   url_launcher: ^6.3.0
   file_selector: ^1.0.3
   image_picker: ^1.1.2
   gal: ^2.3.0
   image: ^4.2.0
   crop_image: ^1.0.13
+  handy_window: ^0.4.0
+  window_manager: ^0.4.2
 
 dev_dependencies:
   flutter_test:

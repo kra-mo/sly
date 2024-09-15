@@ -8,11 +8,6 @@ import 'package:image/image.dart' as img;
 import 'package:gal/gal.dart';
 import 'package:file_selector/file_selector.dart';
 
-bool isDesktop() {
-  return (!kIsWeb &&
-      (Platform.isLinux || Platform.isMacOS || Platform.isWindows));
-}
-
 Future<img.Image?> loadImage(Uint8List bytes) async {
   var cmd = img.Command()..decodeImage(bytes);
 
@@ -64,7 +59,7 @@ Future<ui.Image> _loadUiImage(Uint8List bytes) async {
 /// Returns false if the operation was cancelled.
 Future<bool> saveImage(Uint8List imageData,
     {String fileName = 'Edited Image', String fileExtension = 'png'}) async {
-  if (!isDesktop() && !kIsWeb) {
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
     await Gal.putImageBytes(imageData, name: fileName);
     return true;
   }
