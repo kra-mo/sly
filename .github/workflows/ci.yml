@@ -11,7 +11,8 @@ concurrency:
   group: release-${{ github.sha }}
 
 jobs:
-  build_tar_x86_64:
+  linux:
+    name: Linux
     runs-on: ubuntu-24.04
 
     steps:
@@ -22,14 +23,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang cmake libgtk-3-dev ninja-build
 
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          channel: stable
 
-      - name: Dependencies
-        run: flutter pub get
-
-      - name: Compile Linux
+      - name: Build for Linux
         run: flutter build linux
 
       - name: Create tar.gz archive
@@ -40,10 +39,37 @@ jobs:
       - name: Upload tar.gz archive
         uses: actions/upload-artifact@v4
         with:
-          name: tar-gz-x86-64-result
+          name: Linux Binary
           path: ./*.tar.gz
 
-  build_windows_zip_x86_64:
+  macos:
+    name: macOS
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Build for macOS
+        run: flutter build macos
+
+      - name: Zip compiled files
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -yr Sly.zip Sly.app
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS Application
+          path: build/macos/Build/Products/Release/Sly.zip
+
+  windows:
+    name: Windows
     runs-on: windows-latest
 
     steps:
@@ -53,14 +79,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          channel: stable
 
-      - name: Dependencies
-        run: flutter pub get
-
-      - name: Compile for Windows
+      - name: Build for Windows
         run: flutter build windows
 
       - name: Add DLL files
@@ -76,5 +100,5 @@ jobs:
       - name: Upload zip
         uses: actions/upload-artifact@v4
         with:
-          name: windows-zip-x86-64-result
+          name: Windows Executable
           path: Sly.zip

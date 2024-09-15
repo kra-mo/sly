@@ -39,11 +39,17 @@ jobs:
           workflow: ci.yml
           commit: ${{ github.sha }}
 
-      - name: Copy zip file to root
-        run: cp windows-zip-x64-result/*.zip Sly-${{ needs.build.outputs.version }}-windows-x64.zip
+      - name: Test
+        run: ls --recursive
 
-      - name: Copy tar.gz file to root
-        run: cp tar-gz-x86-64-result/* Sly-${{ needs.build.outputs.version }}-linux-x86-64.tar.gz
+      - name: Move Linux tar.gz to root
+        run: mv Linux\ Binary/* Sly-${{ needs.build.outputs.version }}-Linux.tar.gz
+
+      - name: Move macOS zip to root
+        run: mv macOS\ Application/*.zip Sly-${{ needs.build.outputs.version }}-macOS.zip
+
+      - name: Move Windows zip to root
+        run: mv Windows\ Executable/*.zip Sly-${{ needs.build.outputs.version }}-Windows.zip
 
       - name: Get tag name
         id: get_tag_name
@@ -66,8 +72,9 @@ jobs:
         uses: softprops/action-gh-release@v2.0.8
         with:
           files: |
-            Sly-${{ needs.build.outputs.version }}-windows-x64.zip
             Sly-${{ needs.build.outputs.version }}-linux-x86-64.tar.gz
+            Sly-${{ needs.build.outputs.version }}-macos-x86-64.tar.gz
+            Sly-${{ needs.build.outputs.version }}-windows-x64.zip
           fail_on_unmatched_files: true
           tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
           body_path: release_notes
