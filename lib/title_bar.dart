@@ -10,21 +10,15 @@ class SlyDragWindowBox extends MoveWindow {
   SlyDragWindowBox({super.key, super.child});
 }
 
-final slyWindowButtonColors = WindowButtonColors(
-  iconNormal: Colors.white,
-  mouseOver: Colors.white10,
-  mouseDown: Colors.white24,
-  iconMouseOver: Colors.white,
-  iconMouseDown: Colors.white,
-);
-
 class SlyTitleBarBox extends SizedBox {
   SlyTitleBarBox({super.key, required super.child})
       : super(
           height: isDesktop()
               ? Platform.isMacOS
                   ? 28
-                  : 32
+                  : Platform.isLinux
+                      ? 32
+                      : 0
               : 0,
         );
 }
@@ -69,17 +63,7 @@ final titleBar = isDesktop()
                         ),
                       ),
                     ]
-                  : <Widget>[
-                      MinimizeWindowButton(
-                        colors: slyWindowButtonColors,
-                      ),
-                      MaximizeWindowButton(
-                        colors: slyWindowButtonColors,
-                      ),
-                      CloseWindowButton(
-                        colors: slyWindowButtonColors,
-                      ),
-                    ],
+                  : <Widget>[],
             ),
           ),
         ),
