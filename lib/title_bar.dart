@@ -33,33 +33,34 @@ final titleBar = !kIsWeb && Platform.isLinux
         child: SlyTitleBarBox(
           child: SlyDragWindowBox(
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Semantics(
-                    label: 'Close Window',
-                    child: IconButton(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.white10),
-                      ),
-                      iconSize: 16,
-                      padding: const EdgeInsets.all(0),
-                      constraints: const BoxConstraints(
-                        minWidth: 24,
-                        minHeight: 24,
-                        maxWidth: 24,
-                        maxHeight: 24,
-                      ),
-                      icon: const ImageIcon(
-                        AssetImage('assets/icons/window-close.png'),
-                      ),
-                      onPressed: () {
-                        exit(0);
-                      },
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Semantics(
+                  label: 'Close Window',
+                  child: IconButton(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    style: const ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(Colors.white10),
                     ),
+                    iconSize: 16,
+                    padding: const EdgeInsets.all(0),
+                    constraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                      maxWidth: 24,
+                      maxHeight: 24,
+                    ),
+                    icon: const ImageIcon(
+                      AssetImage('assets/icons/window-close.png'),
+                    ),
+                    onPressed: () {
+                      exit(0);
+                    },
                   ),
-                ]),
+                ),
+              ],
+            ),
           ),
         ),
       )

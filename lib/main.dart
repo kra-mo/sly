@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +20,10 @@ void main() async {
   runApp(const SlyApp());
 
   await windowManager.ensureInitialized();
+
+  if (!kIsWeb && Platform.isWindows) {
+    windowManager.setMinimumSize(const Size(360, 294));
+  }
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
