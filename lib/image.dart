@@ -48,8 +48,6 @@ class SlyImage {
     'saturation': SlyImageAttribute('Saturation', 1, 1, 0, 2),
     'temp': SlyImageAttribute('Temperature', 0, 0, -1, 1),
     'tint': SlyImageAttribute('Tint', 0, 0, -1, 1),
-    // 'gamma': SlyImageAttribute('Gamma', 1, 1, 0, 2),
-    // 'hue': SlyImageAttribute('Hue', 0, 0, 0, 360),
   };
 
   Map<String, SlyImageAttribute> effectAttributes = {
@@ -304,45 +302,69 @@ class SlyImage {
   }
 
   img.Command _buildEditCommand(editableImage) {
-    final exposure = lightAttributes['exposure']!.value;
-    final brightness = lightAttributes['brightness']!.value;
-    final contrast = lightAttributes['contrast']!.value;
-    final saturation = colorAttributes['saturation']!.value;
-    final blacks = lightAttributes['blacks']!.value.round();
-    final whites = lightAttributes['whites']!.value.round();
-    final mids = lightAttributes['mids']!.value.round();
-
-    final red = 50 * colorAttributes['temp']!.value;
-    final green = 50 * colorAttributes['tint']!.value * -1;
-    final blue = 50 * colorAttributes['temp']!.value * -1;
-
-    final sepia = effectAttributes['sepia']!.value;
-    final denoise = effectAttributes['denoise']!.value;
-    final sharpness = effectAttributes['sharpness']!.value;
-    final vignette = effectAttributes['vignette']!.value;
-    final border = effectAttributes['border']!.value;
-
-    return img.Command()
+    final cmd = img.Command()
       ..image(editableImage)
-      ..copy()
-      ..adjustColor(
-        exposure: exposure,
-        brightness: brightness,
-        contrast: contrast,
-        saturation: saturation,
-        // gamma: colorAttributes['gamma']!.value,
-        // hue: colorAttributes['hue']!.value,
-        blacks: img.ColorUint8.rgb(blacks, blacks, blacks),
-        whites: img.ColorUint8.rgb(whites, whites, whites),
-        mids: img.ColorUint8.rgb(mids, mids, mids),
-      )
-      ..colorOffset(
-        red: red,
-        green: green,
-        blue: blue,
-      )
-      ..sepia(amount: sepia)
-      ..convolution(
+      ..copy();
+
+    final exposure = lightAttributes['exposure']!;
+    final brightness = lightAttributes['brightness']!;
+    final contrast = lightAttributes['contrast']!;
+    final saturation = colorAttributes['saturation']!;
+    final blacks = lightAttributes['blacks']!;
+    final whites = lightAttributes['whites']!;
+    final mids = lightAttributes['mids']!;
+
+    for (SlyImageAttribute attribute in [
+      exposure,
+      brightness,
+      contrast,
+      saturation,
+      blacks,
+      whites,
+      mids,
+    ]) {
+      if (attribute.value != attribute.anchor) {
+        final b = blacks.value.round();
+        final w = whites.value.round();
+        final m = mids.value.round();
+
+        cmd.adjustColor(
+          exposure: exposure.value != exposure.anchor ? exposure.value : null,
+          brightness:
+              brightness.value != brightness.anchor ? brightness.value : null,
+          contrast: contrast.value != contrast.anchor ? contrast.value : null,
+          saturation:
+              saturation.value != saturation.anchor ? saturation.value : null,
+          blacks: img.ColorUint8.rgb(b, b, b),
+          whites: img.ColorUint8.rgb(w, w, w),
+          mids: img.ColorUint8.rgb(m, m, m),
+        );
+        break;
+      }
+    }
+
+    final temp = colorAttributes['temp']!;
+    final tint = colorAttributes['tint']!;
+
+    for (SlyImageAttribute attribute in [temp, tint]) {
+      if (attribute.value != attribute.anchor) {
+        cmd.colorOffset(
+          red: 50 * temp.value,
+          green: 50 * tint.value * -1,
+          blue: 50 * temp.value * -1,
+        );
+        break;
+      }
+    }
+
+    final sepia = effectAttributes['sepia']!;
+    if (sepia.value != sepia.anchor) {
+      cmd.sepia(amount: sepia.value);
+    }
+
+    final denoise = effectAttributes['denoise']!;
+    if (denoise.value != denoise.anchor) {
+      cmd.convolution(
         filter: [
           1 / 16,
           2 / 16,
@@ -354,17 +376,32 @@ class SlyImage {
           2 / 16,
           1 / 16,
         ],
-        amount: denoise,
-      )
-      ..convolution(
+        amount: denoise.value,
+      );
+    }
+
+    final sharpness = effectAttributes['sharpness']!;
+    if (sharpness.value != sharpness.anchor) {
+      cmd.convolution(
         filter: [0, -1, 0, -1, 5, -1, 0, -1, 0],
-        amount: sharpness,
-      )
-      ..vignette(amount: vignette)
-      ..copyExpandCanvas(
-          backgroundColor: border > 0
+        amount: sharpness.value,
+      );
+    }
+
+    final vignette = effectAttributes['vignette']!;
+    if (vignette.value != vignette.anchor) {
+      cmd.vignette(amount: vignette.value);
+    }
+
+    final border = effectAttributes['border']!;
+    if (border.value != border.anchor) {
+      cmd.copyExpandCanvas(
+          backgroundColor: border.value > 0
               ? img.ColorRgb8(255, 255, 255)
               : img.ColorRgb8(0, 0, 0),
-          padding: (border.abs() * (editableImage.width / 3)).round());
+          padding: (border.value.abs() * (editableImage.width / 3)).round());
+    }
+
+    return cmd;
   }
 }
