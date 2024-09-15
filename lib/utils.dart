@@ -29,9 +29,7 @@ Future<img.Image?> loadImage(Uint8List bytes) async {
     return null;
   }
 
-  final byteData = await uiImage.toByteData(
-    format: ui.ImageByteFormat.rawRgba,
-  );
+  final byteData = await uiImage.toByteData();
 
   if (byteData == null) {
     throw Exception("Cannot decode image.");

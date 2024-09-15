@@ -40,6 +40,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   Widget? _controlsChild;
 
+  bool _firstUpdate = true;
+
   late final SlyImage _originalImage = widget.image;
   late SlyImage _editedImage;
 
@@ -214,6 +216,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         }
 
         _editedImage.encode(format: 'JPEG75').then((data) {
+          if (!mounted) return;
+
           setState(() {
             _editedImageData = data;
           });
@@ -224,12 +228,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   @override
   void initState() {
     _editedImage = SlyImage.from(_originalImage);
-
     subscription = _editedImage.controller.stream.listen(_onImageUpdate);
-
-    _editedImage.applyEditsProgressive();
+    updateImage();
 
     _originalImage.encode(format: 'PNG').then((data) {
+      if (!mounted) return;
+
       setState(() {
         _originalImageData = data;
       });
@@ -254,6 +258,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   }
 
   void updateImage() async {
+    // Add a timeout to the initial loading of the image
+    // to let the widget build and slide in without a lag spike
+    if (_firstUpdate) {
+      await Future.delayed(const Duration(milliseconds: 400));
+      _firstUpdate = false;
+    }
+
     _editedImage.applyEditsProgressive();
   }
 

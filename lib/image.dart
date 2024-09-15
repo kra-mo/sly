@@ -53,6 +53,7 @@ class SlyImage {
   };
 
   Map<String, SlyImageAttribute> effectAttributes = {
+    'denoise': SlyImageAttribute('Noise Reduction', 0, 0, 0, 1),
     'sharpness': SlyImageAttribute('Sharpness', 0, 0, 0, 1),
     'sepia': SlyImageAttribute('Sepia', 0, 0, 0, 1),
     'vignette': SlyImageAttribute('Vignette', 0, 0, 0, 1),
@@ -316,6 +317,7 @@ class SlyImage {
     final blue = 50 * colorAttributes['temp']!.value * -1;
 
     final sepia = effectAttributes['sepia']!.value;
+    final denoise = effectAttributes['denoise']!.value;
     final sharpness = effectAttributes['sharpness']!.value;
     final vignette = effectAttributes['vignette']!.value;
     final border = effectAttributes['border']!.value;
@@ -340,6 +342,20 @@ class SlyImage {
         blue: blue,
       )
       ..sepia(amount: sepia)
+      ..convolution(
+        filter: [
+          1 / 16,
+          2 / 16,
+          1 / 16,
+          2 / 16,
+          4 / 16,
+          2 / 16,
+          1 / 16,
+          2 / 16,
+          1 / 16,
+        ],
+        amount: denoise,
+      )
       ..convolution(
         filter: [0, -1, 0, -1, 5, -1, 0, -1, 0],
         amount: sharpness,
