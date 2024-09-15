@@ -1196,28 +1196,27 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                   ),
                                   child: Container(
                                     color: Colors.grey.shade900,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: _selectedPageIndex == 3 ||
-                                              _selectedPageIndex == 4
-                                          ? [
-                                              SlyDragWindowBox(
-                                                child: SlyTitleBarBox(
-                                                  child: Container(),
-                                                ),
-                                              ),
-                                              Expanded(child: controlsWidget),
-                                            ]
-                                          : [
-                                              SlyDragWindowBox(
-                                                child: SlyTitleBarBox(
-                                                  child: Container(),
-                                                ),
-                                              ),
-                                              Expanded(child: controlsWidget),
-                                              toolbar,
-                                            ],
+                                    child: AnimatedSize(
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeOutQuint,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          SlyDragWindowBox(
+                                            child: SlyTitleBarBox(
+                                              child: Container(),
+                                            ),
+                                          ),
+                                          Expanded(child: controlsWidget),
+                                          _selectedPageIndex != 3 &&
+                                                  _selectedPageIndex != 4
+                                              ? toolbar
+                                              : Container(),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
