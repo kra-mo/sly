@@ -42,6 +42,9 @@ jobs:
       - name: Test
         run: ls --recursive
 
+      - name: Move Android zip to root
+        run: mv Android\ APK/*.zip Sly-${{ needs.build.outputs.version }}-Android.zip
+
       - name: Move Linux tar.gz to root
         run: mv Linux\ Binary/* Sly-${{ needs.build.outputs.version }}-Linux.tar.gz
 
@@ -72,6 +75,7 @@ jobs:
         uses: softprops/action-gh-release@v2.0.8
         with:
           files: |
+            Sly-${{ needs.build.outputs.version }}-Android.zip
             Sly-${{ needs.build.outputs.version }}-Linux.tar.gz
             Sly-${{ needs.build.outputs.version }}-macOS.zip
             Sly-${{ needs.build.outputs.version }}-Windows.zip

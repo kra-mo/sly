@@ -11,6 +11,38 @@ concurrency:
   group: release-${{ github.sha }}
 
 jobs:
+  android:
+    name: Android
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Build for Android
+        run: flutter build apk --split-per-abi --release
+
+      - name: Zip compiled files
+        run: |
+          cd build/app/outputs/flutter-apk/
+          zip -yr Sly.zip *.apk
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android APK
+          path: build/app/outputs/flutter-apk/Sly.zip
+
   linux:
     name: Linux
     runs-on: ubuntu-24.04
