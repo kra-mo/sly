@@ -29,7 +29,7 @@ jobs:
           channel: stable
 
       - name: Build for Linux
-        run: flutter build linux
+        run: flutter build linux --release
 
       - name: Create tar.gz archive
         run: |
@@ -55,7 +55,7 @@ jobs:
           channel: stable
 
       - name: Build for macOS
-        run: flutter build macos
+        run: flutter build macos --release
 
       - name: Zip compiled files
         run: |
@@ -85,7 +85,7 @@ jobs:
           channel: stable
 
       - name: Build for Windows
-        run: flutter build windows
+        run: flutter build windows --release
 
       - name: Add DLL files
         run: |
