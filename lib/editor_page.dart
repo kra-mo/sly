@@ -349,6 +349,54 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     });
   }
 
+  ListView _createControlsListView(
+    Map<String, SlyImageAttribute> attributes,
+    Key key,
+    BoxConstraints constraints,
+  ) {
+    return ListView.builder(
+      key: key,
+      physics: constraints.maxWidth > 600
+          ? null
+          : const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: attributes.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: index == 0 &&
+                    constraints.maxWidth > 600 &&
+                    !(!kIsWeb && (Platform.isMacOS || Platform.isLinux))
+                ? 16
+                : 0,
+            bottom: index == attributes.length - 1 ? 28 : 0,
+          ),
+          child: SlySliderRow(
+            label: attributes.values.elementAt(index).name,
+            value: attributes.values.elementAt(index).value,
+            secondaryTrackValue: attributes.values.elementAt(index).anchor,
+            min: attributes.values.elementAt(index).min,
+            max: attributes.values.elementAt(index).max,
+            onChanged: (value) {},
+            onChangeEnd: (value) {
+              _addToUndoOrRedo();
+              attributes.values.elementAt(index).value = value;
+              updateImage();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _onAspectRatioSelected(double? ratio) {
+    if ((_cropController != null) && (_cropController!.aspectRatio != ratio)) {
+      _cropChanged = true;
+      _cropController!.aspectRatio = ratio;
+    }
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isApplePlatform = (!kIsWeb && (Platform.isMacOS || Platform.isIOS));
@@ -511,146 +559,23 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 ),
               );
 
-              final lightControls = ListView.builder(
-                key: const Key('lightControls'),
-                physics: constraints.maxWidth > 600
-                    ? null
-                    : const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _editedImage.lightAttributes.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      top: index == 0 && constraints.maxWidth > 600 ? 16 : 0,
-                      bottom: index == _editedImage.lightAttributes.length - 1
-                          ? 28
-                          : 0,
-                    ),
-                    child: SlySliderRow(
-                      label: _editedImage.lightAttributes.values
-                          .elementAt(index)
-                          .name,
-                      value: _editedImage.lightAttributes.values
-                          .elementAt(index)
-                          .value,
-                      secondaryTrackValue: _editedImage.lightAttributes.values
-                          .elementAt(index)
-                          .anchor,
-                      min: _editedImage.lightAttributes.values
-                          .elementAt(index)
-                          .min,
-                      max: _editedImage.lightAttributes.values
-                          .elementAt(index)
-                          .max,
-                      onChanged: (value) {},
-                      onChangeEnd: (value) {
-                        _addToUndoOrRedo();
-                        _editedImage.lightAttributes.values
-                            .elementAt(index)
-                            .value = value;
-                        updateImage();
-                      },
-                    ),
-                  );
-                },
+              final lightControls = _createControlsListView(
+                _editedImage.lightAttributes,
+                const Key('lightControls'),
+                constraints,
               );
 
-              final colorControls = ListView.builder(
-                key: const Key('colorControls'),
-                physics: constraints.maxWidth > 600
-                    ? null
-                    : const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _editedImage.colorAttributes.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      top: index == 0 && constraints.maxWidth > 600 ? 16 : 0,
-                      bottom: index == _editedImage.colorAttributes.length - 1
-                          ? 28
-                          : 0,
-                    ),
-                    child: SlySliderRow(
-                      label: _editedImage.colorAttributes.values
-                          .elementAt(index)
-                          .name,
-                      value: _editedImage.colorAttributes.values
-                          .elementAt(index)
-                          .value,
-                      secondaryTrackValue: _editedImage.colorAttributes.values
-                          .elementAt(index)
-                          .anchor,
-                      min: _editedImage.colorAttributes.values
-                          .elementAt(index)
-                          .min,
-                      max: _editedImage.colorAttributes.values
-                          .elementAt(index)
-                          .max,
-                      onChanged: (value) {},
-                      onChangeEnd: (value) {
-                        _addToUndoOrRedo();
-                        _editedImage.colorAttributes.values
-                            .elementAt(index)
-                            .value = value;
-                        updateImage();
-                      },
-                    ),
-                  );
-                },
+              final colorControls = _createControlsListView(
+                _editedImage.colorAttributes,
+                const Key('colorControls'),
+                constraints,
               );
 
-              final effectControls = ListView.builder(
-                key: const Key('effectControls'),
-                physics: constraints.maxWidth > 600
-                    ? null
-                    : const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _editedImage.effectAttributes.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      top: index == 0 && constraints.maxWidth > 600 ? 16 : 0,
-                      bottom: index == _editedImage.effectAttributes.length - 1
-                          ? 28
-                          : 0,
-                    ),
-                    child: SlySliderRow(
-                      label: _editedImage.effectAttributes.values
-                          .elementAt(index)
-                          .name,
-                      value: _editedImage.effectAttributes.values
-                          .elementAt(index)
-                          .value,
-                      secondaryTrackValue: _editedImage.effectAttributes.values
-                          .elementAt(index)
-                          .anchor,
-                      min: _editedImage.effectAttributes.values
-                          .elementAt(index)
-                          .min,
-                      max: _editedImage.effectAttributes.values
-                          .elementAt(index)
-                          .max,
-                      onChanged: (value) {},
-                      onChangeEnd: (value) {
-                        _addToUndoOrRedo();
-                        _editedImage.effectAttributes.values
-                            .elementAt(index)
-                            .value = value;
-                        updateImage();
-                      },
-                    ),
-                  );
-                },
+              final effectControls = _createControlsListView(
+                _editedImage.effectAttributes,
+                const Key('effectControls'),
+                constraints,
               );
-
-              void onAspectRatioSelected(double? ratio) {
-                if ((_cropController != null) &&
-                    (_cropController!.aspectRatio != ratio)) {
-                  _cropChanged = true;
-                  _cropController!.aspectRatio = ratio;
-                }
-                Navigator.pop(context);
-              }
 
               final cropControls = LayoutBuilder(
                 builder: (context, constraints) {
@@ -684,7 +609,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: SlyButton(
                                 onPressed: () {
-                                  onAspectRatioSelected(null);
+                                  _onAspectRatioSelected(null);
                                 },
                                 style: slySubtleButtonStlye,
                                 child: const Text('Free'),
@@ -694,7 +619,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: SlyButton(
                                 onPressed: () {
-                                  onAspectRatioSelected(1);
+                                  _onAspectRatioSelected(1);
                                 },
                                 style: slySubtleButtonStlye,
                                 child: const Text('Square'),
@@ -704,7 +629,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: SlyButton(
                                 onPressed: () {
-                                  onAspectRatioSelected(
+                                  _onAspectRatioSelected(
                                     _portraitCrop ? 3 / 4 : 4 / 3,
                                   );
                                 },
@@ -716,7 +641,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: SlyButton(
                                 onPressed: () {
-                                  onAspectRatioSelected(
+                                  _onAspectRatioSelected(
                                     _portraitCrop ? 2 / 3 : 3 / 2,
                                   );
                                 },
@@ -728,7 +653,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               padding: const EdgeInsets.only(bottom: 16),
                               child: SlyButton(
                                 onPressed: () {
-                                  onAspectRatioSelected(
+                                  _onAspectRatioSelected(
                                     _portraitCrop ? 9 / 16 : 16 / 9,
                                   );
                                 },
@@ -739,7 +664,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                             SlyButton(
                               onPressed: () {
                                 if (_cropController == null) return;
-                                onAspectRatioSelected(
+                                _onAspectRatioSelected(
                                     _cropController!.aspectRatio);
                               },
                               child: const Text('Cancel'),
@@ -1233,18 +1158,18 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     child: Row(
                       children: <Widget>[
                         Expanded(
-                          child: isDesktop()
-                              ? Column(
-                                  children: <Widget>[
-                                    SlyTitleBarBox(
-                                      child: SlyDragWindowBox(),
-                                    ),
-                                    Expanded(
-                                      child: imageWidget,
-                                    ),
-                                  ],
-                                )
-                              : imageWidget,
+                          child: Column(
+                            children: <Widget>[
+                              SlyDragWindowBox(
+                                child: SlyTitleBarBox(
+                                  child: Container(),
+                                ),
+                              ),
+                              Expanded(
+                                child: imageWidget,
+                              ),
+                            ],
+                          ),
                         ),
                         ConstrainedBox(
                           constraints: BoxConstraints(
@@ -1266,9 +1191,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                       children: _selectedPageIndex == 3 ||
                                               _selectedPageIndex == 4
                                           ? [
+                                              SlyDragWindowBox(
+                                                child: SlyTitleBarBox(
+                                                  child: Container(),
+                                                ),
+                                              ),
                                               Expanded(child: controlsWidget),
                                             ]
                                           : [
+                                              SlyDragWindowBox(
+                                                child: SlyTitleBarBox(
+                                                  child: Container(),
+                                                ),
+                                              ),
                                               Expanded(child: controlsWidget),
                                               toolbar,
                                             ],
@@ -1292,13 +1227,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom:
-                                            !kIsWeb && Platform.isLinux ? 8 : 0,
-                                      ),
-                                      child: titleBar,
-                                    ),
+                                    titleBar,
                                     Expanded(
                                       child: navigationRail,
                                     ),

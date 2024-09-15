@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'utils.dart';
 import 'image.dart';
@@ -12,8 +13,10 @@ import 'snack_bar.dart';
 import 'title_bar.dart';
 import 'about.dart';
 
-void main() {
+void main() async {
   runApp(const SlyApp());
+
+  await windowManager.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
