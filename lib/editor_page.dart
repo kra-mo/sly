@@ -274,6 +274,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     final croppedImage = SlyImage.from(_originalImage);
     await croppedImage.crop(_cropController!.crop);
 
+    croppedImage.lightAttributes = _editedImage.lightAttributes;
+    croppedImage.colorAttributes = _editedImage.colorAttributes;
+    croppedImage.effectAttributes = _editedImage.effectAttributes;
+
     subscription?.cancel();
     _editedImage.dispose();
     _editedImage = croppedImage;
@@ -319,15 +323,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
     _addToUndoOrRedo(redo: !redo, clearRedo: false);
 
-    for (int index in [0, 1, 2]) {
-      Map<String, SlyImageAttribute> attributes = index == 0
-          ? _editedImage.lightAttributes
-          : index == 1
-              ? _editedImage.colorAttributes
-              : _editedImage.effectAttributes;
-
-      for (MapEntry<String, SlyImageAttribute> entry in last[index].entries) {
-        attributes[entry.key] = entry.value;
+    for (int i = 0; i < 3; i++) {
+      for (MapEntry<String, SlyImageAttribute> entry in last[i].entries) {
+        [
+          _editedImage.lightAttributes,
+          _editedImage.colorAttributes,
+          _editedImage.effectAttributes
+        ][i][entry.key] = entry.value;
       }
     }
 

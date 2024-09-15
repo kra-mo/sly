@@ -91,9 +91,7 @@ class SlyImage {
   SlyImage.from(SlyImage src)
       : _image = img.Image.from(src._image),
         _originalImage = img.Image.from(src._originalImage) {
-    lightAttributes = Map.from(src.lightAttributes);
-    colorAttributes = Map.from(src.colorAttributes);
-    effectAttributes = Map.from(src.effectAttributes);
+    copyEditsFrom(src);
   }
 
   /// Applies changes to the image's attrubutes.
@@ -189,6 +187,24 @@ class SlyImage {
   void copyMetadataFrom(SlyImage src) {
     _image.exif = img.ExifData.from(src._image.exif);
     _originalImage.exif = img.ExifData.from(src._originalImage.exif);
+  }
+
+  /// Copies edits from `src` to the image.
+  ///
+  /// Note that if you want to see the changes,
+  /// you need to call `applyEdits` or `applyEditsProgressive` yourself.
+  void copyEditsFrom(SlyImage src) {
+    for (int i = 0; i < 3; i++) {
+      for (MapEntry<String, SlyImageAttribute> entry in [
+        lightAttributes,
+        colorAttributes,
+        effectAttributes,
+      ][i]
+          .entries) {
+        [src.lightAttributes, src.colorAttributes, src.effectAttributes][i]
+            [entry.key] = SlyImageAttribute.copy(entry.value);
+      }
+    }
   }
 
   /// Removes Exif metadata from the image.
