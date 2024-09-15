@@ -72,9 +72,9 @@ jobs:
         uses: softprops/action-gh-release@v2.0.8
         with:
           files: |
-            Sly-${{ needs.build.outputs.version }}-linux-x86-64.tar.gz
-            Sly-${{ needs.build.outputs.version }}-macos-x86-64.tar.gz
-            Sly-${{ needs.build.outputs.version }}-windows-x64.zip
+            Sly-${{ needs.build.outputs.version }}-Linux.tar.gz
+            Sly-${{ needs.build.outputs.version }}-macOS.zip
+            Sly-${{ needs.build.outputs.version }}-Windows.zip
           fail_on_unmatched_files: true
           tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
           body_path: release_notes
