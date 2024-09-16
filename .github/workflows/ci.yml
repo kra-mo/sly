@@ -66,7 +66,7 @@ jobs:
       - name: Create tar.gz archive
         run: |
           cd build/linux/x64/release/bundle
-          tar -czvf ../../../../../result.tar.gz *
+          tar -czvf ../../../../../Sly.tar.gz *
 
       - name: Upload tar.gz archive
         uses: actions/upload-artifact@v4
