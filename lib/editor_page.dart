@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:crop_image/crop_image.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils.dart';
 import 'image.dart';
@@ -15,6 +16,7 @@ import 'slider_row.dart';
 import 'switch.dart';
 import 'toggle_buttons.dart';
 import 'spinner.dart';
+import 'histogram.dart';
 import 'dialog.dart';
 import 'snack_bar.dart';
 import 'title_bar.dart';
@@ -33,6 +35,8 @@ class SlyEditorPage extends StatefulWidget {
 }
 
 class _SlyEditorPageState extends State<SlyEditorPage> {
+  final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
   final GlobalKey<SlyButtonState> _saveButtonKey = GlobalKey<SlyButtonState>();
   final GlobalKey _imageWidgetKey = GlobalKey();
   int _controlsWidgetKeyValue = 0;
@@ -67,6 +71,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   bool _canRedo = false;
 
   int _selectedPageIndex = 0;
+  bool _showHistogram = false;
 
   final String _saveButtonLabel =
       !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
@@ -226,6 +231,15 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   void initState() {
+    prefs.then((value) {
+      final showHistogram = value.getBool('showHistogram');
+      if (showHistogram == null) return;
+
+      setState(() {
+        _showHistogram = showHistogram;
+      });
+    });
+
     _editedImage = SlyImage.from(_originalImage);
     subscription = _editedImage.controller.stream.listen(_onImageUpdate);
     updateImage();
@@ -995,7 +1009,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
 
               final controlsWidget = AnimatedSize(
-                key: Key("controlsWidget $_controlsWidgetKeyValue"),
+                key: Key('controlsWidget $_controlsWidgetKeyValue'),
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutQuint,
                 child: AnimatedSwitcher(
@@ -1044,7 +1058,30 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   alignment: constraints.maxWidth > 600
                       ? WrapAlignment.start
                       : WrapAlignment.center,
-                  children: <Widget>[
+                  children: <Widget?>[
+                    [0, 1].contains(_selectedPageIndex)
+                        ? Tooltip(
+                            message: _showHistogram
+                                ? 'Hide Histogram'
+                                : 'Show Histogram',
+                            child: IconButton(
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              icon: const ImageIcon(
+                                color: Colors.white54,
+                                AssetImage('assets/icons/histogram.png'),
+                              ),
+                              onPressed: () async {
+                                await (await prefs)
+                                    .setBool('showHistogram', !_showHistogram);
+
+                                setState(() {
+                                  _showHistogram = !_showHistogram;
+                                });
+                              },
+                            ),
+                          )
+                        : null,
                     Tooltip(
                       message: 'Show Original',
                       child: IconButton(
@@ -1114,8 +1151,32 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                  ],
+                  ].whereType<Widget>().toList(),
                 ),
+              );
+
+              final histogram = AnimatedSize(
+                duration: Duration(
+                  milliseconds: _selectedPageIndex == 3 ? 0 : 300,
+                ),
+                curve: Curves.easeOutQuint,
+                child: [0, 1].contains(_selectedPageIndex) && _showHistogram
+                    ? Padding(
+                        padding: EdgeInsets.only(
+                          bottom: constraints.maxWidth > 600 ? 12 : 0,
+                          top: (constraints.maxWidth > 600 &&
+                                  !kIsWeb &&
+                                  (Platform.isLinux || Platform.isMacOS))
+                              ? 0
+                              : 8,
+                        ),
+                        child: SizedBox(
+                          height: constraints.maxWidth > 600 ? 40 : 30,
+                          width: constraints.maxWidth > 600 ? null : 150,
+                          child: getHistogram(_editedImage),
+                        ),
+                      )
+                    : Container(),
               );
 
               if (constraints.maxWidth > 600) {
@@ -1201,6 +1262,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                               child: Container(),
                                             ),
                                           ),
+                                          histogram,
                                           Expanded(child: controlsWidget),
                                           _selectedPageIndex != 3 &&
                                                   _selectedPageIndex != 4
@@ -1265,7 +1327,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                       ]
                                     : <Widget>[
                                         imageWidget,
-                                        toolbar,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [toolbar, histogram],
+                                        ),
                                         controlsWidget,
                                       ],
                               ),

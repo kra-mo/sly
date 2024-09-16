@@ -312,6 +312,14 @@ class SlyImage {
     return (await cmd.executeThread()).outputBytes!;
   }
 
+  /// Returns a short list representing the RGB colors across the image,
+  /// useful for building a histogram.
+  Uint8List getHistogramData() {
+    final resizedImage = img.copyResize(_image, width: 20, height: 20);
+
+    return resizedImage.buffer.asUint8List();
+  }
+
   void dispose() {
     controller.close();
     _editsApplied = double.infinity;
