@@ -117,20 +117,10 @@ jobs:
           channel: stable
 
       - name: Build for Windows
-        run: flutter build windows --release
+        run: dart run msix:create
 
-      - name: Add DLL files
-        run: |
-          tree /F
-          Copy-Item C:\\Windows\\System32\\msvcp140.dll build/windows/x64/runner/Release/
-          Copy-Item C:\\Windows\\System32\\vcruntime140.dll build/windows/x64/runner/Release/
-          Copy-Item C:\\Windows\\System32\\vcruntime140_1.dll build/windows/x64/runner/Release/
-
-      - name: Zip compiled files
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath Sly.zip
-
-      - name: Upload zip
+      - name: Upload MSIX
         uses: actions/upload-artifact@v4
         with:
-          name: Windows Executable
-          path: Sly.zip
+          name: Windows Installer
+          path: build\windows\x64\runner\Release\sly.msix

@@ -51,8 +51,8 @@ jobs:
       - name: Move macOS zip to root
         run: mv macOS\ Application/*.zip Sly-${{ needs.build.outputs.version }}-macOS.zip
 
-      - name: Move Windows zip to root
-        run: mv Windows\ Executable/*.zip Sly-${{ needs.build.outputs.version }}-Windows.zip
+      - name: Move Windows MSIX to root
+        run: mv Windows\ Installer/*.msix Sly-${{ needs.build.outputs.version }}-Windows.msix
 
       - name: Get tag name
         id: get_tag_name
@@ -78,7 +78,7 @@ jobs:
             Sly-${{ needs.build.outputs.version }}-Android.zip
             Sly-${{ needs.build.outputs.version }}-Linux.tar.gz
             Sly-${{ needs.build.outputs.version }}-macOS.zip
-            Sly-${{ needs.build.outputs.version }}-Windows.zip
+            Sly-${{ needs.build.outputs.version }}-Windows.msix
           fail_on_unmatched_files: true
           tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
           body_path: release_notes
