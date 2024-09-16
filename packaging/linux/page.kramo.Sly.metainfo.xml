@@ -45,6 +45,13 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.2.2" date="2024-09-16">
+            <description>
+                <ul>
+                    <li>Fixed a bug where rotating the image could cause the edges to go off-screen</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.2.1" date="2024-09-16">
             <description>
                 <ul>
