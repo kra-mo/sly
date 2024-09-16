@@ -45,6 +45,16 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.2.1" date="2024-09-16">
+            <description>
+                <ul>
+                    <li>Added a noise reduction filter</li>
+                    <li>Fixed a bug where some edits would be lost after cropping</li>
+                    <li>User interface improvements</li>
+                    <li>Performance improvements</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.2.0" date="2024-09-15">
             <description>
                 <ul>
