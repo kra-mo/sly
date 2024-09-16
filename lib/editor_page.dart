@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
@@ -54,7 +53,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   String _saveFormat = 'PNG';
   bool _saveOnLoad = false;
 
-  double _rotationAngle = 0.0;
+  int _rotationQuarterTurns = 0;
   bool _hflip = false;
   bool _vflip = false;
 
@@ -164,8 +163,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   Future<void> _save() async {
     final copyImage = SlyImage.from(_editedImage);
 
-    if (_rotationAngle != 0 && _rotationAngle != (math.pi * 2)) {
-      copyImage.rotate(_rotationAngle * (180 / math.pi));
+    if (_rotationQuarterTurns != 0 && _rotationQuarterTurns != 4) {
+      copyImage.rotate(_rotationQuarterTurns * 90);
     }
 
     if (_hflip && _vflip) {
@@ -551,8 +550,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 child: Transform.flip(
                   flipX: _hflip,
                   flipY: _vflip,
-                  child: Transform.rotate(
-                    angle: _rotationAngle,
+                  child: RotatedBox(
+                    quarterTurns: _rotationQuarterTurns,
                     child: constraints.maxWidth > 600
                         ? _selectedPageIndex == 3
                             ? cropImageView
@@ -696,17 +695,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         ),
                         padding: const EdgeInsets.all(12),
                         onPressed: () {
-                          double newAngle = _rotationAngle - (math.pi / 2);
-                          if (newAngle < 0) {
-                            newAngle = (math.pi * 2) + newAngle;
-                          }
-
-                          if (newAngle == (math.pi * 2)) {
-                            newAngle = 0;
-                          }
+                          int newTurns = _rotationQuarterTurns - 1;
+                          if (newTurns < 0) newTurns = 4 + newTurns;
+                          if (newTurns == 4) newTurns = 0;
 
                           setState(() {
-                            _rotationAngle = newAngle;
+                            _rotationQuarterTurns = newTurns;
                           });
                         },
                       ),
@@ -721,17 +715,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         ),
                         padding: const EdgeInsets.all(12),
                         onPressed: () {
-                          double newAngle = _rotationAngle + (math.pi / 2);
-                          if (newAngle > (math.pi * 2)) {
-                            newAngle = newAngle - (math.pi * 2);
-                          }
-
-                          if (newAngle == (math.pi * 2)) {
-                            newAngle = 0;
-                          }
+                          int newTurns = _rotationQuarterTurns + 1;
+                          if (newTurns > 4) newTurns = newTurns - 4;
+                          if (newTurns == 4) newTurns = 0;
 
                           setState(() {
-                            _rotationAngle = newAngle;
+                            _rotationQuarterTurns = newTurns;
                           });
                         },
                       ),
