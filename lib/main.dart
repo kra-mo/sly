@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'utils.dart';
 import 'image.dart';
 import 'button.dart';
 import 'spinner.dart';
@@ -101,7 +100,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
         return;
       }
 
-      final image = await loadImgImage(await file.readAsBytes());
+      final image = await SlyImage.fromData(await file.readAsBytes());
       if (image == null) {
         _pickerButton.setChild(Text(_pickerButtonLabel));
 
@@ -120,7 +119,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
         context,
         MaterialPageRoute(
           builder: (context) => SlyEditorPage(
-            image: SlyImage.fromImage(image),
+            image: image,
             suggestedFileName: '${file.name.split('.').first} Edited',
           ),
         ),

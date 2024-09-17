@@ -39,7 +39,6 @@ Future<ui.Image?> _decodeUiImage(Uint8List bytes) async {
     final frameInfo = await codec.getNextFrame();
     return frameInfo.image;
   } catch (e) {
-    print(e);
     return null;
   }
 }

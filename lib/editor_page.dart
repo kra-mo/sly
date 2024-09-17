@@ -482,7 +482,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
                 showSlySnackBar(context, 'Loading Image', loading: true);
 
-                final image = await loadImgImage(await file.readAsBytes());
+                final image = await SlyImage.fromData(await file.readAsBytes());
                 if (image == null) {
                   if (!context.mounted) return;
 
@@ -497,7 +497,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SlyEditorPage(
-                      image: SlyImage.fromImage(image),
+                      image: image,
                       suggestedFileName: '${file.name.split('.').first} Edited',
                     ),
                   ),
@@ -1156,9 +1156,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
 
               final histogram = AnimatedSize(
-                duration: Duration(
-                  milliseconds: _selectedPageIndex == 3 ? 0 : 300,
-                ),
+                duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutQuint,
                 child: [0, 1].contains(_selectedPageIndex) && _showHistogram
                     ? Padding(
@@ -1262,7 +1260,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                               child: Container(),
                                             ),
                                           ),
-                                          histogram,
+                                          _selectedPageIndex == 3
+                                              ? Container()
+                                              : histogram,
                                           Expanded(child: controlsWidget),
                                           _selectedPageIndex != 3 &&
                                                   _selectedPageIndex != 4

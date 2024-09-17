@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:image/image.dart' as img;
 
+import 'utils.dart';
+
 enum SlyImageFlipDirection { horizontal, vertical, both }
 
 class SlyImageAttribute {
@@ -76,14 +78,6 @@ class SlyImage {
         _originalImage.height <= 500;
   }
 
-  /// Creates a new `SlyImage` from `image`.
-  ///
-  /// The `image` object is not reused, so calling `.from`
-  /// before invoking this constructor is not necessary.
-  SlyImage.fromImage(img.Image image)
-      : _image = img.Image.from(image),
-        _originalImage = img.Image.from(image);
-
   /// Creates a new `SlyImage` from another `src`.
   ///
   /// Note that if `src` is in the process of loading, the copied image might stay at a lower resolution
@@ -92,6 +86,23 @@ class SlyImage {
       : _image = img.Image.from(src._image),
         _originalImage = img.Image.from(src._originalImage) {
     copyEditsFrom(src);
+  }
+
+  /// Creates a new `SlyImage` from `image`.
+  ///
+  /// The `image` object is reused, so calling `.from`
+  /// before invoking this constructor might be necessary
+  /// if you plan on reuising `image`.
+  SlyImage._fromImage(img.Image image)
+      : _image = img.Image.from(image),
+        _originalImage = image;
+
+  /// Creates a new `SlyImage` from `data`.
+  static Future<SlyImage?> fromData(Uint8List data) async {
+    final imgImage = await loadImgImage(data);
+    if (imgImage == null) return null;
+
+    return SlyImage._fromImage(imgImage);
   }
 
   /// Applies changes to the image's attrubutes.
