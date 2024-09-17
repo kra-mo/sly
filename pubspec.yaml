@@ -30,6 +30,8 @@ dev_dependencies:
   msix: ^3.16.8
 
 flutter:
+  uses-material-design: true
+
   assets:
     - assets/
     - assets/icons/
