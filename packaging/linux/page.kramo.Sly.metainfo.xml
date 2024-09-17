@@ -7,7 +7,7 @@
     <summary>Edit your images easily</summary>
     <description>
       <p>A friendly image editor that requires no internet connection or preexisting expertise. Just open a photo and have at it.</p>
-      <p>The app  allows you to adjust simple attributes like brightness or contrast as well as effects like a vignette or a border. It also allows you to flip, rotate and crop the image to your heart's desire.</p>
+      <p>The app  allows you to adjust attributes like brightness or contrast as well as add effects like a vignette or a border. It also allows you to flip, rotate and crop the image to your heart's desire. If you're a pro, you can even preview your edits on a histogram.</p>
       <p>When you're done, just export the photo as a JPEG or a PNG with the quality settings of your choosing. You also get a choice in whether or not to keep metadata such as location information.</p>
     </description>
     <launchable type="desktop-id">page.kramo.Sly.desktop</launchable>
