@@ -45,6 +45,13 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.3.1" date="2024-09-17">
+            <description>
+                <ul>
+                    <li>Fixes the histogram for non-RGB images</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.3.0" date="2024-09-17">
             <description>
                 <ul>
