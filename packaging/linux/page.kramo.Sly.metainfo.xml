@@ -45,6 +45,15 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.3.0" date="2024-09-17">
+            <description>
+                <ul>
+                    <li>You can now view color and light in your images on a histogram</li>
+                    <li>Improved image loading performance</li>
+                    <li>Small fixes</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.2.2" date="2024-09-16">
             <description>
                 <ul>
