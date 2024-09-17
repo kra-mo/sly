@@ -11,16 +11,16 @@ dependencies:
   flutter:
     sdk: flutter
 
+  window_manager: ^0.4.2
+  handy_window: ^0.4.0
+  shared_preferences: ^2.3.2
   url_launcher: ^6.3.0
   file_selector: ^1.0.3
   image_picker: ^1.1.2
   gal: ^2.3.0
   image: ^4.2.0
   crop_image: ^1.0.13
-  handy_window: ^0.4.0
-  window_manager: ^0.4.2
   fl_chart: ^0.69.0
-  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

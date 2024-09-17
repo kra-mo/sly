@@ -16,14 +16,6 @@ import 'title_bar.dart';
 import 'about.dart';
 
 void main() async {
-  runApp(const SlyApp());
-
-  await windowManager.ensureInitialized();
-
-  if (!kIsWeb && Platform.isWindows) {
-    windowManager.setMinimumSize(const Size(360, 294));
-  }
-
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.grey.shade900,
@@ -36,6 +28,13 @@ void main() async {
       systemStatusBarContrastEnforced: false,
     ),
   );
+
+  runApp(const SlyApp());
+
+  await windowManager.ensureInitialized();
+  if (!kIsWeb && Platform.isWindows) {
+    windowManager.setMinimumSize(const Size(360, 294));
+  }
 }
 
 class SlyApp extends StatelessWidget {
