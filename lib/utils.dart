@@ -8,47 +8,40 @@ import 'package:image/image.dart' as img;
 import 'package:gal/gal.dart';
 import 'package:file_selector/file_selector.dart';
 
-Future<img.Image?> loadImage(Uint8List bytes) async {
-  var cmd = img.Command()..decodeImage(bytes);
-
-  img.Image? image;
-
-  try {
-    image = (await cmd.executeThread()).outputImage;
-  } on img.ImageException {
-    // We will try loading a ui.Image afterwards
-  }
-
-  if (image != null) return image;
-
-  final ui.Image uiImage;
-
-  try {
-    uiImage = await _loadUiImage(bytes);
-  } catch (e) {
-    return null;
-  }
+Future<img.Image?> loadImgImage(Uint8List bytes) async {
+  final ui.Image? uiImage;
+  uiImage = await _decodeUiImage(bytes);
+  if (uiImage == null) return _decodeImgImage(bytes);
 
   final byteData = await uiImage.toByteData();
+  if (byteData == null) return _decodeImgImage(bytes);
 
-  if (byteData == null) {
-    throw Exception("Cannot decode image.");
-  }
-
-  image = img.Image.fromBytes(
+  return img.Image.fromBytes(
     numChannels: 4,
     width: uiImage.width,
     height: uiImage.height,
     bytes: byteData.buffer,
   );
-
-  return image;
 }
 
-Future<ui.Image> _loadUiImage(Uint8List bytes) async {
-  final codec = await ui.instantiateImageCodec(bytes);
-  final frameInfo = await codec.getNextFrame();
-  return frameInfo.image;
+Future<img.Image?> _decodeImgImage(Uint8List bytes) async {
+  try {
+    return (await (img.Command()..decodeImage(bytes)).executeThread())
+        .outputImage;
+  } on img.ImageException {
+    return null;
+  }
+}
+
+Future<ui.Image?> _decodeUiImage(Uint8List bytes) async {
+  try {
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frameInfo = await codec.getNextFrame();
+    return frameInfo.image;
+  } catch (e) {
+    print(e);
+    return null;
+  }
 }
 
 /// Saves the image to the user's gallery on iOS and Android

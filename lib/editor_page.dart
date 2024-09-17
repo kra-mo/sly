@@ -482,7 +482,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
                 showSlySnackBar(context, 'Loading Image', loading: true);
 
-                final image = await loadImage(await file.readAsBytes());
+                final image = await loadImgImage(await file.readAsBytes());
                 if (image == null) {
                   if (!context.mounted) return;
 

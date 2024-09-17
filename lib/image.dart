@@ -330,6 +330,20 @@ class SlyImage {
       ..image(editableImage)
       ..copy();
 
+    final temp = colorAttributes['temp']!;
+    final tint = colorAttributes['tint']!;
+
+    for (SlyImageAttribute attribute in [temp, tint]) {
+      if (attribute.value != attribute.anchor) {
+        cmd.colorOffset(
+          red: 50 * temp.value,
+          green: 50 * tint.value * -1,
+          blue: 50 * temp.value * -1,
+        );
+        break;
+      }
+    }
+
     final exposure = lightAttributes['exposure']!;
     final brightness = lightAttributes['brightness']!;
     final contrast = lightAttributes['contrast']!;
@@ -362,20 +376,6 @@ class SlyImage {
           blacks: img.ColorUint8.rgb(b, b, b),
           whites: img.ColorUint8.rgb(w, w, w),
           mids: img.ColorUint8.rgb(m, m, m),
-        );
-        break;
-      }
-    }
-
-    final temp = colorAttributes['temp']!;
-    final tint = colorAttributes['tint']!;
-
-    for (SlyImageAttribute attribute in [temp, tint]) {
-      if (attribute.value != attribute.anchor) {
-        cmd.colorOffset(
-          red: 50 * temp.value,
-          green: 50 * tint.value * -1,
-          blue: 50 * temp.value * -1,
         );
         break;
       }

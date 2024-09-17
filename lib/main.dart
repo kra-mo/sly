@@ -101,7 +101,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
         return;
       }
 
-      final image = await loadImage(await file.readAsBytes());
+      final image = await loadImgImage(await file.readAsBytes());
       if (image == null) {
         _pickerButton.setChild(Text(_pickerButtonLabel));
 
