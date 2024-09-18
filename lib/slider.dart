@@ -91,11 +91,12 @@ class _SlySliderState extends State<SlySlider> {
           secondaryActiveColor: widget.secondaryActiveColor,
           thumbColor: widget.thumbColor,
           overlayColor: widget.overlayColor,
-          mouseCursor: widget.mouseCursor,
+          mouseCursor: widget.mouseCursor ?? SystemMouseCursors.basic,
           semanticFormatterCallback: widget.semanticFormatterCallback,
           focusNode: widget.focusNode,
           autofocus: widget.autofocus,
-          allowedInteraction: widget.allowedInteraction,
+          allowedInteraction:
+              widget.allowedInteraction ?? SliderInteraction.slideThumb,
         ),
       ),
     );
@@ -137,16 +138,18 @@ class InsetSliderThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     context.canvas.drawCircle(
-        center,
-        10,
-        Paint()
-          ..color = sliderTheme.activeTrackColor!
-          ..style = PaintingStyle.fill);
+      center,
+      10,
+      Paint()
+        ..color = sliderTheme.activeTrackColor!
+        ..style = PaintingStyle.fill,
+    );
     context.canvas.drawCircle(
-        center,
-        6 * activationAnimation.value,
-        Paint()
-          ..color = sliderTheme.inactiveTrackColor!
-          ..style = PaintingStyle.fill);
+      center,
+      6 * activationAnimation.value,
+      Paint()
+        ..color = sliderTheme.inactiveTrackColor!
+        ..style = PaintingStyle.fill,
+    );
   }
 }
