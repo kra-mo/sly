@@ -196,13 +196,13 @@ class SlyImage {
   void copyEditsFrom(SlyImage src) {
     for (int i = 0; i < 3; i++) {
       for (MapEntry<String, SlyImageAttribute> entry in [
-        lightAttributes,
-        colorAttributes,
-        effectAttributes,
+        src.lightAttributes,
+        src.colorAttributes,
+        src.effectAttributes,
       ][i]
           .entries) {
-        [src.lightAttributes, src.colorAttributes, src.effectAttributes][i]
-            [entry.key] = SlyImageAttribute.copy(entry.value);
+        [lightAttributes, colorAttributes, effectAttributes][i][entry.key] =
+            SlyImageAttribute.copy(entry.value);
       }
     }
   }
