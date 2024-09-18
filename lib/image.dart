@@ -325,11 +325,13 @@ class SlyImage {
 
   /// Returns a short list representing the RGB colors across the image,
   /// useful for building a histogram.
-  Uint8List getHistogramData() {
-    final resizedImage =
-        img.copyResize(_image, width: 20, height: 20).convert(numChannels: 3);
+  Future<Uint8List> getHistogramData() async {
+    final cmd = img.Command()
+      ..image(_image)
+      ..copyResize(width: 20, height: 20)
+      ..convert(numChannels: 3);
 
-    return resizedImage.buffer.asUint8List();
+    return (await cmd.executeThread()).outputImage!.buffer.asUint8List();
   }
 
   void dispose() {

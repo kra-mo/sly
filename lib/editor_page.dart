@@ -47,7 +47,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   late final SlyImage _originalImage = widget.image;
   late SlyImage _editedImage;
-  late Widget _histogram = getHistogram(_editedImage);
+  Widget? _histogram;
 
   Uint8List? _originalImageData;
   Uint8List? _editedImageData;
@@ -220,15 +220,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           _saveOnLoad = false;
         }
 
-        if (!mounted) return;
-        setState(() {
-          _histogram = getHistogram(_editedImage);
-        });
-
         _editedImage.encode(format: 'JPEG75').then((data) {
           if (!mounted) return;
           setState(() {
             _editedImageData = data;
+          });
+        });
+
+        getHistogram(_editedImage).then((data) {
+          if (!mounted) return;
+          setState(() {
+            _histogram = data;
           });
         });
     }

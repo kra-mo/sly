@@ -1,12 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
 
 import 'image.dart';
 
-LineChart getHistogram(SlyImage image) {
-  final imageData = image.getHistogramData();
-
+LineChart _buildHistogram(Uint8List imagdeData) {
   final List<List<FlSpot>> spots = [
     List.generate(16, (index) => FlSpot(index.toDouble(), 0)),
     List.generate(16, (index) => FlSpot(index.toDouble(), 0)),
@@ -14,7 +13,7 @@ LineChart getHistogram(SlyImage image) {
   ];
 
   int channel = 0;
-  for (int pixel in imageData) {
+  for (int pixel in imagdeData) {
     int i = pixel >> 4;
     if (i == 0 && pixel != 0) {
       i = 1;
@@ -66,4 +65,8 @@ LineChart getHistogram(SlyImage image) {
       lineBarsData: lineBarsData,
     ),
   );
+}
+
+Future<LineChart> getHistogram(SlyImage image) async {
+  return await compute(_buildHistogram, await image.getHistogramData());
 }
