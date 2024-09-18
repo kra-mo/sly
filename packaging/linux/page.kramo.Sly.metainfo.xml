@@ -45,6 +45,11 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.3.4" date="2024-09-18">
+            <description>
+                <p>Fixes a bug where the saved image would lack edits</p>
+            </description>
+        </release>
         <release version="0.3.3" date="2024-09-18">
             <description>
                 <p>General performance improvements</p>
