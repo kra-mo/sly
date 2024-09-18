@@ -24,25 +24,6 @@ Future<img.Image?> loadImgImage(Uint8List bytes) async {
   );
 }
 
-Future<img.Image?> _decodeImgImage(Uint8List bytes) async {
-  try {
-    return (await (img.Command()..decodeImage(bytes)).executeThread())
-        .outputImage;
-  } on img.ImageException {
-    return null;
-  }
-}
-
-Future<ui.Image?> _decodeUiImage(Uint8List bytes) async {
-  try {
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frameInfo = await codec.getNextFrame();
-    return frameInfo.image;
-  } catch (e) {
-    return null;
-  }
-}
-
 /// Saves the image to the user's gallery on iOS and Android
 /// or a user-picked location on desktop or the web.
 ///
@@ -63,4 +44,39 @@ Future<bool> saveImage(Uint8List imageData,
           name: result.path == '' ? '$fileName.$fileExtension' : null)
       .saveTo(result.path);
   return true;
+}
+
+Future<img.Image?> _decodeImgImage(Uint8List bytes) async {
+  try {
+    return (await (img.Command()..decodeImage(bytes)).executeThread())
+        .outputImage;
+  } on img.ImageException {
+    return null;
+  }
+}
+
+Future<ui.Image?> _decodeUiImage(Uint8List bytes) async {
+  try {
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frameInfo = await codec.getNextFrame();
+    return frameInfo.image;
+  } catch (e) {
+    return null;
+  }
+}
+
+Future<img.Image> getResizedImage(
+  img.Image image,
+  int? width,
+  int? height,
+) async {
+  final cmd = img.Command()
+    ..image(image)
+    ..copyResize(
+      width: width,
+      height: height,
+      interpolation: img.Interpolation.average,
+    );
+
+  return (await cmd.executeThread()).outputImage!;
 }

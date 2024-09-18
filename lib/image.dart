@@ -139,39 +139,28 @@ class SlyImage {
     final applied = DateTime.now().millisecondsSinceEpoch;
     _editsApplied = applied;
 
-    final List<img.Image> images = [];
+    final List<Future<img.Image>> images = [];
 
     if (_originalImage.height > 700 ||
         (kIsWeb && _originalImage.height > 500)) {
-      images.add(
-        img.copyResize(
-          _originalImage,
-          height: 500,
-          interpolation: img.Interpolation.average,
-        ),
-      );
+      images.add(getResizedImage(_originalImage, null, 500));
     }
 
     if (canLoadFullRes) {
-      images.add(_originalImage);
+      images.add(Future.value(_originalImage));
     } else if (!kIsWeb) {
-      images.add(
-        img.copyResize(
-          _originalImage,
-          height: 1500,
-          interpolation: img.Interpolation.average,
-        ),
-      );
+      images.add(getResizedImage(_originalImage, null, 1500));
     }
 
-    for (img.Image editableImage in images) {
+    for (Future<img.Image> editableImage in images) {
       if (_editsApplied > applied) {
         _loading -= 1;
         return;
       }
 
       final editedImage =
-          (await _buildEditCommand(editableImage).executeThread()).outputImage;
+          (await _buildEditCommand(await editableImage).executeThread())
+              .outputImage;
       if (editedImage == null) {
         _loading -= 1;
         return;
@@ -339,7 +328,7 @@ class SlyImage {
     _editsApplied = double.infinity;
   }
 
-  img.Command _buildEditCommand(editableImage) {
+  img.Command _buildEditCommand(img.Image editableImage) {
     final cmd = img.Command()
       ..image(editableImage)
       ..copy();

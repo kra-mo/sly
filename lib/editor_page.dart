@@ -43,8 +43,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   Widget? _controlsChild;
 
-  bool _firstUpdate = true;
-
   late final SlyImage _originalImage = widget.image;
   late SlyImage _editedImage;
   Widget? _histogram;
@@ -278,13 +276,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   }
 
   void updateImage() async {
-    // Add a timeout to the initial loading of the image
-    // to let the widget build and slide in without a lag spike
-    if (_firstUpdate) {
-      await Future.delayed(const Duration(milliseconds: 400));
-      _firstUpdate = false;
-    }
-
     _editedImage.applyEditsProgressive();
   }
 
