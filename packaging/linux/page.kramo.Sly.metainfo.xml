@@ -45,18 +45,19 @@
     </screenshot>
   </screenshots>
     <releases>
+        <release version="0.3.3" date="2024-09-18">
+            <description>
+                <p>General performance improvements</p>
+            </description>
+        </release>
         <release version="0.3.2" date="2024-09-17">
             <description>
-                <ul>
-                    <li>Improved the performance of the histogram</li>
-                </ul>
+                <p>Improved the performance of the histogram</p>
             </description>
         </release>
         <release version="0.3.1" date="2024-09-17">
             <description>
-                <ul>
-                    <li>Fixed the histogram for non-RGB images</li>
-                </ul>
+                <p>Fixed the histogram for non-RGB images</p>
             </description>
         </release>
         <release version="0.3.0" date="2024-09-17">
@@ -70,9 +71,7 @@
         </release>
         <release version="0.2.2" date="2024-09-16">
             <description>
-                <ul>
-                    <li>Fixed a bug where rotating the image could cause the edges to go off-screen</li>
-                </ul>
+                <p>Fixed a bug where rotating the image could cause the edges to go off-screen</p>
             </description>
         </release>
         <release version="0.2.1" date="2024-09-16">
