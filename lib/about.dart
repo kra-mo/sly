@@ -25,13 +25,11 @@ void showSlyAboutDialog(BuildContext context) {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
                 children: [
                   const TextSpan(
                     text:
                         'Sly is an open source application licensed under the',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                   const TextSpan(text: ' '),
                   TextSpan(
@@ -50,15 +48,9 @@ void showSlyAboutDialog(BuildContext context) {
                   ),
                   const TextSpan(
                     text: '. ',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                   const TextSpan(
                     text: 'The source code is available',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                   const TextSpan(text: ' '),
                   TextSpan(
@@ -77,9 +69,6 @@ void showSlyAboutDialog(BuildContext context) {
                   ),
                   const TextSpan(
                     text: '. ',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                 ],
               ),
@@ -88,13 +77,11 @@ void showSlyAboutDialog(BuildContext context) {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
                 children: [
                   const TextSpan(
                     text:
                         'If you want to support my work, consider donating to me on',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                   const TextSpan(text: ' '),
                   TextSpan(
@@ -113,9 +100,6 @@ void showSlyAboutDialog(BuildContext context) {
                   ),
                   const TextSpan(
                     text: '.',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                 ],
               ),
@@ -124,13 +108,11 @@ void showSlyAboutDialog(BuildContext context) {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
                 children: [
                   const TextSpan(
                     text:
                         'Licenses of other open source libraries used by the app can be viewed',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                   const TextSpan(text: ' '),
                   TextSpan(
@@ -146,8 +128,9 @@ void showSlyAboutDialog(BuildContext context) {
                             builder: (context) => Column(
                               children: <Widget>[
                                 Container(
-                                  color: Colors.grey.shade900,
-                                  child: titleBar,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  child: const SlyTitleBar(),
                                 ),
                                 const Expanded(
                                   child: LicensePage(
@@ -167,9 +150,6 @@ void showSlyAboutDialog(BuildContext context) {
                   ),
                   const TextSpan(
                     text: '.',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                 ],
               ),
@@ -179,7 +159,6 @@ void showSlyAboutDialog(BuildContext context) {
               onPressed: () {
                 Navigator.pop(context);
               },
-              style: slySubtleButtonStlye,
               child: const Text('Done'),
             ),
           ],

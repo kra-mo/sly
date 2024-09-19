@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class SlyButton extends StatefulWidget {
   const SlyButton({
@@ -8,7 +7,7 @@ class SlyButton extends StatefulWidget {
     this.onLongPress,
     this.onHover,
     this.onFocusChange,
-    this.style = slyElevatedButtonStlye,
+    this.style,
     this.focusNode,
     this.autofocus = false,
     this.clipBehavior,
@@ -56,24 +55,34 @@ class SlyButtonState extends State<SlyButton> {
       onLongPress: widget.onLongPress,
       onHover: widget.onHover,
       onFocusChange: widget.onFocusChange,
-      style: widget.style,
+      style: widget.style ??
+          ButtonStyle(
+            textStyle: const WidgetStatePropertyAll(
+              TextStyle(fontWeight: FontWeight.w600),
+            ),
+            shape: const WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(12),
+                ),
+              ),
+            ),
+            splashFactory: NoSplash.splashFactory,
+            surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+            backgroundColor: WidgetStatePropertyAll(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white10
+                  : Colors.black.withOpacity(0.08),
+            ),
+            shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+          ),
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       clipBehavior: widget.clipBehavior,
       iconAlignment: widget.iconAlignment,
       child: elevatedButtonChild,
     );
-    return CupertinoTheme(
-      data: const CupertinoThemeData(brightness: Brightness.light),
-      child: Theme(
-          data: ThemeData(
-            colorScheme: ColorScheme.fromSwatch(
-              primarySwatch: Colors.grey,
-              brightness: Brightness.light,
-            ),
-          ),
-          child: elevatedButton!),
-    );
+    return elevatedButton!;
   }
 
   void setChild(Widget newChild) {
@@ -112,27 +121,10 @@ const ButtonStyle slyElevatedButtonStlye = ButtonStyle(
     ),
   ),
   splashFactory: NoSplash.splashFactory,
-  overlayColor: WidgetStatePropertyAll(Colors.black12),
   surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
-  foregroundColor: WidgetStatePropertyAll(Colors.black),
-  iconColor: WidgetStatePropertyAll(Colors.black),
+  shadowColor: WidgetStatePropertyAll(Colors.transparent),
   backgroundColor: WidgetStatePropertyAll(Colors.white),
-  shadowColor: WidgetStatePropertyAll(Colors.transparent),
-);
-
-const ButtonStyle slySubtleButtonStlye = ButtonStyle(
-  shape: WidgetStatePropertyAll(
-    RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(12),
-      ),
-    ),
-  ),
-  splashFactory: NoSplash.splashFactory,
-  overlayColor: WidgetStatePropertyAll(Colors.white10),
-  surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
-  foregroundColor: WidgetStatePropertyAll(Colors.white),
-  iconColor: WidgetStatePropertyAll(Colors.white),
-  backgroundColor: WidgetStatePropertyAll(Colors.white10),
-  shadowColor: WidgetStatePropertyAll(Colors.transparent),
+  foregroundColor: WidgetStatePropertyAll(Colors.black87),
+  iconColor: WidgetStatePropertyAll(Colors.black87),
+  overlayColor: WidgetStatePropertyAll(Colors.black12),
 );

@@ -54,7 +54,14 @@ class _SlySliderState extends State<SlySlider> {
   @override
   Widget build(BuildContext context) {
     return SliderTheme(
-      data: SlySliderThemeData(),
+      data: SliderThemeData(
+        secondaryActiveTrackColor:
+            Theme.of(context).colorScheme.primary.withOpacity(0.35),
+        inactiveTrackColor: Theme.of(context).disabledColor,
+        trackHeight: 18,
+        thumbShape: InsetSliderThumbShape(),
+        overlayColor: Colors.transparent,
+      ),
       child: GestureDetector(
         // Reset to secondary track value on double tap
         onDoubleTap: () {
@@ -101,19 +108,6 @@ class _SlySliderState extends State<SlySlider> {
       ),
     );
   }
-}
-
-class SlySliderThemeData extends SliderThemeData {
-  SlySliderThemeData()
-      : super(
-          activeTrackColor: Colors.white,
-          secondaryActiveTrackColor: Colors.grey.shade600,
-          inactiveTrackColor: Colors.grey.shade800,
-          thumbColor: Colors.white,
-          trackHeight: 18,
-          thumbShape: InsetSliderThumbShape(),
-          overlayColor: Colors.transparent,
-        );
 }
 
 class InsetSliderThumbShape extends SliderComponentShape {

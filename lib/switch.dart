@@ -27,13 +27,13 @@ class _SlySwitchState extends State<SlySwitch> {
   @override
   Widget build(BuildContext context) {
     return Switch(
-      activeTrackColor: Colors.white,
-      inactiveTrackColor: Colors.white60,
-      thumbColor: WidgetStatePropertyAll(Colors.grey.shade900),
       trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      thumbColor:
+          WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
+      inactiveTrackColor: Theme.of(context).disabledColor,
       overlayColor: WidgetStateProperty.resolveWith((states) {
         return states.contains(WidgetState.focused)
-            ? Colors.black12
+            ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)
             : Colors.transparent;
       }),
       value: value,

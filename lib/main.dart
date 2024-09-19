@@ -1,12 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'theme.dart';
+import 'preferences.dart';
 import 'image.dart';
 import 'button.dart';
 import 'spinner.dart';
@@ -16,20 +17,11 @@ import 'title_bar.dart';
 import 'about.dart';
 
 void main() async {
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.grey.shade900,
-      systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.light,
-      systemNavigationBarContrastEnforced: false,
-      statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-      systemStatusBarContrastEnforced: false,
-    ),
-  );
+  // TODO: (re)implement immersive system chrome
 
   runApp(const SlyApp());
+
+  await initPreferences();
 
   await windowManager.ensureInitialized();
   if (!kIsWeb && Platform.isWindows) {
@@ -42,24 +34,18 @@ class SlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sly',
-      home: const SlyHomePage(title: 'Home'),
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Geist',
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.grey,
-          accentColor: Colors.white,
-          cardColor: Colors.grey.shade900,
-          backgroundColor: Colors.black,
-          brightness: Brightness.dark,
-        ),
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, style, child) {
+        return MaterialApp(
+          title: 'Sly',
+          home: const SlyHomePage(title: 'Home'),
+          debugShowCheckedModeBanner: false,
+          themeMode: style,
+          theme: lightThemeData,
+          darkTheme: darkThemeData,
+        );
+      },
     );
   }
 }
@@ -79,6 +65,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
   final String _pickerButtonLabel = 'Pick Image';
   late final SlyButton _pickerButton = SlyButton(
     key: pickerButtonKey,
+    style: slyElevatedButtonStlye,
     child: Text(_pickerButtonLabel),
     onPressed: () async {
       _pickerButton.setChild(
@@ -124,22 +111,6 @@ class _SlyHomePageState extends State<SlyHomePage> {
         ),
       );
 
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          systemNavigationBarColor: Color.alphaBlend(
-            Colors.white10,
-            Colors.grey.shade900,
-          ),
-          systemNavigationBarDividerColor: Colors.transparent,
-          systemNavigationBarIconBrightness: Brightness.light,
-          systemNavigationBarContrastEnforced: false,
-          statusBarColor: Colors.transparent,
-          statusBarBrightness: Brightness.dark,
-          statusBarIconBrightness: Brightness.light,
-          systemStatusBarContrastEnforced: true,
-        ),
-      );
-
       // Wait for the page transition animation
       await Future.delayed(const Duration(milliseconds: 2000));
       _pickerButton.setChild(Text(_pickerButtonLabel));
@@ -148,17 +119,48 @@ class _SlyHomePageState extends State<SlyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final preferencesButton = Padding(
+      padding: const EdgeInsets.all(12),
+      child: Semantics(
+        label: 'Preferences',
+        child: IconButton(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          icon: ImageIcon(
+            color: Theme.of(context).hintColor,
+            const AssetImage('assets/icons/preferences.png'),
+          ),
+          padding: const EdgeInsets.all(12),
+          onPressed: () {
+            showSlyPreferencesDialog(context);
+          },
+        ),
+      ),
+    );
+
     return Scaffold(
       body: SlyDragWindowBox(
         child: Column(
           children: <Widget>[
-            titleBar,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: !kIsWeb && (Platform.isLinux || Platform.isWindows)
+                  ? [
+                      preferencesButton,
+                      const SlyTitleBar(),
+                    ]
+                  : [
+                      const SlyTitleBar(),
+                      preferencesButton,
+                    ],
+            ),
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 48,
-                    vertical: 24,
+                  padding: const EdgeInsets.only(
+                    left: 48,
+                    right: 48,
+                    bottom: 72,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -193,14 +195,13 @@ class _SlyHomePageState extends State<SlyHomePage> {
                         constraints: const BoxConstraints(maxWidth: 200),
                         child: Column(
                           children: [
-                            _pickerButton,
+                            LightTheme(child: _pickerButton),
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: SlyButton(
                                 onPressed: () {
                                   showSlyAboutDialog(context);
                                 },
-                                style: slySubtleButtonStlye,
                                 child: const Text('About Sly'),
                               ),
                             ),

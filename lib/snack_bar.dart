@@ -26,7 +26,7 @@ void showSlySnackBar(
                 ui.Radius.circular(8),
               ),
               child: Container(
-                color: Colors.grey.shade700,
+                color: Theme.of(context).colorScheme.secondary,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -44,7 +44,7 @@ void showSlySnackBar(
                       loading ? const SizedBox(width: 16) : Container(),
                       Text(
                         message,
-                        style: const TextStyle(color: Colors.white),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),

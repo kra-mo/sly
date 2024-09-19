@@ -22,48 +22,56 @@ class SlyTitleBarBox extends SizedBox {
         );
 }
 
-final titleBar = !kIsWeb && Platform.isLinux
-    ? Padding(
-        padding: const EdgeInsets.only(
-          top: 6,
-          bottom: 16,
-          left: 8,
-          right: 8,
-        ),
-        child: SlyTitleBarBox(
-          child: SlyDragWindowBox(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Semantics(
-                  label: 'Close Window',
-                  child: IconButton(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    style: const ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.white10),
-                    ),
-                    iconSize: 16,
-                    padding: const EdgeInsets.all(0),
-                    constraints: const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 24,
-                      maxWidth: 24,
-                      maxHeight: 24,
-                    ),
-                    icon: const ImageIcon(
-                      AssetImage('assets/icons/window-close.png'),
-                    ),
-                    onPressed: () {
-                      exit(0);
-                    },
-                  ),
-                ),
-              ],
+class SlyTitleBar extends StatelessWidget {
+  const SlyTitleBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return !kIsWeb && Platform.isLinux
+        ? Padding(
+            padding: const EdgeInsets.only(
+              top: 6,
+              bottom: 16,
+              left: 8,
+              right: 8,
             ),
-          ),
-        ),
-      )
-    : SlyTitleBarBox(
-        child: Container(),
-      );
+            child: SlyTitleBarBox(
+              child: SlyDragWindowBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Semantics(
+                      label: 'Close Window',
+                      child: IconButton(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(
+                              Theme.of(context).hoverColor),
+                        ),
+                        iconSize: 16,
+                        padding: const EdgeInsets.all(0),
+                        constraints: const BoxConstraints(
+                          minWidth: 24,
+                          minHeight: 24,
+                          maxWidth: 24,
+                          maxHeight: 24,
+                        ),
+                        icon: const ImageIcon(
+                          AssetImage('assets/icons/window-close.png'),
+                        ),
+                        onPressed: () {
+                          exit(0);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        : SlyTitleBarBox(
+            child: Container(),
+          );
+  }
+}

@@ -107,14 +107,15 @@ class _SlySliderRowState extends State<SlySliderRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.label ?? '',
-                  style: TextStyle(color: Colors.grey.shade200),
-                ),
+                Text(widget.label ?? ''),
                 Text(
                   valueLabel ?? '',
-                  style: TextStyle(
-                    color: Colors.grey.shade400,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.color
+                        ?.withOpacity(0.7),
                     fontFeatures: const <FontFeature>[
                       FontFeature.tabularFigures(),
                     ],

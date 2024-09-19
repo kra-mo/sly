@@ -6,11 +6,13 @@ class SlyToggleButtons extends StatefulWidget {
     required this.defaultItem,
     required this.children,
     required this.onSelected,
+    this.compact = false,
   });
 
   final int defaultItem;
   final List<Widget> children;
   final void Function(int) onSelected;
+  final bool compact;
 
   @override
   State<SlyToggleButtons> createState() => _SlyToggleButtonsState();
@@ -35,16 +37,16 @@ class _SlyToggleButtonsState extends State<SlyToggleButtons> {
   Widget build(BuildContext context) {
     return Center(
       child: ToggleButtons(
-        disabledColor: Colors.grey.shade600,
-        color: Colors.white70,
-        selectedColor: Colors.white,
-        fillColor: Colors.white12,
-        selectedBorderColor: Colors.white12,
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.all(
+          Radius.circular(widget.compact ? 14 : 12),
+        ),
         borderWidth: 3,
-        constraints: const BoxConstraints(minHeight: 34, minWidth: 120),
+        constraints: BoxConstraints(
+          minHeight: widget.compact ? 28 : 34,
+          minWidth: widget.compact ? 80 : 120,
+        ),
         isSelected: selections,
         children: widget.children,
         onPressed: (int index) {

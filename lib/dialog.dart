@@ -34,10 +34,7 @@ Future<void> showSlyDialog(
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           children: children,
@@ -103,7 +100,6 @@ Future<void> showSlyDialog(
                   title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),

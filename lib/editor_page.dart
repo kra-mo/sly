@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils.dart';
 import 'image.dart';
+import 'theme.dart';
 import 'button.dart';
 import 'slider_row.dart';
 import 'switch.dart';
@@ -76,6 +77,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
     key: _saveButtonKey,
+    style: slyElevatedButtonStlye,
     child: Text(_saveButtonLabel),
     onPressed: () async {
       _saveButton.setChild(
@@ -102,7 +104,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'JPEG75';
                 Navigator.pop(context);
               },
-              style: slySubtleButtonStlye,
               child: const Text('JPEG - Quality 75'),
             ),
           ),
@@ -113,7 +114,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'JPEG90';
                 Navigator.pop(context);
               },
-              style: slySubtleButtonStlye,
               child: const Text('JPEG - Quality 90'),
             ),
           ),
@@ -124,7 +124,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'JPEG100';
                 Navigator.pop(context);
               },
-              style: slySubtleButtonStlye,
               child: const Text('JPEG - Quality 100'),
             ),
           ),
@@ -135,15 +134,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'PNG';
                 Navigator.pop(context);
               },
-              style: slySubtleButtonStlye,
               child: const Text('PNG (Lossless)'),
             ),
           ),
-          SlyButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
+          LightTheme(
+            child: SlyButton(
+              style: slyElevatedButtonStlye,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
           ),
         ],
       );
@@ -528,7 +529,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ? CropImage(
                       key: const Key('cropImageView'),
                       gridThickWidth: constraints.maxWidth > 600 ? 6 : 8,
-                      gridCornerColor: Colors.white,
+                      gridCornerColor: Theme.of(context).colorScheme.primary,
+                      gridColor: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.6),
                       controller: _cropController,
                       image: Image.memory(
                         _originalImageData!,
@@ -635,7 +640,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                 onPressed: () {
                                   _onAspectRatioSelected(null);
                                 },
-                                style: slySubtleButtonStlye,
                                 child: const Text('Free'),
                               ),
                             ),
@@ -645,7 +649,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                 onPressed: () {
                                   _onAspectRatioSelected(1);
                                 },
-                                style: slySubtleButtonStlye,
                                 child: const Text('Square'),
                               ),
                             ),
@@ -657,7 +660,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                     _portraitCrop ? 3 / 4 : 4 / 3,
                                   );
                                 },
-                                style: slySubtleButtonStlye,
                                 child: const Text('4:3'),
                               ),
                             ),
@@ -669,7 +671,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                     _portraitCrop ? 2 / 3 : 3 / 2,
                                   );
                                 },
-                                style: slySubtleButtonStlye,
                                 child: const Text('3:2'),
                               ),
                             ),
@@ -681,17 +682,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                     _portraitCrop ? 9 / 16 : 16 / 9,
                                   );
                                 },
-                                style: slySubtleButtonStlye,
                                 child: const Text('16:9'),
                               ),
                             ),
-                            SlyButton(
-                              onPressed: () {
-                                if (_cropController == null) return;
-                                _onAspectRatioSelected(
-                                    _cropController!.aspectRatio);
-                              },
-                              child: const Text('Cancel'),
+                            LightTheme(
+                              child: SlyButton(
+                                style: slyElevatedButtonStlye,
+                                onPressed: () {
+                                  if (_cropController == null) return;
+                                  _onAspectRatioSelected(
+                                      _cropController!.aspectRatio);
+                                },
+                                child: const Text('Cancel'),
+                              ),
                             ),
                           ]);
                         },
@@ -817,7 +820,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       left: 32,
                       right: 32,
                     ),
-                    child: _saveButton,
+                    child: LightTheme(
+                      child: _saveButton,
+                    ),
                   ),
                 ],
               );
@@ -872,12 +877,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                 ),
                 onDestinationSelected: navigationDestinationSelected,
-                selectedIconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
-                unselectedIconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
                 destinations: const <NavigationRailDestination>[
                   NavigationRailDestination(
                     icon: Tooltip(
@@ -932,13 +931,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
 
               final navigationBar = NavigationBar(
-                backgroundColor: Colors.white10,
+                backgroundColor: Theme.of(context).hoverColor,
                 indicatorColor: Colors.transparent,
-                overlayColor: WidgetStateProperty.resolveWith((states) {
-                  return states.contains(WidgetState.focused)
-                      ? Colors.white12
-                      : Colors.transparent;
-                }),
                 indicatorShape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
                     Radius.circular(8),
@@ -950,46 +944,29 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     NavigationDestinationLabelBehavior.onlyShowSelected,
                 destinations: <Widget>[
                   const NavigationDestination(
-                    icon: ImageIcon(
-                      AssetImage('assets/icons/light.png'),
-                      color: Colors.white,
-                    ),
+                    icon: ImageIcon(AssetImage('assets/icons/light.png')),
                     label: 'Light',
                   ),
                   const NavigationDestination(
-                    icon: ImageIcon(
-                      AssetImage('assets/icons/color.png'),
-                      color: Colors.white,
-                    ),
+                    icon: ImageIcon(AssetImage('assets/icons/color.png')),
                     label: 'Color',
                   ),
                   const NavigationDestination(
-                    icon: ImageIcon(
-                      AssetImage('assets/icons/effects.png'),
-                      color: Colors.white,
-                    ),
+                    icon: ImageIcon(AssetImage('assets/icons/effects.png')),
                     label: 'Effects',
                   ),
                   const NavigationDestination(
-                    icon: ImageIcon(
-                      AssetImage('assets/icons/crop.png'),
-                      color: Colors.white,
-                    ),
+                    icon: ImageIcon(AssetImage('assets/icons/crop.png')),
                     label: 'Crop',
                   ),
                   const NavigationDestination(
-                    icon: ImageIcon(
-                      AssetImage('assets/icons/export.png'),
-                      color: Colors.white,
-                    ),
+                    icon: ImageIcon(AssetImage('assets/icons/export.png')),
                     label: 'Export',
                   ),
                   Semantics(
                     label: 'New Image',
                     child: FloatingActionButton.small(
                       shape: const CircleBorder(),
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.grey.shade800,
                       splashColor: Colors.transparent,
                       elevation: 0,
                       hoverElevation: 0,
@@ -1065,9 +1042,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                             child: IconButton(
                               splashColor: Colors.transparent,
                               highlightColor: Colors.transparent,
-                              icon: const ImageIcon(
-                                color: Colors.white54,
-                                AssetImage('assets/icons/histogram.png'),
+                              icon: ImageIcon(
+                                color: Theme.of(context).hintColor,
+                                const AssetImage('assets/icons/histogram.png'),
                               ),
                               onPressed: () async {
                                 await (await prefs)
@@ -1085,9 +1062,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       child: IconButton(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
-                        icon: const ImageIcon(
-                          color: Colors.white54,
-                          AssetImage('assets/icons/show.png'),
+                        icon: ImageIcon(
+                          color: Theme.of(context).hintColor,
+                          const AssetImage('assets/icons/show.png'),
                         ),
                         onPressed: () async {
                           if (_editedImageData == _originalImageData) {
@@ -1127,7 +1104,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         icon: ImageIcon(
-                          color: _canUndo ? Colors.white60 : Colors.white24,
+                          color: _canUndo
+                              ? Theme.of(context).hintColor
+                              : Theme.of(context).disabledColor,
                           const AssetImage('assets/icons/undo.png'),
                         ),
                         onPressed: () {
@@ -1141,7 +1120,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         icon: ImageIcon(
-                          color: _canRedo ? Colors.white60 : Colors.white24,
+                          color: _canRedo
+                              ? Theme.of(context).hintColor
+                              : Theme.of(context).disabledColor,
                           const AssetImage('assets/icons/redo.png'),
                         ),
                         onPressed: () {
@@ -1193,11 +1174,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           ),
                         ),
                         backgroundColor: constraints.maxHeight > 380
-                            ? Colors.grey.shade700
+                            ? Theme.of(context).focusColor
                             : Colors.black87,
-                        foregroundColor: Colors.white,
-                        focusColor: Colors.white24,
-                        hoverColor: Colors.white10,
+                        foregroundColor: constraints.maxHeight > 380
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.white,
+                        focusColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.1),
+                        hoverColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.1),
                         splashColor: Colors.transparent,
                         elevation: 0,
                         hoverElevation: 0,
@@ -1213,7 +1202,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     ),
                   ),
                   body: Container(
-                    color: Colors.black,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.white
+                        : Colors.black,
                     child: Row(
                       children: <Widget>[
                         Expanded(
@@ -1243,7 +1234,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                     bottomLeft: Radius.circular(12),
                                   ),
                                   child: Container(
-                                    color: Colors.grey.shade900,
+                                    color: Theme.of(context).cardColor,
                                     child: AnimatedSize(
                                       duration: const Duration(
                                         milliseconds: 300,
@@ -1276,7 +1267,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           ),
                         ),
                         Container(
-                          color: Colors.grey.shade900,
+                          color: Theme.of(context).cardColor,
                           child: ClipRRect(
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(12),
@@ -1284,11 +1275,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                             ),
                             child: SlyDragWindowBox(
                               child: Container(
-                                color: Colors.white10,
+                                color: Theme.of(context).hoverColor,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: <Widget>[
-                                    titleBar,
+                                    const SlyTitleBar(),
                                     Expanded(
                                       child: navigationRail,
                                     ),
@@ -1306,7 +1297,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 return Scaffold(
                   body: Column(
                     children: <Widget>[
-                      titleBar,
+                      const SlyTitleBar(),
                       Expanded(
                         child: _selectedPageIndex == 3
                             ? Column(
