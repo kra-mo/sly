@@ -7,6 +7,8 @@ Future<void> showSlyDialog(
 ) async {
   if (MediaQuery.of(context).size.width > 600) {
     await showGeneralDialog(
+      barrierDismissible: true,
+      barrierLabel: title,
       context: context,
       pageBuilder: (context, animation, secondaryAnimation) {
         return SimpleDialog(
@@ -73,6 +75,7 @@ Future<void> showSlyDialog(
     );
   } else {
     await showModalBottomSheet(
+      barrierLabel: title,
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
