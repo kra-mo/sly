@@ -12,12 +12,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'utils.dart';
 import 'image.dart';
 import 'theme.dart';
+import 'histogram.dart';
 import 'button.dart';
 import 'slider_row.dart';
 import 'switch.dart';
 import 'toggle_buttons.dart';
 import 'spinner.dart';
-import 'histogram.dart';
+import 'tooltip.dart';
 import 'dialog.dart';
 import 'snack_bar.dart';
 import 'title_bar.dart';
@@ -608,9 +609,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
               final cropControls = LayoutBuilder(
                 builder: (context, constraints) {
-                  final buttons = <Semantics>[
-                    Semantics(
-                      label: 'Aspect Ratio',
+                  final buttons = <SlyTooltip>[
+                    SlyTooltip(
+                      message: 'Aspect Ratio',
                       child: IconButton(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -700,8 +701,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                    Semantics(
-                      label: 'Rotate Left',
+                    SlyTooltip(
+                      message: 'Rotate Left',
                       child: IconButton(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -720,8 +721,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                    Semantics(
-                      label: 'Rotate Right',
+                    SlyTooltip(
+                      message: 'Rotate Right',
                       child: IconButton(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -740,8 +741,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                    Semantics(
-                      label: 'Flip Horizontal',
+                    SlyTooltip(
+                      message: 'Flip Horizontal',
                       child: IconButton(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -754,8 +755,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                    Semantics(
-                      label: 'Flip Vertical',
+                    SlyTooltip(
+                      message: 'Flip Vertical',
                       child: IconButton(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -879,7 +880,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 onDestinationSelected: navigationDestinationSelected,
                 destinations: const <NavigationRailDestination>[
                   NavigationRailDestination(
-                    icon: Tooltip(
+                    icon: SlyTooltip(
                       message: 'Light',
                       child: ImageIcon(AssetImage('assets/icons/light.png')),
                     ),
@@ -889,7 +890,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     padding: EdgeInsets.only(bottom: 4),
                   ),
                   NavigationRailDestination(
-                    icon: Tooltip(
+                    icon: SlyTooltip(
                       message: 'Color',
                       child: ImageIcon(AssetImage('assets/icons/color.png')),
                     ),
@@ -899,7 +900,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     padding: EdgeInsets.only(bottom: 4),
                   ),
                   NavigationRailDestination(
-                    icon: Tooltip(
+                    icon: SlyTooltip(
                       message: 'Effects',
                       child: ImageIcon(AssetImage('assets/icons/effects.png')),
                     ),
@@ -909,7 +910,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     padding: EdgeInsets.only(bottom: 4),
                   ),
                   NavigationRailDestination(
-                    icon: Tooltip(
+                    icon: SlyTooltip(
                       message: 'Crop',
                       child: ImageIcon(AssetImage('assets/icons/crop.png')),
                     ),
@@ -919,7 +920,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     padding: EdgeInsets.only(bottom: 4),
                   ),
                   NavigationRailDestination(
-                    icon: Tooltip(
+                    icon: SlyTooltip(
                       message: 'Export',
                       child: ImageIcon(AssetImage('assets/icons/export.png')),
                     ),
@@ -1035,7 +1036,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       : WrapAlignment.center,
                   children: <Widget?>[
                     [0, 1].contains(_selectedPageIndex)
-                        ? Tooltip(
+                        ? SlyTooltip(
                             message: _showHistogram
                                 ? 'Hide Histogram'
                                 : 'Show Histogram',
@@ -1057,7 +1058,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                             ),
                           )
                         : null,
-                    Tooltip(
+                    SlyTooltip(
                       message: 'Show Original',
                       child: IconButton(
                         splashColor: Colors.transparent,
@@ -1098,7 +1099,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                    Tooltip(
+                    SlyTooltip(
                       message: 'Undo',
                       child: IconButton(
                         splashColor: Colors.transparent,
@@ -1114,7 +1115,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         },
                       ),
                     ),
-                    Tooltip(
+                    SlyTooltip(
                       message: 'Redo',
                       child: IconButton(
                         splashColor: Colors.transparent,
