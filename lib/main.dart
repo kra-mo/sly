@@ -65,7 +65,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
   final String _pickerButtonLabel = 'Pick Image';
   late final SlyButton _pickerButton = SlyButton(
     key: pickerButtonKey,
-    style: slyElevatedButtonStlye,
+    suggested: true,
     child: Text(_pickerButtonLabel),
     onPressed: () async {
       _pickerButton.setChild(
@@ -195,7 +195,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                         constraints: const BoxConstraints(maxWidth: 200),
                         child: Column(
                           children: [
-                            LightTheme(child: _pickerButton),
+                            _pickerButton,
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: SlyButton(

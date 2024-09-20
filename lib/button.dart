@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'theme.dart';
+
 class SlyButton extends StatefulWidget {
   const SlyButton({
     super.key,
@@ -7,26 +9,16 @@ class SlyButton extends StatefulWidget {
     this.onLongPress,
     this.onHover,
     this.onFocusChange,
-    this.style,
-    this.focusNode,
-    this.autofocus = false,
-    this.clipBehavior,
-    this.statesController,
+    this.suggested = false,
     required this.child,
-    this.iconAlignment = IconAlignment.start,
   });
 
   final void Function()? onPressed;
   final void Function()? onLongPress;
   final void Function(bool)? onHover;
   final void Function(bool)? onFocusChange;
-  final ButtonStyle? style;
-  final FocusNode? focusNode;
-  final bool autofocus;
-  final Clip? clipBehavior;
-  final WidgetStatesController? statesController;
+  final bool suggested;
   final Widget? child;
-  final IconAlignment iconAlignment;
 
   @override
   State<SlyButton> createState() => SlyButtonState();
@@ -44,7 +36,8 @@ class SlyButtonState extends State<SlyButton> {
   late Widget elevatedButtonChild = SizedBox(
     height: 40,
     child: Center(
-      child: widget.child!,
+      child:
+          widget.suggested ? LightTheme(child: widget.child!) : widget.child!,
     ),
   );
 
@@ -55,31 +48,36 @@ class SlyButtonState extends State<SlyButton> {
       onLongPress: widget.onLongPress,
       onHover: widget.onHover,
       onFocusChange: widget.onFocusChange,
-      style: widget.style ??
-          ButtonStyle(
-            textStyle: const WidgetStatePropertyAll(
-              TextStyle(fontWeight: FontWeight.w600),
+      style: ButtonStyle(
+        textStyle: const WidgetStatePropertyAll(
+          TextStyle(fontWeight: FontWeight.w600),
+        ),
+        shape: const WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
             ),
-            shape: const WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(12),
-                ),
-              ),
-            ),
-            splashFactory: NoSplash.splashFactory,
-            surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-            backgroundColor: WidgetStatePropertyAll(
-              Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white10
-                  : Colors.black.withOpacity(0.08),
-            ),
-            shadowColor: const WidgetStatePropertyAll(Colors.transparent),
           ),
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      clipBehavior: widget.clipBehavior,
-      iconAlignment: widget.iconAlignment,
+        ),
+        splashFactory: NoSplash.splashFactory,
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        overlayColor: const WidgetStatePropertyAll(Colors.black12),
+        shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+        backgroundColor: WidgetStatePropertyAll(
+          Theme.of(context).brightness == Brightness.dark
+              ? widget.suggested
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).hoverColor
+              : widget.suggested
+                  ? Theme.of(context).focusColor
+                  : Theme.of(context).hoverColor,
+        ),
+        foregroundColor: WidgetStatePropertyAll(
+          Theme.of(context).brightness == Brightness.dark && !widget.suggested
+              ? Colors.white
+              : Colors.grey.shade900,
+        ),
+      ),
       child: elevatedButtonChild,
     );
     return elevatedButton!;
@@ -90,7 +88,10 @@ class SlyButtonState extends State<SlyButton> {
       elevatedButtonChild = SizedBox(
         height: 40,
         child: Center(
-          child: getCrossfade(elevatedButtonChild, newChild),
+          child: getCrossfade(
+            elevatedButtonChild,
+            widget.suggested ? LightTheme(child: newChild) : newChild,
+          ),
         ),
       );
     });
@@ -108,23 +109,3 @@ Widget getCrossfade(Widget widget1, Widget widget2) {
     sizeCurve: Curves.easeInOutQuint,
   );
 }
-
-const ButtonStyle slyElevatedButtonStlye = ButtonStyle(
-  textStyle: WidgetStatePropertyAll(
-    TextStyle(fontWeight: FontWeight.w600),
-  ),
-  shape: WidgetStatePropertyAll(
-    RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(12),
-      ),
-    ),
-  ),
-  splashFactory: NoSplash.splashFactory,
-  surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
-  shadowColor: WidgetStatePropertyAll(Colors.transparent),
-  backgroundColor: WidgetStatePropertyAll(Colors.white),
-  foregroundColor: WidgetStatePropertyAll(Colors.black87),
-  iconColor: WidgetStatePropertyAll(Colors.black87),
-  overlayColor: WidgetStatePropertyAll(Colors.black12),
-);

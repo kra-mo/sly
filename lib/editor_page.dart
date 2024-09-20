@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils.dart';
 import 'image.dart';
-import 'theme.dart';
 import 'histogram.dart';
 import 'button.dart';
 import 'slider_row.dart';
@@ -78,7 +77,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
     key: _saveButtonKey,
-    style: slyElevatedButtonStlye,
+    suggested: true,
     child: Text(_saveButtonLabel),
     onPressed: () async {
       _saveButton.setChild(
@@ -138,14 +137,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               child: const Text('PNG (Lossless)'),
             ),
           ),
-          LightTheme(
-            child: SlyButton(
-              style: slyElevatedButtonStlye,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
+          SlyButton(
+            suggested: true,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
           ),
         ],
       );
@@ -686,16 +683,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                 child: const Text('16:9'),
                               ),
                             ),
-                            LightTheme(
-                              child: SlyButton(
-                                style: slyElevatedButtonStlye,
-                                onPressed: () {
-                                  if (_cropController == null) return;
-                                  _onAspectRatioSelected(
-                                      _cropController!.aspectRatio);
-                                },
-                                child: const Text('Cancel'),
-                              ),
+                            SlyButton(
+                              suggested: true,
+                              onPressed: () {
+                                if (_cropController == null) return;
+                                _onAspectRatioSelected(
+                                    _cropController!.aspectRatio);
+                              },
+                              child: const Text('Cancel'),
                             ),
                           ]);
                         },
@@ -821,9 +816,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                       left: 32,
                       right: 32,
                     ),
-                    child: LightTheme(
-                      child: _saveButton,
-                    ),
+                    child: _saveButton,
                   ),
                 ],
               );
