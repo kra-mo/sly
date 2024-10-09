@@ -1225,6 +1225,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                               Expanded(
                                 child: ClipRRect(
                                   borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(12),
                                     bottomLeft: Radius.circular(12),
                                   ),
                                   child: Container(
