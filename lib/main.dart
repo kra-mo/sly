@@ -120,7 +120,12 @@ class _SlyHomePageState extends State<SlyHomePage> {
   @override
   Widget build(BuildContext context) {
     final preferencesButton = Padding(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.only(
+        top: !kIsWeb && Platform.isAndroid ? 48 : 12,
+        bottom: 12,
+        left: 12,
+        right: 12,
+      ),
       child: Semantics(
         label: 'Preferences',
         child: IconButton(
