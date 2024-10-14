@@ -121,7 +121,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
   Widget build(BuildContext context) {
     final preferencesButton = Padding(
       padding: EdgeInsets.only(
-        top: !kIsWeb && Platform.isAndroid ? 48 : 12,
+        top: MediaQuery.of(context).viewPadding.top + 12,
         bottom: 12,
         left: 12,
         right: 12,

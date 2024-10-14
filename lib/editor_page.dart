@@ -524,23 +524,28 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     );
 
               final cropImageView = _originalImageData != null
-                  ? CropImage(
-                      key: const Key('cropImageView'),
-                      gridThickWidth: constraints.maxWidth > 600 ? 6 : 8,
-                      gridCornerColor: Theme.of(context).colorScheme.primary,
-                      gridColor: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.6),
-                      controller: _cropController,
-                      image: Image.memory(
-                        _originalImageData!,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
+                  ? Padding(
+                      padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).viewPadding.top,
                       ),
-                      onCrop: (rect) {
-                        _cropChanged = true;
-                      },
+                      child: CropImage(
+                        key: const Key('cropImageView'),
+                        gridThickWidth: constraints.maxWidth > 600 ? 6 : 8,
+                        gridCornerColor: Theme.of(context).colorScheme.primary,
+                        gridColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.6),
+                        controller: _cropController,
+                        image: Image.memory(
+                          _originalImageData!,
+                          fit: BoxFit.contain,
+                          gaplessPlayback: true,
+                        ),
+                        onCrop: (rect) {
+                          _cropChanged = true;
+                        },
+                      ),
                     )
                   : const Center(
                       child: SizedBox(
