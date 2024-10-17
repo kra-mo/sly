@@ -8,6 +8,19 @@ import 'package:image/image.dart' as img;
 import 'package:gal/gal.dart';
 import 'package:file_selector/file_selector.dart';
 
+final isAndroid = !kIsWeb && Platform.isAndroid;
+final isIOS = !kIsWeb && Platform.isIOS;
+final isLinux = !kIsWeb && Platform.isLinux;
+final isMacOS = !kIsWeb && Platform.isMacOS;
+final isWindows = !kIsWeb && Platform.isWindows;
+
+final isDesktop = isLinux || isMacOS || isWindows;
+final isMobile = isIOS || isAndroid;
+final isApplePlatform = isIOS || isMacOS;
+
+final platformHasInsetTopBar = isLinux || isMacOS;
+final platformHasRightAlignedWindowControls = isLinux || isWindows;
+
 Future<img.Image?> loadImgImage(Uint8List bytes) async {
   final ui.Image? uiImage;
   uiImage = await _decodeUiImage(bytes);
@@ -30,7 +43,7 @@ Future<img.Image?> loadImgImage(Uint8List bytes) async {
 /// Returns false if the operation was cancelled.
 Future<bool> saveImage(Uint8List imageData,
     {String fileName = 'Edited Image', String fileExtension = 'png'}) async {
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+  if (isMobile) {
     await Gal.putImageBytes(imageData, name: fileName);
     return true;
   }

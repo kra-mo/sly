@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:window_manager/window_manager.dart';
 
+import 'utils.dart';
+
 class SlyDragWindowBox extends DragToMoveArea {
   const SlyDragWindowBox({super.key, required super.child});
 }
@@ -12,13 +14,11 @@ class SlyDragWindowBox extends DragToMoveArea {
 class SlyTitleBarBox extends SizedBox {
   SlyTitleBarBox({super.key, required super.child})
       : super(
-          height: !kIsWeb
-              ? Platform.isMacOS
-                  ? 28
-                  : Platform.isLinux
-                      ? 32
-                      : 0
-              : 0,
+          height: isMacOS
+              ? 28
+              : isLinux
+                  ? 32
+                  : 0,
         );
 }
 
@@ -27,7 +27,7 @@ class SlyTitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return !kIsWeb && Platform.isLinux
+    return isLinux
         ? Padding(
             padding: const EdgeInsets.only(
               top: 6,

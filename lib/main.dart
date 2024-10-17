@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'utils.dart';
 import 'theme.dart';
 import 'preferences.dart';
 import 'image.dart';
@@ -22,10 +23,10 @@ void main() async {
 
   await initPreferences();
 
-  if (!kIsWeb && (Platform.isLinux || Platform.isMacOS || Platform.isWindows)) {
+  if (isDesktop) {
     await windowManager.ensureInitialized();
   }
-  if (!kIsWeb && Platform.isWindows) {
+  if (isWindows) {
     windowManager.setMinimumSize(const Size(360, 294));
   }
 }
@@ -163,7 +164,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: !kIsWeb && (Platform.isLinux || Platform.isWindows)
+              children: platformHasRightAlignedWindowControls
                   ? [
                       preferencesButton,
                       const SlyTitleBar(),

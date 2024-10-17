@@ -73,8 +73,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
 
-  final String _saveButtonLabel =
-      !kIsWeb && Platform.isIOS ? 'Save to Photos' : 'Save';
+  final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
   late final SlyButton _saveButton = SlyButton(
     key: _saveButtonKey,
     suggested: true,
@@ -389,7 +388,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           padding: EdgeInsets.only(
             top: index == 0 &&
                     constraints.maxWidth > 600 &&
-                    !(!kIsWeb && (Platform.isMacOS || Platform.isLinux))
+                    !platformHasInsetTopBar
                 ? 16
                 : 0,
             bottom: index == attributes.length - 1 ? 28 : 0,
@@ -422,8 +421,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isApplePlatform = (!kIsWeb && (Platform.isMacOS || Platform.isIOS));
-
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         SingleActivator(
@@ -566,19 +563,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 curve: Curves.easeOutQuint,
                 padding: _selectedPageIndex == 3
                     ? EdgeInsets.only(
-                        top: !kIsWeb && (Platform.isLinux || Platform.isMacOS)
-                            ? 4
-                            : 12,
+                        top: platformHasInsetTopBar ? 4 : 12,
                         bottom: 12,
                         left: 32,
                         right: 32,
                       )
                     : constraints.maxWidth > 600
                         ? EdgeInsets.only(
-                            top: !kIsWeb &&
-                                    (Platform.isLinux || Platform.isMacOS)
-                                ? 0
-                                : 8,
+                            top: platformHasInsetTopBar ? 0 : 8,
                             bottom: 8,
                           )
                         : const EdgeInsets.only(
@@ -1161,8 +1153,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         padding: EdgeInsets.only(
                           bottom: constraints.maxWidth > 600 ? 12 : 0,
                           top: (constraints.maxWidth > 600 &&
-                                  !kIsWeb &&
-                                  (Platform.isLinux || Platform.isMacOS))
+                                  platformHasInsetTopBar)
                               ? 0
                               : 8,
                         ),
