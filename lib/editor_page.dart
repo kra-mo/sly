@@ -509,10 +509,15 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                           ? Clip.none
                           : Clip.hardEdge,
                       key: const Key('imageView'),
-                      child: Image.memory(
-                        _editedImageData!,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                        child: Image.memory(
+                          _editedImageData!,
+                          fit: BoxFit.contain,
+                          gaplessPlayback: true,
+                        ),
                       ),
                     )
                   : const Center(
@@ -565,8 +570,18 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         vertical: 12,
                       )
                     : constraints.maxWidth > 600
-                        ? const EdgeInsets.all(0)
-                        : const EdgeInsets.only(top: 12, left: 12, right: 12),
+                        ? EdgeInsets.only(
+                            top: !kIsWeb &&
+                                    (Platform.isLinux || Platform.isMacOS)
+                                ? 0
+                                : 8,
+                            bottom: 8,
+                          )
+                        : const EdgeInsets.only(
+                            top: 12,
+                            left: 12,
+                            right: 12,
+                          ),
                 child: Transform.flip(
                   flipX: _hflip,
                   flipY: _vflip,
@@ -583,7 +598,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                 ? cropImageView
                                 : ClipRRect(
                                     borderRadius: const BorderRadius.all(
-                                        Radius.circular(8)),
+                                      Radius.circular(12),
+                                    ),
                                     child: imageView,
                                   ),
                           ),

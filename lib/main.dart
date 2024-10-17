@@ -22,7 +22,7 @@ void main() async {
 
   await initPreferences();
 
-  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+  if (!kIsWeb && (Platform.isLinux || Platform.isMacOS || Platform.isWindows)) {
     await windowManager.ensureInitialized();
   }
   if (!kIsWeb && Platform.isWindows) {
