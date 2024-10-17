@@ -565,9 +565,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.easeOutQuint,
                 padding: _selectedPageIndex == 3
-                    ? const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 12,
+                    ? EdgeInsets.only(
+                        top: !kIsWeb && (Platform.isLinux || Platform.isMacOS)
+                            ? 4
+                            : 12,
+                        bottom: 12,
+                        left: 32,
+                        right: 32,
                       )
                     : constraints.maxWidth > 600
                         ? EdgeInsets.only(
