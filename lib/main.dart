@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
@@ -17,13 +18,13 @@ import 'title_bar.dart';
 import 'about.dart';
 
 void main() async {
-  // TODO: (re)implement immersive system chrome
-
   runApp(const SlyApp());
 
   await initPreferences();
 
-  await windowManager.ensureInitialized();
+  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    await windowManager.ensureInitialized();
+  }
   if (!kIsWeb && Platform.isWindows) {
     windowManager.setMinimumSize(const Size(360, 294));
   }
@@ -37,6 +38,19 @@ class SlyApp extends StatelessWidget {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
       builder: (context, style, child) {
+        switch (style) {
+          case ThemeMode.dark:
+            SystemChrome.setSystemUIOverlayStyle(darkSystemUiOverlayStyle);
+          case ThemeMode.light:
+            SystemChrome.setSystemUIOverlayStyle(lightSystemUiOverlayStyle);
+          case ThemeMode.system:
+            SystemChrome.setSystemUIOverlayStyle(
+              MediaQuery.of(context).platformBrightness == Brightness.light
+                  ? lightSystemUiOverlayStyle
+                  : darkSystemUiOverlayStyle,
+            );
+        }
+
         return MaterialApp(
           title: 'Sly',
           home: const SlyHomePage(title: 'Home'),

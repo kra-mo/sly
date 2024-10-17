@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -22,6 +23,20 @@ final lightThemeData = ThemeData(
   ),
 );
 
+final lightSystemUiOverlayStyle = SystemUiOverlayStyle(
+  systemNavigationBarColor: Color.alphaBlend(
+    lightThemeData.hoverColor,
+    lightThemeData.colorScheme.surface,
+  ),
+  systemNavigationBarDividerColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.dark,
+  systemNavigationBarContrastEnforced: false,
+  statusBarColor: lightThemeData.colorScheme.surface,
+  statusBarBrightness: Brightness.light,
+  statusBarIconBrightness: Brightness.dark,
+  systemStatusBarContrastEnforced: false,
+);
+
 final darkThemeData = ThemeData(
   useMaterial3: true,
   fontFamily: 'Geist',
@@ -42,6 +57,20 @@ final darkThemeData = ThemeData(
     surface: Colors.grey.shade900,
     onSurface: Colors.white,
   ),
+);
+
+final darkSystemUiOverlayStyle = SystemUiOverlayStyle(
+  systemNavigationBarColor: Color.alphaBlend(
+    darkThemeData.hoverColor,
+    darkThemeData.colorScheme.surface,
+  ),
+  systemNavigationBarDividerColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarContrastEnforced: false,
+  statusBarColor: darkThemeData.colorScheme.surface,
+  statusBarBrightness: Brightness.dark,
+  statusBarIconBrightness: Brightness.light,
+  systemStatusBarContrastEnforced: false,
 );
 
 class LightTheme extends StatelessWidget {
