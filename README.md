@@ -3,7 +3,7 @@
 
   # Sly
 
-  A friendly image editor
+  A Friendly Image Editor
 
   <img src="packaging/screenshot.png">
 
