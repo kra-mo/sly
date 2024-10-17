@@ -32,5 +32,16 @@
 	<string>The app needs access to your photos to be able to edit them.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>The app needs to be able to save edited photos.</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.image</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>
