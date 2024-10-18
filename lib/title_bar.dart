@@ -13,11 +13,7 @@ class SlyDragWindowBox extends DragToMoveArea {
 class SlyTitleBarBox extends SizedBox {
   SlyTitleBarBox({super.key, required super.child})
       : super(
-          height: isMacOS
-              ? 28
-              : isLinux
-                  ? 32
-                  : 0,
+          height: platformInsetTopBarHeight,
         );
 }
 
