@@ -20,6 +20,7 @@ final isApplePlatform = isIOS || isMacOS;
 
 final platformHasInsetTopBar = isLinux || isMacOS;
 final platformHasRightAlignedWindowControls = isLinux || isWindows;
+final platformHasBackGesture = isAndroid;
 
 Future<img.Image?> loadImgImage(Uint8List bytes) async {
   final ui.Image? uiImage;

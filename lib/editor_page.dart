@@ -390,6 +390,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 ? 16
                 : 0,
             bottom: index == attributes.length - 1 ? 28 : 0,
+            left: platformHasBackGesture ? 8 : 0,
+            right: platformHasBackGesture ? 8 : 0,
           ),
           child: SlySliderRow(
             label: attributes.values.elementAt(index).name,
