@@ -19,21 +19,20 @@ When you're done, just export the photo as a JPEG or a PNG with the quality sett
 
 # Installation
 
-## Linux
+| Linux | Android |
+|-------|---------|
+| <a href=https://flathub.org/apps/page.kramo.Sly><img alt='Get it on Flathub' src='https://flathub.org/api/badge?svg&locale=en'/></a> | <a href='https://play.google.com/store/apps/details?id=page.kramo.sly&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img height=120 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a> |
 
-The app is available on Flathub.
-
-<a href=https://flathub.org/apps/page.kramo.Sly><img alt='Get it on Flathub' src='https://flathub.org/api/badge?svg&locale=en'/></a>
+*Google Play and the Google Play logo are trademarks of Google LLC.*
 
 ## Other Platforms
 
-I'm planning to make the app available for all other major platforms (Android, iOS, macOS, Windows) in the near future.
+I'm planning to make the app available for all other major platforms (iOS, macOS, Windows) in the near future.
 
 For now, if you want to try out the app, you can do so at [sly.kramo.page](https://sly.kramo.page). Be aware that this version is unstable and the performance will probably be significantly worse than that of the native app.
 
 **Issues for each platform can be found here:**
 
-- Android - https://github.com/kra-mo/sly/issues/12
 - iOS - https://github.com/kra-mo/sly/issues/11
 - macOS - https://github.com/kra-mo/sly/issues/9
 - Windows - https://github.com/kra-mo/sly/issues/10
