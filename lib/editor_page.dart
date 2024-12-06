@@ -52,7 +52,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   StreamSubscription<String>? subscription;
 
   bool _saveMetadata = true;
-  String _saveFormat = 'PNG';
+  SlyImageFormat _saveFormat = SlyImageFormat.png;
   bool _saveOnLoad = false;
 
   int _rotationQuarterTurns = 0;
@@ -88,7 +88,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         ),
       );
 
-      String? format;
+      SlyImageFormat? format;
 
       await showSlyDialog(
         context,
@@ -98,7 +98,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             padding: const EdgeInsets.only(bottom: 12),
             child: SlyButton(
               onPressed: () {
-                format = 'JPEG75';
+                format = SlyImageFormat.jpeg75;
                 Navigator.pop(context);
               },
               child: const Text('For Sharing'),
@@ -108,7 +108,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             padding: const EdgeInsets.only(bottom: 12),
             child: SlyButton(
               onPressed: () {
-                format = 'JPEG90';
+                format = SlyImageFormat.jpeg90;
                 Navigator.pop(context);
               },
               child: const Text('For Storing'),
@@ -118,7 +118,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             padding: const EdgeInsets.only(bottom: 16),
             child: SlyButton(
               onPressed: () {
-                format = 'PNG';
+                format = SlyImageFormat.png;
                 Navigator.pop(context);
               },
               child: const Text('Lossless'),
@@ -174,7 +174,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (!(await saveImage(
         await copyImage.encode(format: _saveFormat, fullRes: true),
         fileName: widget.suggestedFileName,
-        fileExtension: _saveFormat == 'PNG' ? 'png' : 'jpg'))) {
+        fileExtension: _saveFormat == SlyImageFormat.png ? 'png' : 'jpg'))) {
       _saveButton.setChild(Text(_saveButtonLabel));
       copyImage.dispose();
       return;
@@ -204,7 +204,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           _saveOnLoad = false;
         }
 
-        _editedImage.encode(format: 'JPEG75').then((data) {
+        _editedImage.encode(format: SlyImageFormat.jpeg75).then((data) {
           if (!mounted) return;
           setState(() {
             _editedImageData = data;
@@ -235,7 +235,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     subscription = _editedImage.controller.stream.listen(_onImageUpdate);
     updateImage();
 
-    _originalImage.encode(format: 'PNG').then((data) {
+    _originalImage.encode(format: SlyImageFormat.png).then((data) {
       if (!mounted) return;
 
       setState(() {

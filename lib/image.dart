@@ -10,6 +10,8 @@ import '/utils.dart';
 
 enum SlyImageFlipDirection { horizontal, vertical, both }
 
+enum SlyImageFormat { png, jpeg75, jpeg90, jpeg100, tiff }
+
 class SlyImageAttribute {
   final String name;
   double value;
@@ -272,18 +274,18 @@ class SlyImage {
   /// Returns the image encoded as `format`.
   ///
   /// Available formats are:
-  /// - `'PNG'`
-  /// - `'JPEG100'` - Quality 100
-  /// - `'JPEG'`/`'JPEG90'` - Quality 90
-  /// - `'JPEG75'` - 'Quality' 75
-  /// - `'TIFF'`
+  /// - `png`
+  /// - `jpeg100` - Quality 100
+  /// - `jpeg90` - Quality 90
+  /// - `jpeg75` - Quality 75
+  /// - `tiff`
   ///
   /// If `fullRes` is not true, a lower resolution image might be returned
   /// if it looks like the device could not handle loading the entire image.
   ///
   /// You can check this with `this.canLoadFullRes`.
   Future<Uint8List> encode({
-    String? format = 'PNG',
+    SlyImageFormat? format = SlyImageFormat.png,
     bool fullRes = false,
   }) async {
     if (fullRes && !canLoadFullRes) {
@@ -293,17 +295,15 @@ class SlyImage {
     final cmd = img.Command()..image(_image);
 
     switch (format) {
-      case 'PNG':
+      case SlyImageFormat.png:
         cmd.encodePng();
-      case 'JPEG':
-        cmd.encodeJpg(quality: 90);
-      case 'JPEG100':
-        cmd.encodeJpg(quality: 100);
-      case 'JPEG90':
-        cmd.encodeJpg(quality: 90);
-      case 'JPEG75':
+      case SlyImageFormat.jpeg75:
         cmd.encodeJpg(quality: 75);
-      case 'TIFF':
+      case SlyImageFormat.jpeg90:
+        cmd.encodeJpg(quality: 90);
+      case SlyImageFormat.jpeg100:
+        cmd.encodeJpg(quality: 100);
+      case SlyImageFormat.tiff:
         cmd.encodeTiff();
       default:
         cmd.encodePng();
