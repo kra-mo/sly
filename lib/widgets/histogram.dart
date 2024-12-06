@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
 
-import 'image.dart';
+import '/image.dart';
 
 LineChart _buildHistogram(Uint8List imagdeData) {
   final List<List<FlSpot>> spots = [

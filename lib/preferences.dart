@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'dialog.dart';
-import 'button.dart';
-import 'toggle_buttons.dart';
+import '/widgets/dialog.dart';
+import '/widgets/button.dart';
+import '/widgets/toggle_buttons.dart';
 
 SharedPreferences? _prefs;
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);

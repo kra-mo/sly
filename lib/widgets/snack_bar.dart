@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'spinner.dart';
+import '/widgets/spinner.dart';
 
 void showSlySnackBar(
   BuildContext context,

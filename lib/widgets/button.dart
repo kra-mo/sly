@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'theme.dart';
+import '/theme.dart';
 
 class SlyButton extends StatefulWidget {
   const SlyButton({
@@ -78,7 +78,20 @@ class SlyButtonState extends State<SlyButton> {
               : Colors.grey.shade900,
         ),
       ),
-      child: elevatedButtonChild,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        switchInCurve: Curves.easeOutQuint,
+        switchOutCurve: Curves.easeInQuint,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child: widget.suggested
+            ? LightTheme(
+                key: UniqueKey(),
+                child: elevatedButtonChild,
+              )
+            : elevatedButtonChild,
+      ),
     );
     return elevatedButton!;
   }
@@ -86,26 +99,10 @@ class SlyButtonState extends State<SlyButton> {
   void setChild(Widget newChild) {
     setState(() {
       elevatedButtonChild = SizedBox(
+        key: UniqueKey(),
         height: 40,
-        child: Center(
-          child: getCrossfade(
-            elevatedButtonChild,
-            widget.suggested ? LightTheme(child: newChild) : newChild,
-          ),
-        ),
+        child: Center(child: newChild),
       );
     });
   }
-}
-
-Widget getCrossfade(Widget widget1, Widget widget2) {
-  return AnimatedCrossFade(
-    duration: const Duration(milliseconds: 700),
-    firstChild: widget1,
-    secondChild: widget2,
-    crossFadeState: CrossFadeState.showSecond,
-    firstCurve: Curves.easeOutQuint,
-    secondCurve: Curves.easeInQuint,
-    sizeCurve: Curves.easeInOutQuint,
-  );
 }

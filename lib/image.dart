@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:image/image.dart' as img;
 
-import 'utils.dart';
+import '/utils.dart';
 
 enum SlyImageFlipDirection { horizontal, vertical, both }
 

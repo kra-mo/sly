@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'utils.dart';
-import 'theme.dart';
-import 'preferences.dart';
-import 'image.dart';
-import 'button.dart';
-import 'spinner.dart';
-import 'editor_page.dart';
-import 'snack_bar.dart';
-import 'title_bar.dart';
-import 'about.dart';
+import '/utils.dart';
+import '/theme.dart';
+import '/preferences.dart';
+import '/image.dart';
+import '/editor_page.dart';
+import '/widgets/button.dart';
+import '/widgets/spinner.dart';
+import '/widgets/snack_bar.dart';
+import '/widgets/title_bar.dart';
+import '/widgets/about.dart';
 
 void main() async {
   runApp(const SlyApp());

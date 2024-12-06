@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'slider.dart';
+import '/widgets/slider.dart';
 
 class SlySliderRow extends StatefulWidget {
   const SlySliderRow({

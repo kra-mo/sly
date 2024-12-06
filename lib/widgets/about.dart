@@ -3,9 +3,9 @@ import 'package:flutter/gestures.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import 'dialog.dart';
-import 'button.dart';
-import 'title_bar.dart';
+import '/widgets/dialog.dart';
+import '/widgets/button.dart';
+import '/widgets/title_bar.dart';
 
 void showSlyAboutDialog(BuildContext context) {
   showSlyDialog(

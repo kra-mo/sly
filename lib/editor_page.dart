@@ -7,18 +7,18 @@ import 'package:crop_image/crop_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'utils.dart';
-import 'image.dart';
-import 'histogram.dart';
-import 'button.dart';
-import 'slider_row.dart';
-import 'switch.dart';
-import 'toggle_buttons.dart';
-import 'spinner.dart';
-import 'tooltip.dart';
-import 'dialog.dart';
-import 'snack_bar.dart';
-import 'title_bar.dart';
+import '/utils.dart';
+import '/image.dart';
+import '/crop_controls.dart';
+import '/widgets/histogram.dart';
+import '/widgets/button.dart';
+import '/widgets/slider_row.dart';
+import '/widgets/switch.dart';
+import '/widgets/spinner.dart';
+import '/widgets/tooltip.dart';
+import '/widgets/dialog.dart';
+import '/widgets/snack_bar.dart';
+import '/widgets/title_bar.dart';
 
 class SlyEditorPage extends StatefulWidget {
   final SlyImage image;
@@ -92,7 +92,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
       await showSlyDialog(
         context,
-        'Choose a Format',
+        'Choose a Quality',
         <Widget>[
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
@@ -101,7 +101,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'JPEG75';
                 Navigator.pop(context);
               },
-              child: const Text('JPEG - Quality 75'),
+              child: const Text('For Sharing'),
             ),
           ),
           Padding(
@@ -111,17 +111,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'JPEG90';
                 Navigator.pop(context);
               },
-              child: const Text('JPEG - Quality 90'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SlyButton(
-              onPressed: () {
-                format = 'JPEG100';
-                Navigator.pop(context);
-              },
-              child: const Text('JPEG - Quality 100'),
+              child: const Text('For Storing'),
             ),
           ),
           Padding(
@@ -131,7 +121,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 format = 'PNG';
                 Navigator.pop(context);
               },
-              child: const Text('PNG (Lossless)'),
+              child: const Text('Lossless'),
             ),
           ),
           SlyButton(
@@ -621,182 +611,22 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 constraints,
               );
 
-              final cropControls = LayoutBuilder(
-                builder: (context, constraints) {
-                  final buttons = <SlyTooltip>[
-                    SlyTooltip(
-                      message: 'Aspect Ratio',
-                      child: IconButton(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        icon: const ImageIcon(
-                          AssetImage('assets/icons/aspect-ratio.png'),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        onPressed: () {
-                          showSlyDialog(
-                              context, 'Select Aspect Ratio', <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: SlyToggleButtons(
-                                defaultItem: _portraitCrop ? 1 : 0,
-                                onSelected: (index) {
-                                  _portraitCrop = index == 1;
-                                },
-                                children: const <Widget>[
-                                  Text('Landscape'),
-                                  Text('Portrait'),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: SlyButton(
-                                onPressed: () {
-                                  _onAspectRatioSelected(null);
-                                },
-                                child: const Text('Free'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: SlyButton(
-                                onPressed: () {
-                                  _onAspectRatioSelected(1);
-                                },
-                                child: const Text('Square'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: SlyButton(
-                                onPressed: () {
-                                  _onAspectRatioSelected(
-                                    _portraitCrop ? 3 / 4 : 4 / 3,
-                                  );
-                                },
-                                child: const Text('4:3'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: SlyButton(
-                                onPressed: () {
-                                  _onAspectRatioSelected(
-                                    _portraitCrop ? 2 / 3 : 3 / 2,
-                                  );
-                                },
-                                child: const Text('3:2'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: SlyButton(
-                                onPressed: () {
-                                  _onAspectRatioSelected(
-                                    _portraitCrop ? 9 / 16 : 16 / 9,
-                                  );
-                                },
-                                child: const Text('16:9'),
-                              ),
-                            ),
-                            SlyButton(
-                              suggested: true,
-                              onPressed: () {
-                                if (_cropController == null) return;
-                                _onAspectRatioSelected(
-                                    _cropController!.aspectRatio);
-                              },
-                              child: const Text('Cancel'),
-                            ),
-                          ]);
-                        },
-                      ),
-                    ),
-                    SlyTooltip(
-                      message: 'Rotate Left',
-                      child: IconButton(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        icon: const ImageIcon(
-                          AssetImage('assets/icons/rotate-left.png'),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        onPressed: () {
-                          int newTurns = _rotationQuarterTurns - 1;
-                          if (newTurns < 0) newTurns = 4 + newTurns;
-                          if (newTurns == 4) newTurns = 0;
-
-                          setState(() {
-                            _rotationQuarterTurns = newTurns;
-                          });
-                        },
-                      ),
-                    ),
-                    SlyTooltip(
-                      message: 'Rotate Right',
-                      child: IconButton(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        icon: const ImageIcon(
-                          AssetImage('assets/icons/rotate-right.png'),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        onPressed: () {
-                          int newTurns = _rotationQuarterTurns + 1;
-                          if (newTurns > 4) newTurns = newTurns - 4;
-                          if (newTurns == 4) newTurns = 0;
-
-                          setState(() {
-                            _rotationQuarterTurns = newTurns;
-                          });
-                        },
-                      ),
-                    ),
-                    SlyTooltip(
-                      message: 'Flip Horizontal',
-                      child: IconButton(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        icon: const ImageIcon(
-                          AssetImage('assets/icons/flip-horizontal.png'),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        onPressed: () {
-                          flipImage(SlyImageFlipDirection.horizontal);
-                        },
-                      ),
-                    ),
-                    SlyTooltip(
-                      message: 'Flip Vertical',
-                      child: IconButton(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        icon: const ImageIcon(
-                          AssetImage('assets/icons/flip-vertical.png'),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        onPressed: () {
-                          flipImage(SlyImageFlipDirection.vertical);
-                        },
-                      ),
-                    ),
-                  ];
-
-                  return Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: (constraints.maxWidth > 600)
-                        ? Wrap(
-                            direction: Axis.vertical,
-                            spacing: 6,
-                            children: buttons,
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: buttons,
-                          ),
-                  );
+              final cropControls = getCropControls(
+                _cropController,
+                () => _portraitCrop,
+                (value) {
+                  setState(() {
+                    _portraitCrop = value;
+                  });
                 },
+                _onAspectRatioSelected,
+                () => _rotationQuarterTurns,
+                (value) {
+                  setState(() {
+                    _rotationQuarterTurns = value;
+                  });
+                },
+                flipImage,
               );
 
               final exportControls = ListView(
@@ -849,32 +679,22 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
                 _selectedPageIndex = index;
 
-                switch (index) {
-                  case 0:
-                    setState(() {
+                setState(() {
+                  switch (index) {
+                    case 0:
                       _controlsChild = lightControls;
-                    });
-                  case 1:
-                    setState(() {
+                    case 1:
                       _controlsChild = colorControls;
-                    });
-                  case 2:
-                    setState(() {
+                    case 2:
                       _controlsChild = effectControls;
-                    });
-                  case 3:
-                    setState(() {
+                    case 3:
                       _controlsChild = cropControls;
-                    });
-                  case 4:
-                    setState(() {
+                    case 4:
                       _controlsChild = exportControls;
-                    });
-                  default:
-                    setState(() {
+                    default:
                       _controlsChild = lightControls;
-                    });
-                }
+                  }
+                });
               }
 
               final navigationRail = NavigationRail(
