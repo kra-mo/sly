@@ -65,9 +65,7 @@ class _SlySliderState extends State<SlySlider> {
       child: GestureDetector(
         // Reset to secondary track value on double tap
         onDoubleTap: () {
-          setState(() {
-            value = widget.secondaryTrackValue ?? 0;
-          });
+          setState(() => value = widget.secondaryTrackValue ?? 0);
 
           if (widget.onChangeStart != null) widget.onChangeStart!(value);
           if (widget.onChanged != null) widget.onChanged!(value);
@@ -77,16 +75,12 @@ class _SlySliderState extends State<SlySlider> {
           value: value,
           secondaryTrackValue: widget.secondaryTrackValue,
           onChanged: (v) {
-            setState(() {
-              value = v;
-            });
+            setState(() => value = v);
             if (widget.onChanged != null) widget.onChanged!(v);
           },
           onChangeStart: widget.onChangeStart,
           onChangeEnd: (v) {
-            setState(() {
-              value = v;
-            });
+            setState(() => value = v);
             if (widget.onChangeEnd != null) widget.onChangeEnd!(v);
           },
           min: widget.min,

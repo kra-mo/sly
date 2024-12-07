@@ -51,13 +51,9 @@ class _SlyToggleButtonsState extends State<SlyToggleButtons> {
         children: widget.children,
         onPressed: (int index) {
           for (int i = 0; i < selections.length; i++) {
-            setState(() {
-              selections[i] = false;
-            });
+            setState(() => selections[i] = false);
           }
-          setState(() {
-            selections[index] = true;
-          });
+          setState(() => selections[index] = true);
 
           widget.onSelected(index);
         },

@@ -72,9 +72,7 @@ class _SlySliderRowState extends State<SlySliderRow> {
     value: widget.value,
     secondaryTrackValue: widget.secondaryTrackValue,
     onChanged: (value) {
-      setState(() {
-        valueLabel = getLabel(value);
-      });
+      setState(() => valueLabel = getLabel(value));
       if (widget.onChanged != null) widget.onChanged!(value);
     },
     onChangeStart: widget.onChangeStart,

@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '/platform.dart';
 import '/image.dart';
 import '/preferences.dart';
-import '/views/editor_page.dart';
+import '/views/editor.dart';
 import '/widgets/button.dart';
 import '/widgets/spinner.dart';
 import '/widgets/snack_bar.dart';

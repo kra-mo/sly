@@ -38,9 +38,7 @@ class _SlySwitchState extends State<SlySwitch> {
       }),
       value: value,
       onChanged: (v) {
-        setState(() {
-          value = v;
-        });
+        setState(() => value = v);
         if (widget.onChanged != null) widget.onChanged!(v);
       },
     );

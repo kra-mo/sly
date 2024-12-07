@@ -6,7 +6,7 @@ import 'package:window_manager/window_manager.dart';
 import '/platform.dart';
 import '/theme.dart';
 import '/preferences.dart';
-import '/views/home_page.dart';
+import '/views/home.dart';
 
 void main() async {
   runApp(const SlyApp());
