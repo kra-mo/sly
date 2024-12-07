@@ -5,18 +5,18 @@ import 'package:flutter/material.dart';
 
 import 'package:crop_image/crop_image.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '/utils.dart';
+import '/platform.dart';
 import '/image.dart';
-import '/crop_controls.dart';
-import '/widgets/histogram.dart';
+import '/io.dart';
+import '/preferences.dart';
+import '/views/crop_controls.dart';
 import '/widgets/button.dart';
+import '/widgets/histogram.dart';
 import '/widgets/slider_row.dart';
 import '/widgets/switch.dart';
 import '/widgets/spinner.dart';
 import '/widgets/tooltip.dart';
-import '/widgets/dialog.dart';
 import '/widgets/snack_bar.dart';
 import '/widgets/title_bar.dart';
 
@@ -34,8 +34,6 @@ class SlyEditorPage extends StatefulWidget {
 }
 
 class _SlyEditorPageState extends State<SlyEditorPage> {
-  final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
-
   final GlobalKey<SlyButtonState> _saveButtonKey = GlobalKey<SlyButtonState>();
   final GlobalKey _imageWidgetKey = GlobalKey();
   int _controlsWidgetKeyValue = 0;
@@ -71,84 +69,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
 
+  SlyButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
-  late final SlyButton _saveButton = SlyButton(
-    key: _saveButtonKey,
-    suggested: true,
-    child: Text(_saveButtonLabel),
-    onPressed: () async {
-      _saveButton.setChild(
-        const Padding(
-          padding: EdgeInsets.all(6),
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: SlySpinner(),
-          ),
-        ),
-      );
-
-      SlyImageFormat? format;
-
-      await showSlyDialog(
-        context,
-        'Choose a Quality',
-        <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SlyButton(
-              onPressed: () {
-                format = SlyImageFormat.jpeg75;
-                Navigator.pop(context);
-              },
-              child: const Text('For Sharing'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SlyButton(
-              onPressed: () {
-                format = SlyImageFormat.jpeg90;
-                Navigator.pop(context);
-              },
-              child: const Text('For Storing'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: SlyButton(
-              onPressed: () {
-                format = SlyImageFormat.png;
-                Navigator.pop(context);
-              },
-              child: const Text('Lossless'),
-            ),
-          ),
-          SlyButton(
-            suggested: true,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
-          ),
-        ],
-      );
-
-      // The user cancelled the format selection
-      if (format == null) {
-        _saveButton.setChild(Text(_saveButtonLabel));
-        return;
-      }
-
-      _saveFormat = format!;
-
-      if (_editedImage.loading) {
-        _saveOnLoad = true;
-      } else {
-        _save();
-      }
-    },
-  );
 
   Future<void> _save() async {
     final copyImage = SlyImage.from(_editedImage);
@@ -175,7 +97,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         await copyImage.encode(format: _saveFormat, fullRes: true),
         fileName: widget.suggestedFileName,
         fileExtension: _saveFormat == SlyImageFormat.png ? 'png' : 'jpg'))) {
-      _saveButton.setChild(Text(_saveButtonLabel));
+      _saveButton?.setChild(Text(_saveButtonLabel));
       copyImage.dispose();
       return;
     }
@@ -183,7 +105,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     copyImage.dispose();
 
     if (mounted) {
-      _saveButton.setChild(
+      _saveButton?.setChild(
         const ImageIcon(
           AssetImage('assets/icons/checkmark.png'),
         ),
@@ -191,7 +113,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       await Future.delayed(const Duration(milliseconds: 2500));
     }
 
-    _saveButton.setChild(Text(_saveButtonLabel));
+    _saveButton?.setChild(Text(_saveButtonLabel));
   }
 
   void _onImageUpdate(event) {
@@ -411,6 +333,20 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    _saveButton ??= getSaveButton(
+      _saveButtonKey,
+      context,
+      _saveButtonLabel,
+      (value) => _saveFormat = value,
+      () {
+        if (_editedImage.loading) {
+          _saveOnLoad = true;
+        } else {
+          _save();
+        }
+      },
+    );
+
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         SingleActivator(

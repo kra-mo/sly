@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:window_manager/window_manager.dart';
 
-import '/utils.dart';
+import '/platform.dart';
 
 class SlyDragWindowBox extends DragToMoveArea {
   const SlyDragWindowBox({super.key, required super.child});

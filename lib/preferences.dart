@@ -6,17 +6,14 @@ import '/widgets/dialog.dart';
 import '/widgets/button.dart';
 import '/widgets/toggle_buttons.dart';
 
-SharedPreferences? _prefs;
+final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
 
 /// Initializes preferences.
 ///
-/// Make sure to call this once before using anything from this module.
+/// Be sure to call this once before using anything from this module.
 Future<void> initPreferences() async {
-  _prefs = await SharedPreferences.getInstance();
-  if (_prefs == null) return;
-
-  final style = _prefs!.getInt('theme');
+  final style = (await prefs).getInt('theme');
   if (style == null) return;
 
   switch (style) {
@@ -40,8 +37,8 @@ void showSlyPreferencesDialog(BuildContext context) {
             : themeNotifier.value == ThemeMode.system
                 ? 1
                 : 2,
-        onSelected: (index) {
-          _prefs?.setInt('theme', index);
+        onSelected: (index) async {
+          (await prefs).setInt('theme', index);
 
           switch (index) {
             case 0:

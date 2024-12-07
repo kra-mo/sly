@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:image/image.dart' as img;
 
-import '/utils.dart';
+import '/io.dart';
 
 enum SlyImageFlipDirection { horizontal, vertical, both }
 
@@ -145,13 +145,13 @@ class SlyImage {
 
     if (_originalImage.height > 700 ||
         (kIsWeb && _originalImage.height > 500)) {
-      images.add(getResizedImage(_originalImage, null, 500));
+      images.add(_getResizedImage(_originalImage, null, 500));
     }
 
     if (canLoadFullRes) {
       images.add(Future.value(_originalImage));
     } else if (!kIsWeb) {
-      images.add(getResizedImage(_originalImage, null, 1500));
+      images.add(_getResizedImage(_originalImage, null, 1500));
     }
 
     for (Future<img.Image> editableImage in images) {
@@ -431,4 +431,20 @@ class SlyImage {
 
     return cmd;
   }
+}
+
+Future<img.Image> _getResizedImage(
+  img.Image image,
+  int? width,
+  int? height,
+) async {
+  final cmd = img.Command()
+    ..image(image)
+    ..copyResize(
+      width: width,
+      height: height,
+      interpolation: img.Interpolation.average,
+    );
+
+  return (await cmd.executeThread()).outputImage!;
 }
