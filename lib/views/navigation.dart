@@ -29,7 +29,7 @@ NavigationRail getNavigationRail(
 
 NavigationBar getNavigationBar(
   BuildContext context,
-  Function getShowImageCarousel,
+  Function getgetShowCarousel,
   Function getSelectedPageIndex,
   Function(int)? onDestinationSelected,
   VoidCallback? toggleCarousel,
@@ -52,7 +52,7 @@ NavigationBar getNavigationBar(
       _getDestination('Crop', 'assets/icons/crop.png'),
       _getDestination('Export', 'assets/icons/export.png'),
       Semantics(
-        label: 'Show/Hide Images',
+        label: 'More Images',
         child: FloatingActionButton.small(
           shape: const CircleBorder(),
           splashColor: Colors.transparent,
@@ -63,7 +63,7 @@ NavigationBar getNavigationBar(
           highlightElevation: 0,
           onPressed: toggleCarousel,
           child: AnimatedRotation(
-            turns: getShowImageCarousel() ? 1 / 8 : 0,
+            turns: getgetShowCarousel() ? 1 / 8 : 0,
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutBack,
             child: const ImageIcon(AssetImage('assets/icons/add.png')),

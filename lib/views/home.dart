@@ -25,7 +25,7 @@ class SlyHomePage extends StatefulWidget {
 class _SlyHomePageState extends State<SlyHomePage> {
   final GlobalKey<SlyButtonState> pickerButtonKey = GlobalKey<SlyButtonState>();
 
-  final String _pickerButtonLabel = 'Pick Image';
+  final String _pickerButtonLabel = 'Pick Images';
   late final SlyButton _pickerButton = SlyButton(
     key: pickerButtonKey,
     suggested: true,
@@ -43,20 +43,27 @@ class _SlyHomePageState extends State<SlyHomePage> {
       );
 
       final ImagePicker picker = ImagePicker();
-      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-      if (file == null) {
+      final List<XFile> files = await picker.pickMultiImage();
+
+      if (files.isEmpty) {
         _pickerButton.setChild(Text(_pickerButtonLabel));
         return;
       }
 
-      final image = await SlyImage.fromData(await file.readAsBytes());
-      if (image == null) {
-        _pickerButton.setChild(Text(_pickerButtonLabel));
+      final List<SlyImage> images = [];
 
-        if (!mounted) return;
+      for (final file in files) {
+        final image = await SlyImage.fromData(await file.readAsBytes());
+        if (image == null) {
+          _pickerButton.setChild(Text(_pickerButtonLabel));
 
-        showSlySnackBar(context, 'Couldn’t Load Image');
-        return;
+          if (!mounted) return;
+
+          showSlySnackBar(context, 'Couldn’t Load Image');
+          return;
+        }
+
+        images.add(image);
       }
 
       if (!mounted) {
@@ -68,9 +75,10 @@ class _SlyHomePageState extends State<SlyHomePage> {
         context,
         MaterialPageRoute(
           builder: (context) => SlyEditorPage(
-              image: image,
-              suggestedFileName: '${file.name.split('.').first} Edited',
-              carouselProvider: SlyCarouselProvider(context, [image])),
+            suggestedFileName: 'Edited Image',
+            carouselProvider: SlyCarouselProvider(context, images),
+            showCarousel: images.length > 1,
+          ),
         ),
       );
 

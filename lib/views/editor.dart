@@ -25,15 +25,15 @@ import '/widgets/histogram.dart';
 import '/widgets/snack_bar.dart';
 
 class SlyEditorPage extends StatefulWidget {
-  final SlyImage image;
   final String suggestedFileName;
-  final SlyCarouselProvider? carouselProvider;
+  final SlyCarouselProvider carouselProvider;
+  final bool showCarousel;
 
   const SlyEditorPage({
     super.key,
-    required this.image,
+    required this.carouselProvider,
     this.suggestedFileName = 'Edited Image',
-    this.carouselProvider,
+    this.showCarousel = false,
   });
 
   @override
@@ -48,7 +48,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   Widget? _controlsChild;
 
-  late final SlyImage _originalImage = widget.image;
+  late final SlyImage _originalImage = widget.carouselProvider.selectedImage;
   late SlyImage _editedImage;
   Widget? _histogram;
 
@@ -80,10 +80,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
 
-  bool _showImageCarousel = false;
-  void toggleCarousel() {
-    setState(() => _showImageCarousel = !_showImageCarousel);
-  }
+  late bool showCarousel = widget.showCarousel;
 
   SlyButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
@@ -237,7 +234,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    widget.carouselProvider?.context = context;
+    widget.carouselProvider.context = context;
 
     _saveButton ??= getSaveButton(
       _saveButtonKey,
@@ -252,6 +249,59 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         }
       },
     );
+
+    pickNewImage() async {
+      final ImagePicker picker = ImagePicker();
+      final List<XFile> files = await picker.pickMultiImage();
+
+      if (files.isEmpty) return;
+      if (!context.mounted) return;
+
+      showSlySnackBar(context, 'Loading Image', loading: true);
+
+      final List<SlyImage> images = [];
+
+      for (final file in files) {
+        final image = await SlyImage.fromData(await file.readAsBytes());
+        if (image == null) {
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          showSlySnackBar(context, 'Couldn’t Load Image');
+          return;
+        }
+
+        images.add(image);
+      }
+
+      if (!context.mounted) return;
+
+      for (final image in images) {
+        widget.carouselProvider.addImage(image);
+      }
+      widget.carouselProvider.selected = 0;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SlyEditorPage(
+            suggestedFileName: 'Edited Image',
+            carouselProvider: widget.carouselProvider,
+            showCarousel: true,
+          ),
+        ),
+      );
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+
+    void toggleCarousel() {
+      if (widget.carouselProvider.images.length <= 1) {
+        pickNewImage();
+      } else {
+        setState(() => showCarousel = !showCarousel);
+      }
+    }
 
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
@@ -380,55 +430,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
               final navigationBar = getNavigationBar(
                 context,
-                () => _showImageCarousel,
+                () => showCarousel,
                 () => _selectedPageIndex,
                 navigationDestinationSelected,
                 toggleCarousel,
               );
 
-              pickNewImage() async {
-                final ImagePicker picker = ImagePicker();
-
-                final XFile? file =
-                    await picker.pickImage(source: ImageSource.gallery);
-                if (file == null) return;
-
-                if (!context.mounted) return;
-
-                showSlySnackBar(context, 'Loading Image', loading: true);
-
-                final image = await SlyImage.fromData(await file.readAsBytes());
-                if (image == null) {
-                  if (!context.mounted) return;
-
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  showSlySnackBar(context, 'Couldn’t Load Image');
-                  return;
-                }
-
-                widget.carouselProvider?.images.add(image);
-                widget.carouselProvider?.addImage(image);
-
-                if (!context.mounted) return;
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SlyEditorPage(
-                      image: image,
-                      suggestedFileName: '${file.name.split('.').first} Edited',
-                      carouselProvider: widget.carouselProvider,
-                    ),
-                  ),
-                );
-
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              }
-
               final imageCarousel = AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutQuint,
-                child: _showImageCarousel
+                child: showCarousel
                     ? Container(
                         color: constraints.maxWidth > 600
                             ? null
@@ -449,24 +460,21 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                                 ),
                               ),
                               itemExtent: 75,
-                              children: widget.carouselProvider == null
-                                  ? []
-                                  : widget.carouselProvider!.children,
+                              children: widget.carouselProvider.children,
                               onTap: (int index) {
                                 if (index == 0) {
                                   pickNewImage();
                                 } else {
-                                  if (widget.carouselProvider == null) return;
+                                  widget.carouselProvider.selected = index - 1;
 
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => SlyEditorPage(
-                                        image: widget.carouselProvider!
-                                            .images[index - 1],
                                         suggestedFileName: 'Edited Image',
                                         carouselProvider:
                                             widget.carouselProvider,
+                                        showCarousel: true,
                                       ),
                                     ),
                                   );
@@ -555,7 +563,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 navigationRail,
                 navigationBar,
                 imageCarousel,
-                () => _showImageCarousel,
+                () => showCarousel,
                 () => _selectedPageIndex,
                 toggleCarousel,
               );
