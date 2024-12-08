@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '/platform.dart';
 import '/image.dart';
+import '/carousel.dart';
 import '/preferences.dart';
 import '/views/editor.dart';
 import '/widgets/button.dart';
@@ -67,9 +68,9 @@ class _SlyHomePageState extends State<SlyHomePage> {
         context,
         MaterialPageRoute(
           builder: (context) => SlyEditorPage(
-            image: image,
-            suggestedFileName: '${file.name.split('.').first} Edited',
-          ),
+              image: image,
+              suggestedFileName: '${file.name.split('.').first} Edited',
+              carouselProvider: SlyCarouselProvider(context, [image])),
         ),
       );
 

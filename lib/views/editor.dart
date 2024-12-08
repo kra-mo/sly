@@ -10,6 +10,7 @@ import '/platform.dart';
 import '/image.dart';
 import '/history.dart';
 import '/io.dart';
+import '/carousel.dart';
 import '/preferences.dart';
 import '/views/navigation.dart';
 import '/views/controls.dart';
@@ -26,11 +27,14 @@ import '/widgets/snack_bar.dart';
 class SlyEditorPage extends StatefulWidget {
   final SlyImage image;
   final String suggestedFileName;
+  final SlyCarouselProvider? carouselProvider;
 
-  const SlyEditorPage(
-      {super.key,
-      required this.image,
-      this.suggestedFileName = 'Edited Image'});
+  const SlyEditorPage({
+    super.key,
+    required this.image,
+    this.suggestedFileName = 'Edited Image',
+    this.carouselProvider,
+  });
 
   @override
   State<SlyEditorPage> createState() => _SlyEditorPageState();
@@ -39,6 +43,7 @@ class SlyEditorPage extends StatefulWidget {
 class _SlyEditorPageState extends State<SlyEditorPage> {
   final GlobalKey<SlyButtonState> _saveButtonKey = GlobalKey<SlyButtonState>();
   final GlobalKey _imageViewKey = GlobalKey();
+  final GlobalKey _imageCarouselKey = GlobalKey();
   int _controlsWidgetKeyValue = 0;
 
   Widget? _controlsChild;
@@ -74,6 +79,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
+
+  bool _showImageCarousel = false;
+  void toggleCarousel() {
+    setState(() => _showImageCarousel = !_showImageCarousel);
+  }
 
   SlyButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
@@ -227,6 +237,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    widget.carouselProvider?.context = context;
+
     _saveButton ??= getSaveButton(
       _saveButtonKey,
       context,
@@ -285,41 +297,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           autofocus: true,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              Future<void> pickNewImage() async {
-                final ImagePicker picker = ImagePicker();
-
-                final XFile? file =
-                    await picker.pickImage(source: ImageSource.gallery);
-                if (file == null) return;
-
-                if (!context.mounted) return;
-
-                showSlySnackBar(context, 'Loading Image', loading: true);
-
-                final image = await SlyImage.fromData(await file.readAsBytes());
-                if (image == null) {
-                  if (!context.mounted) return;
-
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  showSlySnackBar(context, 'Couldn’t Load Image');
-                  return;
-                }
-
-                if (!context.mounted) return;
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SlyEditorPage(
-                      image: image,
-                      suggestedFileName: '${file.name.split('.').first} Edited',
-                    ),
-                  ),
-                );
-
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              }
-
               final imageView = getImageView(
                 _imageViewKey,
                 context,
@@ -403,9 +380,106 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
               final navigationBar = getNavigationBar(
                 context,
+                () => _showImageCarousel,
                 () => _selectedPageIndex,
                 navigationDestinationSelected,
-                pickNewImage,
+                toggleCarousel,
+              );
+
+              pickNewImage() async {
+                final ImagePicker picker = ImagePicker();
+
+                final XFile? file =
+                    await picker.pickImage(source: ImageSource.gallery);
+                if (file == null) return;
+
+                if (!context.mounted) return;
+
+                showSlySnackBar(context, 'Loading Image', loading: true);
+
+                final image = await SlyImage.fromData(await file.readAsBytes());
+                if (image == null) {
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  showSlySnackBar(context, 'Couldn’t Load Image');
+                  return;
+                }
+
+                widget.carouselProvider?.images.add(image);
+                widget.carouselProvider?.addImage(image);
+
+                if (!context.mounted) return;
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SlyEditorPage(
+                      image: image,
+                      suggestedFileName: '${file.name.split('.').first} Edited',
+                      carouselProvider: widget.carouselProvider,
+                    ),
+                  ),
+                );
+
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              }
+
+              final imageCarousel = AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutQuint,
+                child: _showImageCarousel
+                    ? Container(
+                        color: constraints.maxWidth > 600
+                            ? null
+                            : Theme.of(context).hoverColor,
+                        child: AnimatedPadding(
+                          key: _imageCarouselKey,
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeOutQuint,
+                          padding: EdgeInsets.only(
+                            bottom: constraints.maxWidth > 600 ? 12 : 3,
+                          ),
+                          child: SizedBox(
+                            height: 75,
+                            child: CarouselView(
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
+                              itemExtent: 75,
+                              children: widget.carouselProvider == null
+                                  ? []
+                                  : widget.carouselProvider!.children,
+                              onTap: (int index) {
+                                if (index == 0) {
+                                  pickNewImage();
+                                } else {
+                                  if (widget.carouselProvider == null) return;
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SlyEditorPage(
+                                        image: widget.carouselProvider!
+                                            .images[index - 1],
+                                        suggestedFileName: 'Edited Image',
+                                        carouselProvider:
+                                            widget.carouselProvider,
+                                      ),
+                                    ),
+                                  );
+
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      )
+                    : Container(),
               );
 
               final controlsView = getControlsView(
@@ -480,8 +554,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 histogram,
                 navigationRail,
                 navigationBar,
+                imageCarousel,
+                () => _showImageCarousel,
                 () => _selectedPageIndex,
-                pickNewImage,
+                toggleCarousel,
               );
             },
           ),

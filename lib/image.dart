@@ -284,15 +284,34 @@ class SlyImage {
   /// if it looks like the device could not handle loading the entire image.
   ///
   /// You can check this with `this.canLoadFullRes`.
+  ///
+  /// `maxSideLength` defines the maximum length of the shorter side
+  /// of the image in pixels. Unlimited (depending on `fullRes`) if omitted.
   Future<Uint8List> encode({
     SlyImageFormat? format = SlyImageFormat.png,
     bool fullRes = false,
+    int? maxSideLength,
   }) async {
     if (fullRes && !canLoadFullRes) {
       await applyEdits();
     }
 
     final cmd = img.Command()..image(_image);
+
+    if (maxSideLength != null &&
+        (height > maxSideLength || width < maxSideLength)) {
+      if (height > width) {
+        cmd.copyResize(
+          height: maxSideLength,
+          interpolation: img.Interpolation.average,
+        );
+      } else {
+        cmd.copyResize(
+          width: maxSideLength,
+          interpolation: img.Interpolation.average,
+        );
+      }
+    }
 
     switch (format) {
       case SlyImageFormat.png:
