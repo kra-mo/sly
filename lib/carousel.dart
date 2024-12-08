@@ -1,13 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
+import 'package:crop_image/crop_image.dart';
+
 import '/image.dart';
+import '/widgets/spinner.dart';
 
 class SlyCarouselProvider {
-  final List<SlyImage> images = [];
+  final List<(SlyImage, (SlyImage, CropController)?)> images = [];
   int selected = 0;
   BuildContext context;
 
-  get selectedImage => images[selected];
+  SlyImage get originalImage => images[selected].$1;
+  SlyImage? get editedImage => images[selected].$2?.$1;
+  CropController? get cropController => images[selected].$2?.$2;
 
   late final List<Widget> children = [
     const ImageIcon(
@@ -16,23 +23,26 @@ class SlyCarouselProvider {
     ),
   ];
 
-  addImage(SlyImage image) async {
-    images.insert(0, image);
-
-    final bytes = await image.encode(
-      format: SlyImageFormat.jpeg75,
-      maxSideLength: 150,
+  void addImage(SlyImage image) {
+    images.insert(0, (image, null));
+    children.insert(
+      1,
+      FutureBuilder<Uint8List>(
+        future: image.encode(
+          format: SlyImageFormat.jpeg75,
+          maxSideLength: 150,
+        ),
+        builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
+          if (snapshot.hasData) {
+            return Image.memory(snapshot.data!, fit: BoxFit.cover);
+          } else if (snapshot.hasError) {
+            return Container();
+          } else {
+            return const SlySpinner();
+          }
+        },
+      ),
     );
-
-    final index = images.indexOf(image) + 1;
-    if (index > children.length) {
-      children.add(Image.memory(bytes, fit: BoxFit.cover));
-    } else {
-      children.insert(
-        index,
-        Image.memory(bytes, fit: BoxFit.cover),
-      );
-    }
   }
 
   SlyCarouselProvider(this.context, images) {

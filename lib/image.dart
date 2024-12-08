@@ -12,23 +12,94 @@ enum SlyImageFlipDirection { horizontal, vertical, both }
 
 enum SlyImageFormat { png, jpeg75, jpeg90, jpeg100, tiff }
 
-class SlyImageAttribute {
+class SlyImageAttribute<T> {
   final String name;
-  double value;
-  final double anchor;
-  final double min;
-  final double max;
+  T value;
 
-  SlyImageAttribute(this.name, this.value, this.anchor, this.min, this.max);
+  SlyImageAttribute(this.name, this.value);
 
-  SlyImageAttribute.copy(SlyImageAttribute imageAttribute)
+  SlyImageAttribute.copy(SlyImageAttribute attribute)
+      : this(attribute.name, attribute.value);
+}
+
+class SlyClamptedAttribute<T> extends SlyImageAttribute<T> {
+  final T min;
+  final T max;
+
+  SlyClamptedAttribute(
+    super.name,
+    super.value,
+    this.min,
+    this.max,
+  );
+
+  SlyClamptedAttribute.copy(SlyClamptedAttribute attribute)
       : this(
-          imageAttribute.name,
-          imageAttribute.value,
-          imageAttribute.anchor,
-          imageAttribute.min,
-          imageAttribute.max,
+          attribute.name,
+          attribute.value,
+          attribute.min,
+          attribute.max,
         );
+}
+
+class SlyOverflowAttribute extends SlyClamptedAttribute<int> {
+  @override
+  set value(int v) {
+    if (v < value) {
+      if (v < min) v = max + v;
+    } else if (v > value) {
+      if (v > max) v = v - max;
+    } else {
+      return;
+    }
+
+    if (v == max) v = min;
+
+    super.value = v;
+  }
+
+  SlyOverflowAttribute(
+    super.name,
+    super.value,
+    super.min,
+    super.max,
+  );
+
+  SlyOverflowAttribute.copy(SlyOverflowAttribute attribute)
+      : this(
+          attribute.name,
+          attribute.value,
+          attribute.min,
+          attribute.max,
+        );
+}
+
+class SlyRangeAttribute extends SlyClamptedAttribute<double> {
+  final double anchor;
+
+  SlyRangeAttribute(
+    super.name,
+    super.value,
+    this.anchor,
+    super.min,
+    super.max,
+  );
+
+  SlyRangeAttribute.copy(SlyRangeAttribute attribute)
+      : this(
+          attribute.name,
+          attribute.value,
+          attribute.anchor,
+          attribute.min,
+          attribute.max,
+        );
+}
+
+class SlyBoolAttribute extends SlyImageAttribute<bool> {
+  SlyBoolAttribute(super.name, super.value);
+
+  SlyBoolAttribute.copy(SlyBoolAttribute attribute)
+      : this(attribute.name, attribute.value);
 }
 
 class SlyImage {
@@ -39,27 +110,34 @@ class SlyImage {
   num _editsApplied = 0;
   int _loading = 0;
 
-  Map<String, SlyImageAttribute> lightAttributes = {
-    'exposure': SlyImageAttribute('Exposure', 0, 0, 0, 1),
-    'brightness': SlyImageAttribute('Brightness', 1, 1, 0.2, 1.8),
-    'contrast': SlyImageAttribute('Contrast', 1, 1, 0.4, 1.6),
-    'blacks': SlyImageAttribute('Blacks', 0, 0, 0, 127.5),
-    'whites': SlyImageAttribute('Whites', 255, 255, 76.5, 255),
-    'mids': SlyImageAttribute('Midtones', 127.5, 127.5, 25.5, 229.5),
+  Map<String, SlyRangeAttribute> lightAttributes = {
+    'exposure': SlyRangeAttribute('Exposure', 0, 0, 0, 1),
+    'brightness': SlyRangeAttribute('Brightness', 1, 1, 0.2, 1.8),
+    'contrast': SlyRangeAttribute('Contrast', 1, 1, 0.4, 1.6),
+    'blacks': SlyRangeAttribute('Blacks', 0, 0, 0, 127.5),
+    'whites': SlyRangeAttribute('Whites', 255, 255, 76.5, 255),
+    'mids': SlyRangeAttribute('Midtones', 127.5, 127.5, 25.5, 229.5),
   };
 
-  Map<String, SlyImageAttribute> colorAttributes = {
-    'saturation': SlyImageAttribute('Saturation', 1, 1, 0, 2),
-    'temp': SlyImageAttribute('Temperature', 0, 0, -1, 1),
-    'tint': SlyImageAttribute('Tint', 0, 0, -1, 1),
+  Map<String, SlyRangeAttribute> colorAttributes = {
+    'saturation': SlyRangeAttribute('Saturation', 1, 1, 0, 2),
+    'temp': SlyRangeAttribute('Temperature', 0, 0, -1, 1),
+    'tint': SlyRangeAttribute('Tint', 0, 0, -1, 1),
   };
 
-  Map<String, SlyImageAttribute> effectAttributes = {
-    'denoise': SlyImageAttribute('Noise Reduction', 0, 0, 0, 1),
-    'sharpness': SlyImageAttribute('Sharpness', 0, 0, 0, 1),
-    'sepia': SlyImageAttribute('Sepia', 0, 0, 0, 1),
-    'vignette': SlyImageAttribute('Vignette', 0, 0, 0, 1),
-    'border': SlyImageAttribute('Border', 0, 0, -1, 1),
+  Map<String, SlyRangeAttribute> effectAttributes = {
+    'denoise': SlyRangeAttribute('Noise Reduction', 0, 0, 0, 1),
+    'sharpness': SlyRangeAttribute('Sharpness', 0, 0, 0, 1),
+    'sepia': SlyRangeAttribute('Sepia', 0, 0, 0, 1),
+    'vignette': SlyRangeAttribute('Vignette', 0, 0, 0, 1),
+    'border': SlyRangeAttribute('Border', 0, 0, -1, 1),
+  };
+
+  /// For informational purposes only, not actually reflected in the buffer
+  Map<String, SlyImageAttribute> geometryAttributes = {
+    'hflip': SlyBoolAttribute('Flip Horizontally', false),
+    'vflip': SlyBoolAttribute('Flip Vertically', false),
+    'rotation': SlyOverflowAttribute('Rotation', 0, 0, 4),
   };
 
   int get width {
@@ -94,7 +172,7 @@ class SlyImage {
   ///
   /// The `image` object is reused, so calling `.from`
   /// before invoking this constructor might be necessary
-  /// if you plan on reuising `image`.
+  /// if you plan on reusing `image`.
   SlyImage._fromImage(img.Image image)
       : _image = img.Image.from(image),
         _originalImage = image;
@@ -197,16 +275,29 @@ class SlyImage {
   /// you need to call `applyEdits` or `applyEditsProgressive` yourself.
   void copyEditsFrom(SlyImage src) {
     for (int i = 0; i < 3; i++) {
-      for (MapEntry<String, SlyImageAttribute> entry in [
+      for (MapEntry<String, SlyRangeAttribute> entry in [
         src.lightAttributes,
         src.colorAttributes,
         src.effectAttributes,
       ][i]
           .entries) {
-        [lightAttributes, colorAttributes, effectAttributes][i][entry.key] =
-            SlyImageAttribute.copy(entry.value);
+        [
+          lightAttributes,
+          colorAttributes,
+          effectAttributes,
+        ][i][entry.key] = SlyRangeAttribute.copy(entry.value);
       }
     }
+
+    geometryAttributes['hflip'] = SlyBoolAttribute.copy(
+      src.geometryAttributes['hflip'] as SlyBoolAttribute,
+    );
+    geometryAttributes['vflip'] = SlyBoolAttribute.copy(
+      src.geometryAttributes['vflip'] as SlyBoolAttribute,
+    );
+    geometryAttributes['rotation'] = SlyOverflowAttribute.copy(
+      src.geometryAttributes['rotation'] as SlyOverflowAttribute,
+    );
   }
 
   /// Removes Exif metadata from the image.
@@ -355,7 +446,7 @@ class SlyImage {
     final temp = colorAttributes['temp']!;
     final tint = colorAttributes['tint']!;
 
-    for (SlyImageAttribute attribute in [temp, tint]) {
+    for (SlyRangeAttribute attribute in [temp, tint]) {
       if (attribute.value != attribute.anchor) {
         cmd.colorOffset(
           red: 50 * temp.value,
@@ -374,7 +465,7 @@ class SlyImage {
     final whites = lightAttributes['whites']!;
     final mids = lightAttributes['mids']!;
 
-    for (SlyImageAttribute attribute in [
+    for (SlyRangeAttribute attribute in [
       exposure,
       brightness,
       contrast,

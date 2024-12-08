@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:crop_image/crop_image.dart';
 
 import '/platform.dart';
+import '/image.dart';
 import '/widgets/spinner.dart';
 
 Widget getImageView(
@@ -16,9 +17,9 @@ Widget getImageView(
   Function showCropView,
   CropController? cropController,
   ValueChanged<Rect>? onCrop,
-  Function getRotationQuarterTurns,
-  Function getHflip,
-  Function getVflip,
+  SlyImageAttribute hflip,
+  SlyImageAttribute vflip,
+  SlyImageAttribute rotation,
 ) {
   final imageView = editedImageData != null
       ? InteractiveViewer(
@@ -92,10 +93,10 @@ Widget getImageView(
                 right: 12,
               ),
     child: Transform.flip(
-      flipX: getHflip(),
-      flipY: getVflip(),
+      flipX: hflip.value,
+      flipY: vflip.value,
       child: RotatedBox(
-        quarterTurns: getRotationQuarterTurns(),
+        quarterTurns: rotation.value,
         child: constraints.maxWidth > 600
             ? showCropView()
                 ? cropImageView

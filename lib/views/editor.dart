@@ -19,6 +19,7 @@ import '/views/crop_controls.dart';
 import '/views/export_controls.dart';
 import '/views/toolbar.dart';
 import '/views/image.dart';
+import '/views/carousel.dart';
 import '/views/editor_scaffold.dart';
 import '/widgets/button.dart';
 import '/widgets/histogram.dart';
@@ -48,7 +49,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   Widget? _controlsChild;
 
-  late final SlyImage _originalImage = widget.carouselProvider.selectedImage;
+  late final SlyImage _originalImage = widget.carouselProvider.originalImage;
   late SlyImage _editedImage;
   Widget? _histogram;
 
@@ -61,11 +62,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   SlyImageFormat _saveFormat = SlyImageFormat.png;
   bool _saveOnLoad = false;
 
-  int _rotationQuarterTurns = 0;
-  bool _hflip = false;
-  bool _vflip = false;
+  CropController? _cropController;
 
-  CropController? _cropController = CropController();
   bool _cropChanged = false;
   bool _portraitCrop = false;
 
@@ -88,15 +86,21 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   Future<void> _save() async {
     final copyImage = SlyImage.from(_editedImage);
 
-    if (_rotationQuarterTurns != 0 && _rotationQuarterTurns != 4) {
-      copyImage.rotate(_rotationQuarterTurns * 90);
+    final rotationAttr =
+        copyImage.geometryAttributes['rotation']! as SlyClamptedAttribute;
+
+    if (![rotationAttr.min, rotationAttr.max].contains(rotationAttr.value)) {
+      copyImage.rotate(rotationAttr.value * 90);
     }
 
-    if (_hflip && _vflip) {
+    final hflip = copyImage.geometryAttributes['hflip']!.value;
+    final vflip = copyImage.geometryAttributes['vflip']!.value;
+
+    if (hflip && vflip) {
       copyImage.flip(SlyImageFlipDirection.both);
-    } else if (_hflip) {
+    } else if (hflip) {
       copyImage.flip(SlyImageFlipDirection.horizontal);
-    } else if (_vflip) {
+    } else if (vflip) {
       copyImage.flip(SlyImageFlipDirection.vertical);
     }
 
@@ -160,7 +164,18 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       setState(() => _showHistogram = showHistogram);
     });
 
-    _editedImage = SlyImage.from(_originalImage);
+    if (widget.carouselProvider.editedImage != null) {
+      _editedImage = widget.carouselProvider.editedImage!;
+    } else {
+      _editedImage = SlyImage.from(_originalImage);
+    }
+
+    if (widget.carouselProvider.cropController != null) {
+      _cropController = widget.carouselProvider.cropController!;
+    } else {
+      _cropController = CropController();
+    }
+
     subscription = _editedImage.controller.stream.listen(_onImageUpdate);
     updateImage();
 
@@ -199,6 +214,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     croppedImage.lightAttributes = _editedImage.lightAttributes;
     croppedImage.colorAttributes = _editedImage.colorAttributes;
     croppedImage.effectAttributes = _editedImage.effectAttributes;
+    croppedImage.geometryAttributes = _editedImage.geometryAttributes;
 
     subscription?.cancel();
     _editedImage.dispose();
@@ -212,14 +228,17 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (!mounted) return;
 
     setState(() {
+      final hflipAttr = _editedImage.geometryAttributes['hflip']!;
+      final vflipAttr = _editedImage.geometryAttributes['vflip']!;
+
       switch (direction) {
         case SlyImageFlipDirection.horizontal:
-          _hflip = !_hflip;
+          hflipAttr.value = !hflipAttr.value;
         case SlyImageFlipDirection.vertical:
-          _vflip = !_vflip;
+          vflipAttr.value = !vflipAttr.value;
         case SlyImageFlipDirection.both:
-          _hflip = !_hflip;
-          _vflip = !_vflip;
+          hflipAttr.value = !hflipAttr.value;
+          vflipAttr.value = !vflipAttr.value;
       }
     });
   }
@@ -356,9 +375,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 () => _selectedPageIndex == 3,
                 _cropController,
                 (rect) => _cropChanged = true,
-                () => _rotationQuarterTurns,
-                () => _hflip,
-                () => _vflip,
+                _editedImage.geometryAttributes['hflip']!,
+                _editedImage.geometryAttributes['vflip']!,
+                _editedImage.geometryAttributes['rotation']!,
               );
 
               final lightControls = createControlsListView(
@@ -390,8 +409,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 () => _portraitCrop,
                 (value) => setState(() => _portraitCrop = value),
                 _onAspectRatioSelected,
-                () => _rotationQuarterTurns,
-                (value) => setState(() => _rotationQuarterTurns = value),
+                _editedImage.geometryAttributes['rotation']!,
+                (value) => setState(() {
+                  _editedImage.geometryAttributes['rotation']!.value = value;
+                }),
                 flipImage,
               );
 
@@ -436,58 +457,15 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 toggleCarousel,
               );
 
-              final imageCarousel = AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutQuint,
-                child: showCarousel
-                    ? Container(
-                        color: constraints.maxWidth > 600
-                            ? null
-                            : Theme.of(context).hoverColor,
-                        child: AnimatedPadding(
-                          key: _imageCarouselKey,
-                          duration: const Duration(milliseconds: 600),
-                          curve: Curves.easeOutQuint,
-                          padding: EdgeInsets.only(
-                            bottom: constraints.maxWidth > 600 ? 12 : 3,
-                          ),
-                          child: SizedBox(
-                            height: 75,
-                            child: CarouselView(
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                              ),
-                              itemExtent: 75,
-                              children: widget.carouselProvider.children,
-                              onTap: (int index) {
-                                if (index == 0) {
-                                  pickNewImage();
-                                } else {
-                                  widget.carouselProvider.selected = index - 1;
-
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SlyEditorPage(
-                                        suggestedFileName: 'Edited Image',
-                                        carouselProvider:
-                                            widget.carouselProvider,
-                                        showCarousel: true,
-                                      ),
-                                    ),
-                                  );
-
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      )
-                    : Container(),
+              final imageCarousel = getImageCarousel(
+                context,
+                constraints,
+                _imageCarouselKey,
+                () => showCarousel,
+                widget.carouselProvider,
+                pickNewImage,
+                () => _editedImage,
+                () => _cropController,
               );
 
               final controlsView = getControlsView(
