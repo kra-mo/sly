@@ -67,7 +67,11 @@ class SlyJuggler {
           } else if (snapshot.hasError) {
             return Container();
           } else {
-            return const SlySpinner();
+            return const SizedBox(
+              width: 24,
+              height: 24,
+              child: SlySpinner(),
+            );
           }
         },
       ),
