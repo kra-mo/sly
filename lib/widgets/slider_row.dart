@@ -65,7 +65,7 @@ class _SlySliderRowState extends State<SlySliderRow> {
     String label =
         '${value < initial ? '-' : '+'}${(100 * ((v - i) / ((v < i ? min : max) - i))).round().toString()}';
 
-    return (label == '+0' || label == "-0") ? null : label;
+    return (label == '+0' || label == '-0') ? null : label;
   }
 
   late final slider = SlySlider(

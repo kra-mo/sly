@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:async';
 import 'dart:ui';
+// import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -12,54 +13,133 @@ enum SlyImageFlipDirection { horizontal, vertical, both }
 
 enum SlyImageFormat { png, jpeg75, jpeg90, jpeg100, tiff }
 
-class SlyImageAttribute {
+class SlyImageAttribute<T> {
   final String name;
-  double value;
-  final double anchor;
-  final double min;
-  final double max;
+  T value;
 
-  SlyImageAttribute(this.name, this.value, this.anchor, this.min, this.max);
+  SlyImageAttribute(this.name, this.value);
 
-  SlyImageAttribute.copy(SlyImageAttribute imageAttribute)
+  SlyImageAttribute.copy(SlyImageAttribute attribute)
+      : this(attribute.name, attribute.value);
+}
+
+class SlyClamptedAttribute<T> extends SlyImageAttribute<T> {
+  final T min;
+  final T max;
+
+  SlyClamptedAttribute(
+    super.name,
+    super.value,
+    this.min,
+    this.max,
+  );
+
+  SlyClamptedAttribute.copy(SlyClamptedAttribute attribute)
       : this(
-          imageAttribute.name,
-          imageAttribute.value,
-          imageAttribute.anchor,
-          imageAttribute.min,
-          imageAttribute.max,
+          attribute.name,
+          attribute.value,
+          attribute.min,
+          attribute.max,
         );
+}
+
+class SlyOverflowAttribute extends SlyClamptedAttribute<int> {
+  @override
+  set value(int v) {
+    if (v < value) {
+      if (v < min) v = max + v;
+    } else if (v > value) {
+      if (v > max) v = v - max;
+    } else {
+      return;
+    }
+
+    if (v == max) v = min;
+
+    super.value = v;
+  }
+
+  SlyOverflowAttribute(
+    super.name,
+    super.value,
+    super.min,
+    super.max,
+  );
+
+  SlyOverflowAttribute.copy(SlyOverflowAttribute attribute)
+      : this(
+          attribute.name,
+          attribute.value,
+          attribute.min,
+          attribute.max,
+        );
+}
+
+class SlyRangeAttribute extends SlyClamptedAttribute<double> {
+  final double anchor;
+
+  SlyRangeAttribute(
+    super.name,
+    super.value,
+    this.anchor,
+    super.min,
+    super.max,
+  );
+
+  SlyRangeAttribute.copy(SlyRangeAttribute attribute)
+      : this(
+          attribute.name,
+          attribute.value,
+          attribute.anchor,
+          attribute.min,
+          attribute.max,
+        );
+}
+
+class SlyBoolAttribute extends SlyImageAttribute<bool> {
+  SlyBoolAttribute(super.name, super.value);
+
+  SlyBoolAttribute.copy(SlyBoolAttribute attribute)
+      : this(attribute.name, attribute.value);
 }
 
 class SlyImage {
   StreamController<String> controller = StreamController<String>();
+  // bool shallow = false;
 
   img.Image _originalImage;
   img.Image _image;
   num _editsApplied = 0;
   int _loading = 0;
 
-  Map<String, SlyImageAttribute> lightAttributes = {
-    'exposure': SlyImageAttribute('Exposure', 0, 0, 0, 1),
-    'brightness': SlyImageAttribute('Brightness', 1, 1, 0.2, 1.8),
-    'contrast': SlyImageAttribute('Contrast', 1, 1, 0.4, 1.6),
-    'blacks': SlyImageAttribute('Blacks', 0, 0, 0, 127.5),
-    'whites': SlyImageAttribute('Whites', 255, 255, 76.5, 255),
-    'mids': SlyImageAttribute('Midtones', 127.5, 127.5, 25.5, 229.5),
+  Map<String, SlyRangeAttribute> lightAttributes = {
+    'exposure': SlyRangeAttribute('Exposure', 0, 0, 0, 1),
+    'brightness': SlyRangeAttribute('Brightness', 1, 1, 0.2, 1.8),
+    'contrast': SlyRangeAttribute('Contrast', 1, 1, 0.4, 1.6),
+    'blacks': SlyRangeAttribute('Blacks', 0, 0, 0, 127.5),
+    'whites': SlyRangeAttribute('Whites', 255, 255, 76.5, 255),
+    'mids': SlyRangeAttribute('Midtones', 127.5, 127.5, 25.5, 229.5),
   };
 
-  Map<String, SlyImageAttribute> colorAttributes = {
-    'saturation': SlyImageAttribute('Saturation', 1, 1, 0, 2),
-    'temp': SlyImageAttribute('Temperature', 0, 0, -1, 1),
-    'tint': SlyImageAttribute('Tint', 0, 0, -1, 1),
+  Map<String, SlyRangeAttribute> colorAttributes = {
+    'saturation': SlyRangeAttribute('Saturation', 1, 1, 0, 2),
+    'temp': SlyRangeAttribute('Temperature', 0, 0, -1, 1),
+    'tint': SlyRangeAttribute('Tint', 0, 0, -1, 1),
   };
 
-  Map<String, SlyImageAttribute> effectAttributes = {
-    'denoise': SlyImageAttribute('Noise Reduction', 0, 0, 0, 1),
-    'sharpness': SlyImageAttribute('Sharpness', 0, 0, 0, 1),
-    'sepia': SlyImageAttribute('Sepia', 0, 0, 0, 1),
-    'vignette': SlyImageAttribute('Vignette', 0, 0, 0, 1),
-    'border': SlyImageAttribute('Border', 0, 0, -1, 1),
+  Map<String, SlyRangeAttribute> effectAttributes = {
+    'denoise': SlyRangeAttribute('Noise Reduction', 0, 0, 0, 1),
+    'sharpness': SlyRangeAttribute('Sharpness', 0, 0, 0, 1),
+    'sepia': SlyRangeAttribute('Sepia', 0, 0, 0, 1),
+    'vignette': SlyRangeAttribute('Vignette', 0, 0, 0, 1),
+    'border': SlyRangeAttribute('Border', 0, 0, -1, 1),
+  };
+
+  /// For informational purposes only, not actually reflected in the buffer
+  Map<String, SlyImageAttribute> geometryAttributes = {
+    'hflip': SlyBoolAttribute('Flip Horizontally', false),
+    'vflip': SlyBoolAttribute('Flip Vertically', false),
+    'rotation': SlyOverflowAttribute('Rotation', 0, 0, 4),
   };
 
   int get width {
@@ -82,8 +162,9 @@ class SlyImage {
 
   /// Creates a new `SlyImage` from another `src`.
   ///
-  /// Note that if `src` is in the process of loading, the copied image might stay at a lower resolution
-  /// until `applyEdits` or `applyEditsProgressive` is called on `this`.
+  /// Note that if `src` is in the process of loading,
+  /// the copied image might stay at a lower resolution until
+  /// `applyEdits` or `applyEditsProgressive` is called on `this`.
   SlyImage.from(SlyImage src)
       : _image = img.Image.from(src._image),
         _originalImage = img.Image.from(src._originalImage) {
@@ -94,7 +175,7 @@ class SlyImage {
   ///
   /// The `image` object is reused, so calling `.from`
   /// before invoking this constructor might be necessary
-  /// if you plan on reuising `image`.
+  /// if you plan on reusing `image`.
   SlyImage._fromImage(img.Image image)
       : _image = img.Image.from(image),
         _originalImage = image;
@@ -106,6 +187,18 @@ class SlyImage {
 
     return SlyImage._fromImage(imgImage);
   }
+
+  /// Creates a new shallow `SlyImage` from `file`.
+  ///
+  /// Shallow `SlyImage`s are not loaded into memory until the
+  /// first operation that requires the buffer is performed on them.
+  ///
+  /// This means that if the original file is moved or removed,
+  /// the image will no longer be valid.
+  // SlyImage.shallowFromFile(File file)
+  //     : shallow = true,
+  //       _image = img.Image.empty(),
+  //       _originalImage = img.Image.empty();
 
   /// Applies changes to the image's attrubutes.
   Future<void> applyEdits() async {
@@ -197,16 +290,29 @@ class SlyImage {
   /// you need to call `applyEdits` or `applyEditsProgressive` yourself.
   void copyEditsFrom(SlyImage src) {
     for (int i = 0; i < 3; i++) {
-      for (MapEntry<String, SlyImageAttribute> entry in [
+      for (MapEntry<String, SlyRangeAttribute> entry in [
         src.lightAttributes,
         src.colorAttributes,
         src.effectAttributes,
       ][i]
           .entries) {
-        [lightAttributes, colorAttributes, effectAttributes][i][entry.key] =
-            SlyImageAttribute.copy(entry.value);
+        [
+          lightAttributes,
+          colorAttributes,
+          effectAttributes,
+        ][i][entry.key] = SlyRangeAttribute.copy(entry.value);
       }
     }
+
+    geometryAttributes['hflip'] = SlyBoolAttribute.copy(
+      src.geometryAttributes['hflip'] as SlyBoolAttribute,
+    );
+    geometryAttributes['vflip'] = SlyBoolAttribute.copy(
+      src.geometryAttributes['vflip'] as SlyBoolAttribute,
+    );
+    geometryAttributes['rotation'] = SlyOverflowAttribute.copy(
+      src.geometryAttributes['rotation'] as SlyOverflowAttribute,
+    );
   }
 
   /// Removes Exif metadata from the image.
@@ -284,15 +390,34 @@ class SlyImage {
   /// if it looks like the device could not handle loading the entire image.
   ///
   /// You can check this with `this.canLoadFullRes`.
+  ///
+  /// `maxSideLength` defines the maximum length of the shorter side
+  /// of the image in pixels. Unlimited (depending on `fullRes`) if omitted.
   Future<Uint8List> encode({
     SlyImageFormat? format = SlyImageFormat.png,
     bool fullRes = false,
+    int? maxSideLength,
   }) async {
     if (fullRes && !canLoadFullRes) {
       await applyEdits();
     }
 
     final cmd = img.Command()..image(_image);
+
+    if (maxSideLength != null &&
+        (height > maxSideLength || width < maxSideLength)) {
+      if (height > width) {
+        cmd.copyResize(
+          height: maxSideLength,
+          interpolation: img.Interpolation.average,
+        );
+      } else {
+        cmd.copyResize(
+          width: maxSideLength,
+          interpolation: img.Interpolation.average,
+        );
+      }
+    }
 
     switch (format) {
       case SlyImageFormat.png:
@@ -336,7 +461,7 @@ class SlyImage {
     final temp = colorAttributes['temp']!;
     final tint = colorAttributes['tint']!;
 
-    for (SlyImageAttribute attribute in [temp, tint]) {
+    for (SlyRangeAttribute attribute in [temp, tint]) {
       if (attribute.value != attribute.anchor) {
         cmd.colorOffset(
           red: 50 * temp.value,
@@ -355,7 +480,7 @@ class SlyImage {
     final whites = lightAttributes['whites']!;
     final mids = lightAttributes['mids']!;
 
-    for (SlyImageAttribute attribute in [
+    for (SlyRangeAttribute attribute in [
       exposure,
       brightness,
       contrast,

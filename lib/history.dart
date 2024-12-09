@@ -4,25 +4,25 @@ class HistoryManager {
   final Function getImage;
   final Function? updateCallback;
 
-  final List<List<Map<String, SlyImageAttribute>>> _undoList = [];
-  final List<List<Map<String, SlyImageAttribute>>> _redoList = [];
+  final List<List<Map<String, SlyRangeAttribute>>> _undoList = [];
+  final List<List<Map<String, SlyRangeAttribute>>> _redoList = [];
   bool canUndo = false;
   bool canRedo = false;
 
   HistoryManager(this.getImage, this.updateCallback);
 
   void update({bool redo = false, bool clearRedo = true}) {
-    List<Map<String, SlyImageAttribute>> newItem = [];
+    List<Map<String, SlyRangeAttribute>> newItem = [];
 
     for (final attributes in [
       getImage().lightAttributes,
       getImage().colorAttributes,
       getImage().effectAttributes,
     ]) {
-      final Map<String, SlyImageAttribute> newMap = {};
+      final Map<String, SlyRangeAttribute> newMap = {};
 
-      for (MapEntry<String, SlyImageAttribute> entry in attributes.entries) {
-        newMap[entry.key] = SlyImageAttribute.copy(entry.value);
+      for (MapEntry<String, SlyRangeAttribute> entry in attributes.entries) {
+        newMap[entry.key] = SlyRangeAttribute.copy(entry.value);
       }
       newItem.add(newMap);
     }
@@ -52,7 +52,7 @@ class HistoryManager {
     update(redo: !redo, clearRedo: false);
 
     for (int i = 0; i < 3; i++) {
-      for (MapEntry<String, SlyImageAttribute> entry in last[i].entries) {
+      for (MapEntry<String, SlyRangeAttribute> entry in last[i].entries) {
         [
           getImage().lightAttributes,
           getImage().colorAttributes,

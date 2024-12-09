@@ -7,13 +7,14 @@ Scaffold getEditorScaffold(
   BoxConstraints constraints,
   Widget imageView,
   Widget controlsView,
-  Widget cropControls,
   Widget toolbar,
   Widget histogram,
-  NavigationRail navigationRail,
-  NavigationBar navigationBar,
+  Widget navigationRail,
+  Widget navigationBar,
+  Widget imageCarousel,
+  Function getShowCarousel,
   Function getSelectedPageIndex,
-  VoidCallback? newImage,
+  VoidCallback? toggleCarousel,
 ) {
   if (constraints.maxWidth > 600) {
     return Scaffold(
@@ -21,10 +22,14 @@ Scaffold getEditorScaffold(
       floatingActionButtonLocation: constraints.maxHeight > 380
           ? null
           : FloatingActionButtonLocation.startFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(3),
+      floatingActionButton: AnimatedPadding(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutQuint,
+        padding: constraints.maxHeight <= 380 && getShowCarousel()
+            ? const EdgeInsets.only(top: 3, bottom: 80, left: 3, right: 3)
+            : const EdgeInsets.all(3),
         child: Semantics(
-          label: 'New Image',
+          label: 'More Images',
           child: FloatingActionButton.small(
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
@@ -45,8 +50,13 @@ Scaffold getEditorScaffold(
             focusElevation: 0,
             disabledElevation: 0,
             highlightElevation: 0,
-            onPressed: newImage,
-            child: const ImageIcon(AssetImage('assets/icons/add.png')),
+            onPressed: toggleCarousel,
+            child: AnimatedRotation(
+              turns: getShowCarousel() ? 1 / 8 : 0,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutBack,
+              child: const ImageIcon(AssetImage('assets/icons/add.png')),
+            ),
           ),
         ),
       ),
@@ -65,6 +75,7 @@ Scaffold getEditorScaffold(
                     ),
                   ),
                   Expanded(child: imageView),
+                  imageCarousel,
                 ],
               ),
             ),
@@ -149,7 +160,7 @@ Scaffold getEditorScaffold(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Expanded(child: imageView),
-                      cropControls,
+                      controlsView,
                     ],
                   )
                 : ListView(
@@ -175,7 +186,13 @@ Scaffold getEditorScaffold(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
         ),
-        child: navigationBar,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            navigationBar,
+            imageCarousel,
+          ],
+        ),
       ),
     );
   }

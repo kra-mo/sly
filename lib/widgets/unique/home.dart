@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:image_picker/image_picker.dart';
-
 import '/platform.dart';
-import '/image.dart';
+import '/juggler.dart';
 import '/preferences.dart';
-import '/views/editor.dart';
 import '/widgets/button.dart';
 import '/widgets/spinner.dart';
-import '/widgets/snack_bar.dart';
 import '/widgets/title_bar.dart';
 import '/widgets/about.dart';
 
@@ -24,7 +20,7 @@ class SlyHomePage extends StatefulWidget {
 class _SlyHomePageState extends State<SlyHomePage> {
   final GlobalKey<SlyButtonState> pickerButtonKey = GlobalKey<SlyButtonState>();
 
-  final String _pickerButtonLabel = 'Pick Image';
+  final String _pickerButtonLabel = 'Pick Images';
   late final SlyButton _pickerButton = SlyButton(
     key: pickerButtonKey,
     suggested: true,
@@ -41,36 +37,9 @@ class _SlyHomePageState extends State<SlyHomePage> {
         ),
       );
 
-      final ImagePicker picker = ImagePicker();
-      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-      if (file == null) {
-        _pickerButton.setChild(Text(_pickerButtonLabel));
-        return;
-      }
-
-      final image = await SlyImage.fromData(await file.readAsBytes());
-      if (image == null) {
-        _pickerButton.setChild(Text(_pickerButtonLabel));
-
-        if (!mounted) return;
-
-        showSlySnackBar(context, 'Couldn’t Load Image');
-        return;
-      }
-
-      if (!mounted) {
-        _pickerButton.setChild(Text(_pickerButtonLabel));
-        return;
-      }
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SlyEditorPage(
-            image: image,
-            suggestedFileName: '${file.name.split('.').first} Edited',
-          ),
-        ),
+      await SlyJuggler().editImages(
+        context: context,
+        failedCallback: () => _pickerButton.setChild(Text(_pickerButtonLabel)),
       );
 
       // Wait for the page transition animation
