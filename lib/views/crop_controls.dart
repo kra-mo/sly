@@ -13,8 +13,8 @@ Widget getCropControls(
   Function getPortraitCrop,
   Function setPortraitCrop,
   Function onAspectRatioSelected,
-  Function getRotationQuarterTurns,
-  Function setRotationQuarterTurns,
+  SlyImageAttribute rotation,
+  Function rotate,
   Function flipImage,
 ) {
   return LayoutBuilder(
@@ -117,11 +117,7 @@ Widget getCropControls(
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {
-              int newTurns = getRotationQuarterTurns() - 1;
-              if (newTurns < 0) newTurns = 4 + newTurns;
-              if (newTurns == 4) newTurns = 0;
-
-              setRotationQuarterTurns(newTurns);
+              rotate(rotation.value - 1);
             },
           ),
         ),
@@ -135,11 +131,7 @@ Widget getCropControls(
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {
-              int newTurns = getRotationQuarterTurns() + 1;
-              if (newTurns > 4) newTurns = newTurns - 4;
-              if (newTurns == 4) newTurns = 0;
-
-              setRotationQuarterTurns(newTurns);
+              rotate(rotation.value + 1);
             },
           ),
         ),

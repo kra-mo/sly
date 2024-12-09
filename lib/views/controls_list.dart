@@ -6,7 +6,7 @@ import '/history.dart';
 import '/widgets/slider_row.dart';
 
 ListView createControlsListView(
-  Map<String, SlyImageAttribute> attributes,
+  Map<String, SlyRangeAttribute> attributes,
   Key key,
   BoxConstraints constraints,
   HistoryManager history,
