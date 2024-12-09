@@ -161,7 +161,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (!mounted) return;
 
     switch (event) {
-      case 'image picked':
+      case 'image added':
         setState(() => _carouselKey = GlobalKey());
 
       case 'new image':

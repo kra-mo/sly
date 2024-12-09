@@ -29,9 +29,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                 key: globalKey,
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.easeOutQuint,
-                padding: EdgeInsets.only(
-                  bottom: wideLayout ? 12 : 3,
-                ),
+                padding: EdgeInsets.only(bottom: wideLayout ? 12 : 3, left: 8),
                 child: SizedBox(
                   height: 75,
                   child: CarouselView(
@@ -47,7 +45,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                     }),
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
-                        Radius.circular(12),
+                        Radius.circular(8),
                       ),
                     ),
                     itemExtent: 75,

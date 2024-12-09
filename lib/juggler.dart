@@ -72,6 +72,7 @@ class SlyJuggler {
         },
       ),
     );
+    controller.add('image added');
   }
 
   /// Used to pick new images to edit or to select existing ones.
