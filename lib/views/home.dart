@@ -71,13 +71,14 @@ class _SlyHomePageState extends State<SlyHomePage> {
         return;
       }
 
+      final provider = SlyCarouselProvider(images);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => SlyEditorPage(
             suggestedFileName: 'Edited Image',
-            carouselProvider: SlyCarouselProvider(context, images),
-            showCarousel: images.length > 1,
+            carouselProvider: provider,
           ),
         ),
       );

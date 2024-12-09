@@ -13,7 +13,7 @@ Scaffold getEditorScaffold(
   Widget navigationRail,
   Widget navigationBar,
   Widget imageCarousel,
-  Function getgetShowCarousel,
+  Function getShowCarousel,
   Function getSelectedPageIndex,
   VoidCallback? toggleCarousel,
 ) {
@@ -26,7 +26,7 @@ Scaffold getEditorScaffold(
       floatingActionButton: AnimatedPadding(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutQuint,
-        padding: constraints.maxHeight <= 380 && getgetShowCarousel()
+        padding: constraints.maxHeight <= 380 && getShowCarousel()
             ? const EdgeInsets.only(top: 3, bottom: 80, left: 3, right: 3)
             : const EdgeInsets.all(3),
         child: Semantics(
@@ -53,7 +53,7 @@ Scaffold getEditorScaffold(
             highlightElevation: 0,
             onPressed: toggleCarousel,
             child: AnimatedRotation(
-              turns: getgetShowCarousel() ? 1 / 8 : 0,
+              turns: getShowCarousel() ? 1 / 8 : 0,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutBack,
               child: const ImageIcon(AssetImage('assets/icons/add.png')),

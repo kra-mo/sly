@@ -10,7 +10,6 @@ import '/widgets/spinner.dart';
 class SlyCarouselProvider {
   final List<(SlyImage, (SlyImage, CropController)?)> images = [];
   int selected = 0;
-  BuildContext context;
 
   SlyImage get originalImage => images[selected].$1;
   SlyImage? get editedImage => images[selected].$2?.$1;
@@ -45,7 +44,7 @@ class SlyCarouselProvider {
     );
   }
 
-  SlyCarouselProvider(this.context, images) {
+  SlyCarouselProvider(images) {
     for (final image in images) {
       addImage(image);
     }

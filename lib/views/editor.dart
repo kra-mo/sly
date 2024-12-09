@@ -28,23 +28,48 @@ import '/widgets/snack_bar.dart';
 class SlyEditorPage extends StatefulWidget {
   final String suggestedFileName;
   final SlyCarouselProvider carouselProvider;
-  final bool showCarousel;
 
   const SlyEditorPage({
     super.key,
     required this.carouselProvider,
     this.suggestedFileName = 'Edited Image',
-    this.showCarousel = false,
   });
 
   @override
   State<SlyEditorPage> createState() => _SlyEditorPageState();
 }
 
+class CarouselData extends InheritedWidget {
+  final (
+    bool,
+    bool,
+    SlyCarouselProvider,
+    SlyImage,
+    CropController?,
+  ) data;
+
+  const CarouselData({
+    super.key,
+    required this.data,
+    required super.child,
+  });
+
+  static CarouselData? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<CarouselData>();
+  }
+
+  static CarouselData of(BuildContext context) {
+    final CarouselData? result = maybeOf(context);
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(CarouselData oldWidget) => data != oldWidget.data;
+}
+
 class _SlyEditorPageState extends State<SlyEditorPage> {
-  final GlobalKey<SlyButtonState> _saveButtonKey = GlobalKey<SlyButtonState>();
-  final GlobalKey _imageViewKey = GlobalKey();
-  final GlobalKey _imageCarouselKey = GlobalKey();
+  final _saveButtonKey = GlobalKey<SlyButtonState>();
+  final _imageViewKey = GlobalKey();
   int _controlsWidgetKeyValue = 0;
 
   Widget? _controlsChild;
@@ -77,8 +102,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
-
-  late bool showCarousel = widget.showCarousel;
+  late bool _showCarousel = widget.carouselProvider.images.length > 1;
 
   SlyButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
@@ -253,8 +277,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    widget.carouselProvider.context = context;
-
     _saveButton ??= getSaveButton(
       _saveButtonKey,
       context,
@@ -306,20 +328,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           builder: (context) => SlyEditorPage(
             suggestedFileName: 'Edited Image',
             carouselProvider: widget.carouselProvider,
-            showCarousel: true,
           ),
         ),
       );
 
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    }
-
-    void toggleCarousel() {
-      if (widget.carouselProvider.images.length <= 1) {
-        pickNewImage();
-      } else {
-        setState(() => showCarousel = !showCarousel);
-      }
     }
 
     return Shortcuts(
@@ -366,6 +379,25 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           autofocus: true,
           child: LayoutBuilder(
             builder: (context, constraints) {
+              final imageCarousel = CarouselData(
+                data: (
+                  _showCarousel,
+                  constraints.maxWidth > 600,
+                  widget.carouselProvider,
+                  _editedImage,
+                  _cropController,
+                ),
+                child: const SlyImageCarousel(),
+              );
+
+              void toggleCarousel() {
+                if (widget.carouselProvider.images.length <= 1) {
+                  pickNewImage();
+                } else {
+                  setState(() => _showCarousel = !_showCarousel);
+                }
+              }
+
               final imageView = getImageView(
                 _imageViewKey,
                 context,
@@ -451,21 +483,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
               final navigationBar = getNavigationBar(
                 context,
-                () => showCarousel,
+                () => _showCarousel,
                 () => _selectedPageIndex,
                 navigationDestinationSelected,
                 toggleCarousel,
-              );
-
-              final imageCarousel = getImageCarousel(
-                context,
-                constraints,
-                _imageCarouselKey,
-                () => showCarousel,
-                widget.carouselProvider,
-                pickNewImage,
-                () => _editedImage,
-                () => _cropController,
               );
 
               final controlsView = getControlsView(
@@ -541,7 +562,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 navigationRail,
                 navigationBar,
                 imageCarousel,
-                () => showCarousel,
+                () => _showCarousel,
                 () => _selectedPageIndex,
                 toggleCarousel,
               );

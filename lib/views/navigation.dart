@@ -29,7 +29,7 @@ NavigationRail getNavigationRail(
 
 NavigationBar getNavigationBar(
   BuildContext context,
-  Function getgetShowCarousel,
+  Function getShowCarousel,
   Function getSelectedPageIndex,
   Function(int)? onDestinationSelected,
   VoidCallback? toggleCarousel,
@@ -63,7 +63,7 @@ NavigationBar getNavigationBar(
           highlightElevation: 0,
           onPressed: toggleCarousel,
           child: AnimatedRotation(
-            turns: getgetShowCarousel() ? 1 / 8 : 0,
+            turns: getShowCarousel() ? 1 / 8 : 0,
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutBack,
             child: const ImageIcon(AssetImage('assets/icons/add.png')),
