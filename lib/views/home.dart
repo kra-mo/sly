@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:image_picker/image_picker.dart';
-
 import '/platform.dart';
-import '/image.dart';
-import '/carousel.dart';
+import '/io.dart';
 import '/preferences.dart';
-import '/views/editor.dart';
 import '/widgets/button.dart';
 import '/widgets/spinner.dart';
-import '/widgets/snack_bar.dart';
 import '/widgets/title_bar.dart';
 import '/widgets/about.dart';
 
@@ -42,45 +37,14 @@ class _SlyHomePageState extends State<SlyHomePage> {
         ),
       );
 
-      final ImagePicker picker = ImagePicker();
-      final List<XFile> files = await picker.pickMultiImage();
-
-      if (files.isEmpty) {
-        _pickerButton.setChild(Text(_pickerButtonLabel));
-        return;
-      }
-
-      final List<SlyImage> images = [];
-
-      for (final file in files) {
-        final image = await SlyImage.fromData(await file.readAsBytes());
-        if (image == null) {
-          _pickerButton.setChild(Text(_pickerButtonLabel));
-
-          if (!mounted) return;
-
-          showSlySnackBar(context, 'Couldn’t Load Image');
-          return;
-        }
-
-        images.add(image);
-      }
-
-      if (!mounted) {
-        _pickerButton.setChild(Text(_pickerButtonLabel));
-        return;
-      }
-
-      final provider = SlyCarouselProvider(images);
-
-      Navigator.pushReplacement(
+      openImage(
         context,
-        MaterialPageRoute(
-          builder: (context) => SlyEditorPage(
-            suggestedFileName: 'Edited Image',
-            carouselProvider: provider,
-          ),
-        ),
+        null,
+        null,
+        () => _pickerButton.setChild(Text(_pickerButtonLabel)),
+        true,
+        null,
+        null,
       );
 
       // Wait for the page transition animation

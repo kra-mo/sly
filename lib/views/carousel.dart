@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:image_picker/image_picker.dart';
-
+import '/io.dart';
 import '/image.dart';
 import '/views/editor.dart';
 import '/widgets/snack_bar.dart';
@@ -24,50 +23,6 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
     final provider = data.$3;
     final editedImage = data.$4;
     final cropController = data.$5;
-
-    pickNewImage() async {
-      final ImagePicker picker = ImagePicker();
-      final List<XFile> files = await picker.pickMultiImage();
-
-      if (files.isEmpty) return;
-      if (!context.mounted) return;
-
-      showSlySnackBar(context, 'Loading Image', loading: true);
-
-      final List<SlyImage> images = [];
-
-      for (final file in files) {
-        final image = await SlyImage.fromData(await file.readAsBytes());
-        if (image == null) {
-          if (!context.mounted) return;
-
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          showSlySnackBar(context, 'Couldn’t Load Image');
-          return;
-        }
-
-        images.add(image);
-      }
-
-      if (!context.mounted) return;
-
-      for (final image in images) {
-        provider.addImage(image);
-      }
-      provider.selected = 0;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SlyEditorPage(
-            suggestedFileName: 'Edited Image',
-            carouselProvider: provider,
-          ),
-        ),
-      );
-
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    }
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
@@ -99,31 +54,32 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                     children: provider.children,
                     onTap: (int index) {
                       if (index == 0) {
-                        pickNewImage();
+                        openImage(
+                          context,
+                          provider,
+                          () => showSlySnackBar(
+                            context,
+                            'Loading Image',
+                            loading: true,
+                          ),
+                          null,
+                          true,
+                          null,
+                          null,
+                        );
                       } else {
                         if (cropController != null) {
-                          provider.images[provider.selected] = (
-                            provider.images[provider.selected].$1,
+                          openImage(
+                            context,
+                            provider,
+                            null,
+                            null,
+                            false,
+                            index - 1,
                             // TODO: Reuse the object
-                            (SlyImage.from(editedImage), cropController)
+                            (SlyImage.from(editedImage), cropController),
                           );
                         }
-
-                        provider.selected = index - 1;
-
-                        Navigator.pushReplacement(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) =>
-                                    SlyEditorPage(
-                              suggestedFileName: 'Edited Image',
-                              carouselProvider: provider,
-                            ),
-                          ),
-                        );
-
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       }
                     },
                   ),

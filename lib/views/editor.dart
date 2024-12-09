@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:crop_image/crop_image.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '/platform.dart';
 import '/image.dart';
@@ -291,50 +290,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       },
     );
 
-    pickNewImage() async {
-      final ImagePicker picker = ImagePicker();
-      final List<XFile> files = await picker.pickMultiImage();
-
-      if (files.isEmpty) return;
-      if (!context.mounted) return;
-
-      showSlySnackBar(context, 'Loading Image', loading: true);
-
-      final List<SlyImage> images = [];
-
-      for (final file in files) {
-        final image = await SlyImage.fromData(await file.readAsBytes());
-        if (image == null) {
-          if (!context.mounted) return;
-
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          showSlySnackBar(context, 'Couldn’t Load Image');
-          return;
-        }
-
-        images.add(image);
-      }
-
-      if (!context.mounted) return;
-
-      for (final image in images) {
-        widget.carouselProvider.addImage(image);
-      }
-      widget.carouselProvider.selected = 0;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SlyEditorPage(
-            suggestedFileName: 'Edited Image',
-            carouselProvider: widget.carouselProvider,
-          ),
-        ),
-      );
-
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    }
-
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         SingleActivator(
@@ -392,7 +347,19 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
               void toggleCarousel() {
                 if (widget.carouselProvider.images.length <= 1) {
-                  pickNewImage();
+                  openImage(
+                    context,
+                    widget.carouselProvider,
+                    () => showSlySnackBar(
+                      context,
+                      'Loading Image',
+                      loading: true,
+                    ),
+                    null,
+                    true,
+                    null,
+                    null,
+                  );
                 } else {
                   setState(() => _showCarousel = !_showCarousel);
                 }
