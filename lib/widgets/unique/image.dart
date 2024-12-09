@@ -21,28 +21,36 @@ Widget getImageView(
   SlyImageAttribute vflip,
   SlyImageAttribute rotation,
 ) {
-  final imageView = editedImageData != null
-      ? InteractiveViewer(
-          clipBehavior: constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
-          key: const Key('imageView'),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(6),
+  final imageView = AnimatedSize(
+    duration: const Duration(seconds: 1),
+    curve: Curves.easeOutQuint,
+    child: editedImageData != null
+        ? InteractiveViewer(
+            clipBehavior:
+                constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
+            key: const Key('imageView'),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(6),
+              ),
+              child: Image.memory(
+                editedImageData,
+                fit: BoxFit.contain,
+                gaplessPlayback: true,
+              ),
             ),
-            child: Image.memory(
-              editedImageData,
-              fit: BoxFit.contain,
-              gaplessPlayback: true,
+          )
+        : SizedBox(
+            height: constraints.maxWidth,
+            child: const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: SlySpinner(),
+              ),
             ),
           ),
-        )
-      : const Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: SlySpinner(),
-          ),
-        );
+  );
 
   final cropImageView = originalImageData != null
       ? Padding(
