@@ -37,7 +37,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
         ),
       );
 
-      SlyJuggler().editImages(
+      await SlyJuggler().editImages(
         context: context,
         failedCallback: () => _pickerButton.setChild(Text(_pickerButtonLabel)),
       );
