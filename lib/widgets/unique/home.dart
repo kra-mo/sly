@@ -37,13 +37,9 @@ class _SlyHomePageState extends State<SlyHomePage> {
         ),
       );
 
-      editImages(
-        context,
-        null,
-        null,
-        () => _pickerButton.setChild(Text(_pickerButtonLabel)),
-        true,
-        null,
+      SlyJuggler().editImages(
+        context: context,
+        failedCallback: () => _pickerButton.setChild(Text(_pickerButtonLabel)),
       );
 
       // Wait for the page transition animation

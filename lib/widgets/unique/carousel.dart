@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '/juggler.dart';
-import '/views/editor.dart';
 import '/widgets/snack_bar.dart';
+import '/widgets/unique/editor.dart';
 
 class SlyImageCarousel extends StatefulWidget {
   const SlyImageCarousel({super.key});
@@ -12,14 +11,13 @@ class SlyImageCarousel extends StatefulWidget {
 }
 
 class _SlyImageCarouselState extends State<SlyImageCarousel> {
-  final GlobalKey _animatedPaddingKey = GlobalKey();
-
   @override
   build(BuildContext context) {
     final data = CarouselData.of(context).data;
     final visible = data.$1;
     final wideLayout = data.$2;
     final juggler = data.$3;
+    final globalKey = data.$4;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
@@ -28,7 +26,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
           ? Container(
               color: wideLayout ? null : Theme.of(context).hoverColor,
               child: AnimatedPadding(
-                key: _animatedPaddingKey,
+                key: globalKey,
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.easeOutQuint,
                 padding: EdgeInsets.only(
@@ -37,6 +35,11 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                 child: SizedBox(
                   height: 75,
                   child: CarouselView(
+                    padding: const EdgeInsets.only(
+                      bottom: 8,
+                      left: 4,
+                      right: 4,
+                    ),
                     overlayColor: WidgetStateProperty.resolveWith((states) {
                       return states.contains(WidgetState.focused)
                           ? Theme.of(context).hoverColor
@@ -51,26 +54,18 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                     children: juggler.carouselChildren,
                     onTap: (int index) {
                       if (index == 0) {
-                        editImages(
-                          context,
-                          juggler,
-                          () => showSlySnackBar(
+                        juggler.editImages(
+                          context: context,
+                          loadingCallback: () => showSlySnackBar(
                             context,
                             'Loading Image',
                             loading: true,
                           ),
-                          null,
-                          true,
-                          null,
                         );
                       } else {
-                        editImages(
-                          context,
-                          juggler,
-                          null,
-                          null,
-                          false,
-                          index - 1,
+                        juggler.editImages(
+                          context: context,
+                          newSelection: index - 1,
                         );
                       }
                     },

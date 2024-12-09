@@ -11,18 +11,18 @@ import '/history.dart';
 import '/io.dart';
 import '/juggler.dart';
 import '/preferences.dart';
-import '/views/navigation.dart';
-import '/views/controls.dart';
-import '/views/crop_controls.dart';
-import '/views/export_controls.dart';
-import '/views/toolbar.dart';
-import '/views/image.dart';
-import '/views/editor_scaffold.dart';
 import '/widgets/controls_list.dart';
-import '/widgets/carousel.dart';
 import '/widgets/button.dart';
-import '/widgets/histogram.dart';
 import '/widgets/snack_bar.dart';
+import '/widgets/unique/carousel.dart';
+import '/widgets/unique/histogram.dart';
+import '/widgets/unique/navigation.dart';
+import '/widgets/unique/controls.dart';
+import '/widgets/unique/crop_controls.dart';
+import '/widgets/unique/export_controls.dart';
+import '/widgets/unique/toolbar.dart';
+import '/widgets/unique/image.dart';
+import '/widgets/unique/editor_scaffold.dart';
 
 class SlyEditorPage extends StatefulWidget {
   final String suggestedFileName;
@@ -39,7 +39,7 @@ class SlyEditorPage extends StatefulWidget {
 }
 
 class CarouselData extends InheritedWidget {
-  final (bool, bool, SlyJuggler) data;
+  final (bool, bool, SlyJuggler, GlobalKey) data;
 
   const CarouselData({
     super.key,
@@ -63,7 +63,8 @@ class CarouselData extends InheritedWidget {
 class _SlyEditorPageState extends State<SlyEditorPage> {
   final _saveButtonKey = GlobalKey<SlyButtonState>();
   final _imageViewKey = GlobalKey();
-  GlobalKey _controlsWidgetKey = GlobalKey();
+  GlobalKey _controlsKey = GlobalKey();
+  GlobalKey _carouselKey = GlobalKey();
 
   Widget? _controlsChild;
 
@@ -95,7 +96,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     () => _editedImage,
     () {
       updateImage();
-      _controlsWidgetKey = GlobalKey();
+      _controlsKey = GlobalKey();
     },
   );
 
@@ -160,6 +161,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (!mounted) return;
 
     switch (event) {
+      case 'image picked':
+        setState(() => _carouselKey = GlobalKey());
+
       case 'new image':
         _originalImageData = null;
         _originalImage.encode(format: SlyImageFormat.png).then((data) {
@@ -180,7 +184,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
         setState(() {
           newImage = true;
-          _controlsWidgetKey = GlobalKey();
+          _controlsKey = GlobalKey();
         });
 
       case 'updated':
@@ -344,23 +348,20 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   _showCarousel,
                   constraints.maxWidth > 600,
                   widget.juggler,
+                  _carouselKey,
                 ),
                 child: const SlyImageCarousel(),
               );
 
               void toggleCarousel() {
                 if (widget.juggler.images.length <= 1) {
-                  editImages(
-                    context,
-                    widget.juggler,
-                    () => showSlySnackBar(
+                  widget.juggler.editImages(
+                    context: context,
+                    loadingCallback: () => showSlySnackBar(
                       context,
                       'Loading Image',
                       loading: true,
                     ),
-                    null,
-                    true,
-                    null,
                   );
                 } else {
                   setState(() => _showCarousel = !_showCarousel);
@@ -464,7 +465,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
 
               final controlsView = getControlsView(
-                _controlsWidgetKey,
+                _controlsKey,
                 constraints,
                 _controlsChild,
               );
