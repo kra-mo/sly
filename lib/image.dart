@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:async';
 import 'dart:ui';
+// import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -104,6 +105,7 @@ class SlyBoolAttribute extends SlyImageAttribute<bool> {
 
 class SlyImage {
   StreamController<String> controller = StreamController<String>();
+  // bool shallow = false;
 
   img.Image _originalImage;
   img.Image _image;
@@ -160,8 +162,9 @@ class SlyImage {
 
   /// Creates a new `SlyImage` from another `src`.
   ///
-  /// Note that if `src` is in the process of loading, the copied image might stay at a lower resolution
-  /// until `applyEdits` or `applyEditsProgressive` is called on `this`.
+  /// Note that if `src` is in the process of loading,
+  /// the copied image might stay at a lower resolution until
+  /// `applyEdits` or `applyEditsProgressive` is called on `this`.
   SlyImage.from(SlyImage src)
       : _image = img.Image.from(src._image),
         _originalImage = img.Image.from(src._originalImage) {
@@ -184,6 +187,18 @@ class SlyImage {
 
     return SlyImage._fromImage(imgImage);
   }
+
+  /// Creates a new shallow `SlyImage` from `file`.
+  ///
+  /// Shallow `SlyImage`s are not loaded into memory until the
+  /// first operation that requires the buffer is performed on them.
+  ///
+  /// This means that if the original file is moved or removed,
+  /// the image will no longer be valid.
+  // SlyImage.shallowFromFile(File file)
+  //     : shallow = true,
+  //       _image = img.Image.empty(),
+  //       _originalImage = img.Image.empty();
 
   /// Applies changes to the image's attrubutes.
   Future<void> applyEdits() async {

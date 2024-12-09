@@ -7,7 +7,6 @@ Scaffold getEditorScaffold(
   BoxConstraints constraints,
   Widget imageView,
   Widget controlsView,
-  Widget cropControls,
   Widget toolbar,
   Widget histogram,
   Widget navigationRail,
@@ -161,7 +160,7 @@ Scaffold getEditorScaffold(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Expanded(child: imageView),
-                      cropControls,
+                      controlsView,
                     ],
                   )
                 : ListView(

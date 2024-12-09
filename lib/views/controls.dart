@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 Widget getControlsView(
+  GlobalKey key,
   BoxConstraints constraints,
-  int keyValue,
   Widget? child,
 ) {
   return AnimatedSize(
-    key: Key('controlsWidget $keyValue'),
+    key: key,
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeOutQuint,
     child: AnimatedSwitcher(

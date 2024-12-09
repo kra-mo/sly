@@ -9,28 +9,28 @@ import '/platform.dart';
 import '/image.dart';
 import '/history.dart';
 import '/io.dart';
-import '/carousel.dart';
+import '/juggler.dart';
 import '/preferences.dart';
 import '/views/navigation.dart';
 import '/views/controls.dart';
-import '/views/controls_list.dart';
 import '/views/crop_controls.dart';
 import '/views/export_controls.dart';
 import '/views/toolbar.dart';
 import '/views/image.dart';
-import '/views/carousel.dart';
 import '/views/editor_scaffold.dart';
+import '/widgets/controls_list.dart';
+import '/widgets/carousel.dart';
 import '/widgets/button.dart';
 import '/widgets/histogram.dart';
 import '/widgets/snack_bar.dart';
 
 class SlyEditorPage extends StatefulWidget {
   final String suggestedFileName;
-  final SlyCarouselProvider carouselProvider;
+  final SlyJuggler juggler;
 
   const SlyEditorPage({
     super.key,
-    required this.carouselProvider,
+    required this.juggler,
     this.suggestedFileName = 'Edited Image',
   });
 
@@ -39,13 +39,7 @@ class SlyEditorPage extends StatefulWidget {
 }
 
 class CarouselData extends InheritedWidget {
-  final (
-    bool,
-    bool,
-    SlyCarouselProvider,
-    SlyImage,
-    CropController?,
-  ) data;
+  final (bool, bool, SlyJuggler) data;
 
   const CarouselData({
     super.key,
@@ -69,24 +63,30 @@ class CarouselData extends InheritedWidget {
 class _SlyEditorPageState extends State<SlyEditorPage> {
   final _saveButtonKey = GlobalKey<SlyButtonState>();
   final _imageViewKey = GlobalKey();
-  int _controlsWidgetKeyValue = 0;
+  GlobalKey _controlsWidgetKey = GlobalKey();
 
   Widget? _controlsChild;
 
-  late final SlyImage _originalImage = widget.carouselProvider.originalImage;
-  late SlyImage _editedImage;
+  CropController? get _cropController => widget.juggler.cropController;
+  SlyImage get _originalImage => widget.juggler.originalImage;
+  SlyImage get _editedImage => widget.juggler.editedImage!;
+  set _editedImage(value) => widget.juggler.editedImage = value;
+
+  get _lightAttributes => _editedImage.lightAttributes;
+  get _colorAttributes => _editedImage.colorAttributes;
+  get _effectAttributes => _editedImage.effectAttributes;
+  get _geometryAttributes => _editedImage.geometryAttributes;
+
+  bool newImage = false;
+
   Widget? _histogram;
 
   Uint8List? _originalImageData;
   Uint8List? _editedImageData;
 
-  StreamSubscription<String>? subscription;
-
   bool _saveMetadata = true;
   SlyImageFormat _saveFormat = SlyImageFormat.png;
   bool _saveOnLoad = false;
-
-  CropController? _cropController;
 
   bool _cropChanged = false;
   bool _portraitCrop = false;
@@ -95,13 +95,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     () => _editedImage,
     () {
       updateImage();
-      _controlsWidgetKeyValue++;
+      _controlsWidgetKey = GlobalKey();
     },
   );
 
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
-  late bool _showCarousel = widget.carouselProvider.images.length > 1;
+  late bool _showCarousel = widget.juggler.images.length > 1;
 
   SlyButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
@@ -160,6 +160,29 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (!mounted) return;
 
     switch (event) {
+      case 'new image':
+        _originalImageData = null;
+        _originalImage.encode(format: SlyImageFormat.png).then((data) {
+          if (!mounted) return;
+          setState(() => _originalImageData = data);
+        });
+
+        _editedImageData = null;
+        _editedImage.encode(format: SlyImageFormat.jpeg75).then((data) {
+          if (!mounted) return;
+          setState(() => _editedImageData = data);
+        });
+
+        getHistogram(_editedImage).then((data) {
+          if (!mounted) return;
+          setState(() => _histogram = data);
+        });
+
+        setState(() {
+          newImage = true;
+          _controlsWidgetKey = GlobalKey();
+        });
+
       case 'updated':
         if (_saveOnLoad) {
           _save();
@@ -187,19 +210,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       setState(() => _showHistogram = showHistogram);
     });
 
-    if (widget.carouselProvider.editedImage != null) {
-      _editedImage = widget.carouselProvider.editedImage!;
-    } else {
-      _editedImage = SlyImage.from(_originalImage);
-    }
-
-    if (widget.carouselProvider.cropController != null) {
-      _cropController = widget.carouselProvider.cropController!;
-    } else {
-      _cropController = CropController();
-    }
-
-    subscription = _editedImage.controller.stream.listen(_onImageUpdate);
+    widget.juggler.controller.stream.listen(_onImageUpdate);
     updateImage();
 
     _originalImage.encode(format: SlyImageFormat.png).then((data) {
@@ -213,15 +224,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   @override
   void dispose() {
-    subscription?.cancel();
-
     _originalImage.dispose();
     _editedImage.dispose();
 
     _originalImageData = null;
     _editedImageData = null;
-
-    _cropController = null;
 
     super.dispose();
   }
@@ -234,15 +241,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     final croppedImage = SlyImage.from(_originalImage);
     await croppedImage.crop(_cropController!.crop);
 
-    croppedImage.lightAttributes = _editedImage.lightAttributes;
-    croppedImage.colorAttributes = _editedImage.colorAttributes;
-    croppedImage.effectAttributes = _editedImage.effectAttributes;
-    croppedImage.geometryAttributes = _editedImage.geometryAttributes;
+    croppedImage.lightAttributes = _lightAttributes;
+    croppedImage.colorAttributes = _colorAttributes;
+    croppedImage.effectAttributes = _effectAttributes;
+    croppedImage.geometryAttributes = _geometryAttributes;
 
-    subscription?.cancel();
     _editedImage.dispose();
     _editedImage = croppedImage;
-    subscription = _editedImage.controller.stream.listen(_onImageUpdate);
 
     updateImage();
   }
@@ -251,8 +256,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (!mounted) return;
 
     setState(() {
-      final hflipAttr = _editedImage.geometryAttributes['hflip']!;
-      final vflipAttr = _editedImage.geometryAttributes['vflip']!;
+      final hflipAttr = _geometryAttributes['hflip']!;
+      final vflipAttr = _geometryAttributes['vflip']!;
 
       switch (direction) {
         case SlyImageFlipDirection.horizontal:
@@ -338,18 +343,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 data: (
                   _showCarousel,
                   constraints.maxWidth > 600,
-                  widget.carouselProvider,
-                  _editedImage,
-                  _cropController,
+                  widget.juggler,
                 ),
                 child: const SlyImageCarousel(),
               );
 
               void toggleCarousel() {
-                if (widget.carouselProvider.images.length <= 1) {
-                  openImage(
+                if (widget.juggler.images.length <= 1) {
+                  editImages(
                     context,
-                    widget.carouselProvider,
+                    widget.juggler,
                     () => showSlySnackBar(
                       context,
                       'Loading Image',
@@ -357,7 +360,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     ),
                     null,
                     true,
-                    null,
                     null,
                   );
                 } else {
@@ -374,55 +376,66 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 () => _selectedPageIndex == 3,
                 _cropController,
                 (rect) => _cropChanged = true,
-                _editedImage.geometryAttributes['hflip']!,
-                _editedImage.geometryAttributes['vflip']!,
-                _editedImage.geometryAttributes['rotation']!,
+                _geometryAttributes['hflip']!,
+                _geometryAttributes['vflip']!,
+                _geometryAttributes['rotation']!,
               );
 
-              final lightControls = createControlsListView(
-                _editedImage.lightAttributes,
-                const Key('lightControls'),
-                constraints,
-                history,
-                updateImage,
-              );
+              Widget getControlsChild(index) {
+                switch (index) {
+                  case 1:
+                    return SlyControlsListView(
+                      key: const Key('colorControls'),
+                      attributes: _colorAttributes,
+                      constraints: constraints,
+                      history: history,
+                      updateImage: updateImage,
+                    );
+                  case 2:
+                    return SlyControlsListView(
+                      key: const Key('effectControls'),
+                      attributes: _effectAttributes,
+                      constraints: constraints,
+                      history: history,
+                      updateImage: updateImage,
+                    );
+                  case 3:
+                    return getCropControls(
+                      _cropController,
+                      () => _portraitCrop,
+                      (value) => setState(() => _portraitCrop = value),
+                      _onAspectRatioSelected,
+                      _geometryAttributes['rotation']!,
+                      (value) => setState(() {
+                        _geometryAttributes['rotation']!.value = value;
+                      }),
+                      flipImage,
+                    );
+                  case 4:
+                    return getExportControls(
+                      constraints,
+                      _saveButton,
+                      () => _saveMetadata,
+                      (value) => _saveMetadata = value,
+                    );
+                  default:
+                    return SlyControlsListView(
+                      key: const Key('lightControls'),
+                      attributes: _lightAttributes,
+                      constraints: constraints,
+                      history: history,
+                      updateImage: updateImage,
+                    );
+                }
+              }
 
-              final colorControls = createControlsListView(
-                _editedImage.colorAttributes,
-                const Key('colorControls'),
-                constraints,
-                history,
-                updateImage,
-              );
+              _controlsChild ??= getControlsChild(_selectedPageIndex);
 
-              final effectControls = createControlsListView(
-                _editedImage.effectAttributes,
-                const Key('effectControls'),
-                constraints,
-                history,
-                updateImage,
-              );
-
-              final cropControls = getCropControls(
-                _cropController,
-                () => _portraitCrop,
-                (value) => setState(() => _portraitCrop = value),
-                _onAspectRatioSelected,
-                _editedImage.geometryAttributes['rotation']!,
-                (value) => setState(() {
-                  _editedImage.geometryAttributes['rotation']!.value = value;
-                }),
-                flipImage,
-              );
-
-              final exportControls = getExportControls(
-                constraints,
-                _saveButton,
-                () => _saveMetadata,
-                (value) => _saveMetadata = value,
-              );
-
-              _controlsChild ??= lightControls;
+              if (newImage) {
+                if (_selectedPageIndex == 3) _selectedPageIndex = 0;
+                _controlsChild = getControlsChild(_selectedPageIndex);
+                newImage = false;
+              }
 
               void navigationDestinationSelected(int index) {
                 if (_selectedPageIndex == index) return;
@@ -434,13 +447,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 _selectedPageIndex = index;
 
                 setState(() {
-                  _controlsChild = [
-                    lightControls,
-                    colorControls,
-                    effectControls,
-                    cropControls,
-                    exportControls,
-                  ][index];
+                  _controlsChild = getControlsChild(index);
                 });
               }
 
@@ -457,8 +464,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
               );
 
               final controlsView = getControlsView(
+                _controlsWidgetKey,
                 constraints,
-                _controlsWidgetKeyValue,
                 _controlsChild,
               );
 
@@ -523,7 +530,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                 constraints,
                 imageView,
                 controlsView,
-                cropControls,
                 toolbar,
                 histogram,
                 navigationRail,

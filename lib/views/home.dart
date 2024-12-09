@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '/platform.dart';
-import '/io.dart';
+import '/juggler.dart';
 import '/preferences.dart';
 import '/widgets/button.dart';
 import '/widgets/spinner.dart';
@@ -37,13 +37,12 @@ class _SlyHomePageState extends State<SlyHomePage> {
         ),
       );
 
-      openImage(
+      editImages(
         context,
         null,
         null,
         () => _pickerButton.setChild(Text(_pickerButtonLabel)),
         true,
-        null,
         null,
       );
 

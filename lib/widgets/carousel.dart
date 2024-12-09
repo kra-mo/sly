@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/io.dart';
-import '/image.dart';
+import '/juggler.dart';
 import '/views/editor.dart';
 import '/widgets/snack_bar.dart';
 
@@ -20,9 +19,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
     final data = CarouselData.of(context).data;
     final visible = data.$1;
     final wideLayout = data.$2;
-    final provider = data.$3;
-    final editedImage = data.$4;
-    final cropController = data.$5;
+    final juggler = data.$3;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
@@ -51,12 +48,12 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                       ),
                     ),
                     itemExtent: 75,
-                    children: provider.children,
+                    children: juggler.carouselChildren,
                     onTap: (int index) {
                       if (index == 0) {
-                        openImage(
+                        editImages(
                           context,
-                          provider,
+                          juggler,
                           () => showSlySnackBar(
                             context,
                             'Loading Image',
@@ -65,21 +62,16 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                           null,
                           true,
                           null,
-                          null,
                         );
                       } else {
-                        if (cropController != null) {
-                          openImage(
-                            context,
-                            provider,
-                            null,
-                            null,
-                            false,
-                            index - 1,
-                            // TODO: Reuse the object
-                            (SlyImage.from(editedImage), cropController),
-                          );
-                        }
+                        editImages(
+                          context,
+                          juggler,
+                          null,
+                          null,
+                          false,
+                          index - 1,
+                        );
                       }
                     },
                   ),

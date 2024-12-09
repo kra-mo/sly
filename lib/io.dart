@@ -6,94 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:gal/gal.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:crop_image/crop_image.dart';
 
 import '/platform.dart';
-import '/carousel.dart';
 import '/image.dart';
-import '/views/editor.dart';
 import '/widgets/dialog.dart';
 import '/widgets/button.dart';
 import '/widgets/spinner.dart';
-import '/widgets/snack_bar.dart';
-
-Future<void> openImage(
-  BuildContext context,
-  SlyCarouselProvider? carouselProvider,
-  VoidCallback? loadingCallback,
-  VoidCallback? failedCallback,
-  bool animate,
-  int? newSelection,
-  (SlyImage, CropController)? currentImage,
-) async {
-  if (newSelection == null) {
-    final ImagePicker picker = ImagePicker();
-    final List<XFile> files = await picker.pickMultiImage();
-
-    if (files.isEmpty) {
-      if (failedCallback != null) failedCallback();
-      return;
-    }
-
-    if (!context.mounted) {
-      if (failedCallback != null) failedCallback();
-      return;
-    }
-    if (loadingCallback != null) loadingCallback();
-
-    final List<SlyImage> images = [];
-    for (final file in files) {
-      final image = await SlyImage.fromData(await file.readAsBytes());
-      if (image == null) {
-        if (failedCallback != null) failedCallback();
-
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        showSlySnackBar(context, 'Couldn’t Load Image');
-        return;
-      }
-
-      images.add(image);
-    }
-
-    if (!context.mounted) {
-      if (failedCallback != null) failedCallback();
-      return;
-    }
-
-    if (carouselProvider == null) {
-      carouselProvider = SlyCarouselProvider(images);
-    } else {
-      for (final image in images) {
-        carouselProvider.addImage(image);
-      }
-      carouselProvider.selected = 0;
-    }
-  } else {
-    if (currentImage != null && carouselProvider != null) {
-      carouselProvider.images[carouselProvider.selected] =
-          (carouselProvider.images[carouselProvider.selected].$1, currentImage);
-
-      carouselProvider.selected = newSelection;
-    }
-  }
-
-  Navigator.pushReplacement(
-    context,
-    animate
-        ? MaterialPageRoute(
-            builder: (context) =>
-                SlyEditorPage(carouselProvider: carouselProvider!),
-          )
-        : PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                SlyEditorPage(carouselProvider: carouselProvider!),
-          ),
-  );
-
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-}
 
 Future<img.Image?> loadImgImage(Uint8List bytes) async {
   final ui.Image? uiImage;
