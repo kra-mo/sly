@@ -64,7 +64,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
           highlightColor: Colors.transparent,
           icon: ImageIcon(
             color: Theme.of(context).hintColor,
-            const AssetImage('assets/icons/preferences.png'),
+            const AssetImage('assets/icons/preferences.webp'),
           ),
           padding: const EdgeInsets.all(12),
           onPressed: () {
@@ -103,7 +103,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const ImageIcon(
-                        AssetImage('assets/sly.png'),
+                        AssetImage('assets/sly.webp'),
                         color: Colors.deepOrangeAccent,
                         size: 96,
                       ),

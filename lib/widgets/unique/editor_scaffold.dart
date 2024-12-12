@@ -55,7 +55,7 @@ Scaffold getEditorScaffold(
               turns: getShowCarousel() ? 1 / 8 : 0,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutBack,
-              child: const ImageIcon(AssetImage('assets/icons/add.png')),
+              child: const ImageIcon(AssetImage('assets/icons/add.webp')),
             ),
           ),
         ),

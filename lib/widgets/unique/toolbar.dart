@@ -41,7 +41,7 @@ Widget getToolbar(
                   highlightColor: Colors.transparent,
                   icon: ImageIcon(
                     color: Theme.of(context).hintColor,
-                    const AssetImage('assets/icons/histogram.png'),
+                    const AssetImage('assets/icons/histogram.webp'),
                   ),
                   onPressed: () async {
                     await (await prefs)
@@ -59,7 +59,7 @@ Widget getToolbar(
             highlightColor: Colors.transparent,
             icon: ImageIcon(
               color: Theme.of(context).hintColor,
-              const AssetImage('assets/icons/show.png'),
+              const AssetImage('assets/icons/show.webp'),
             ),
             onPressed: showOriginal,
           ),
@@ -73,7 +73,7 @@ Widget getToolbar(
               color: history.canUndo
                   ? Theme.of(context).hintColor
                   : Theme.of(context).disabledColor,
-              const AssetImage('assets/icons/undo.png'),
+              const AssetImage('assets/icons/undo.webp'),
             ),
             onPressed: () {
               history.undo();
@@ -89,7 +89,7 @@ Widget getToolbar(
               color: history.canRedo
                   ? Theme.of(context).hintColor
                   : Theme.of(context).disabledColor,
-              const AssetImage('assets/icons/redo.png'),
+              const AssetImage('assets/icons/redo.webp'),
             ),
             onPressed: () {
               history.redo();

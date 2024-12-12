@@ -26,7 +26,7 @@ Widget getCropControls(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             icon: const ImageIcon(
-              AssetImage('assets/icons/aspect-ratio.png'),
+              AssetImage('assets/icons/aspect-ratio.webp'),
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {
@@ -113,7 +113,7 @@ Widget getCropControls(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             icon: const ImageIcon(
-              AssetImage('assets/icons/rotate-left.png'),
+              AssetImage('assets/icons/rotate-left.webp'),
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {
@@ -127,7 +127,7 @@ Widget getCropControls(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             icon: const ImageIcon(
-              AssetImage('assets/icons/rotate-right.png'),
+              AssetImage('assets/icons/rotate-right.webp'),
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {
@@ -141,7 +141,7 @@ Widget getCropControls(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             icon: const ImageIcon(
-              AssetImage('assets/icons/flip-horizontal.png'),
+              AssetImage('assets/icons/flip-horizontal.webp'),
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {
@@ -155,7 +155,7 @@ Widget getCropControls(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             icon: const ImageIcon(
-              AssetImage('assets/icons/flip-vertical.png'),
+              AssetImage('assets/icons/flip-vertical.webp'),
             ),
             padding: const EdgeInsets.all(12),
             onPressed: () {

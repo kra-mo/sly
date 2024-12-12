@@ -18,7 +18,7 @@ class SlyJuggler {
 
   late final List<Widget> carouselChildren = [
     const ImageIcon(
-      AssetImage('assets/icons/add.png'),
+      AssetImage('assets/icons/add.webp'),
       semanticLabel: 'Add Images',
     ),
   ];

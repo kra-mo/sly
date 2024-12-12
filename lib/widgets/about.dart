@@ -138,7 +138,7 @@ void showSlyAboutDialog(BuildContext context) {
                                     applicationIcon: ImageIcon(
                                       size: 96,
                                       color: Colors.deepOrangeAccent,
-                                      AssetImage('assets/sly.png'),
+                                      AssetImage('assets/sly.webp'),
                                     ),
                                   ),
                                 ),

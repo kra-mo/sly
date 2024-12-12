@@ -53,7 +53,7 @@ class SlyTitleBar extends StatelessWidget {
                           maxHeight: 24,
                         ),
                         icon: const ImageIcon(
-                          AssetImage('assets/icons/window-close.png'),
+                          AssetImage('assets/icons/window-close.webp'),
                         ),
                         onPressed: () {
                           exit(0);

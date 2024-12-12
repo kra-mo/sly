@@ -18,11 +18,11 @@ NavigationRail getNavigationRail(
     ),
     onDestinationSelected: onDestinationSelected,
     destinations: <NavigationRailDestination>[
-      _getRailDestination('Light', 'assets/icons/light.png'),
-      _getRailDestination('Color', 'assets/icons/color.png'),
-      _getRailDestination('Effects', 'assets/icons/effects.png'),
-      _getRailDestination('Crop', 'assets/icons/crop.png'),
-      _getRailDestination('Export', 'assets/icons/export.png'),
+      _getRailDestination('Light', 'assets/icons/light.webp'),
+      _getRailDestination('Color', 'assets/icons/color.webp'),
+      _getRailDestination('Effects', 'assets/icons/effects.webp'),
+      _getRailDestination('Crop', 'assets/icons/crop.webp'),
+      _getRailDestination('Export', 'assets/icons/export.webp'),
     ],
   );
 }
@@ -46,11 +46,11 @@ NavigationBar getNavigationBar(
     onDestinationSelected: onDestinationSelected,
     labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
     destinations: <Widget>[
-      _getDestination('Light', 'assets/icons/light.png'),
-      _getDestination('Color', 'assets/icons/color.png'),
-      _getDestination('Effects', 'assets/icons/effects.png'),
-      _getDestination('Crop', 'assets/icons/crop.png'),
-      _getDestination('Export', 'assets/icons/export.png'),
+      _getDestination('Light', 'assets/icons/light.webp'),
+      _getDestination('Color', 'assets/icons/color.webp'),
+      _getDestination('Effects', 'assets/icons/effects.webp'),
+      _getDestination('Crop', 'assets/icons/crop.webp'),
+      _getDestination('Export', 'assets/icons/export.webp'),
       Semantics(
         label: 'More Images',
         child: FloatingActionButton.small(
@@ -66,7 +66,7 @@ NavigationBar getNavigationBar(
             turns: getShowCarousel() ? 1 / 8 : 0,
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutBack,
-            child: const ImageIcon(AssetImage('assets/icons/add.png')),
+            child: const ImageIcon(AssetImage('assets/icons/add.webp')),
           ),
         ),
       ),

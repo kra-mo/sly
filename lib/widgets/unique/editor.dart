@@ -148,7 +148,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     if (mounted) {
       _saveButton?.setChild(
         const ImageIcon(
-          AssetImage('assets/icons/checkmark.png'),
+          AssetImage('assets/icons/checkmark.webp'),
         ),
       );
       await Future.delayed(const Duration(milliseconds: 2500));
