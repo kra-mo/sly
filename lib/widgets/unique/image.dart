@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,7 @@ import 'package:crop_image/crop_image.dart';
 import '/platform.dart';
 import '/image.dart';
 import '/widgets/spinner.dart';
+import '/widgets/unique/fullscreen_viewer.dart';
 
 Widget getImageView(
   GlobalKey key,
@@ -25,18 +27,24 @@ Widget getImageView(
     duration: const Duration(seconds: 1),
     curve: Curves.easeOutQuint,
     child: editedImageData != null
-        ? InteractiveViewer(
-            clipBehavior:
-                constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
-            key: const Key('imageView'),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(
-                Radius.circular(6),
-              ),
-              child: Image.memory(
-                editedImageData,
-                fit: BoxFit.contain,
-                gaplessPlayback: true,
+        ? GestureDetector(
+            onTap: () => showFullScreenViewer(context, editedImageData!),
+            child: InteractiveViewer(
+              clipBehavior:
+                  constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
+              key: const Key('imageView'),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(6),
+                ),
+                child: Hero(
+                  tag: 'image',
+                  child: Image.memory(
+                    editedImageData,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  ),
+                ),
               ),
             ),
           )

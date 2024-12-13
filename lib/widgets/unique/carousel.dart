@@ -61,6 +61,8 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                           ),
                         );
                       } else {
+                        if (juggler.selected == index - 1) return;
+
                         juggler.editImages(
                           context: context,
                           newSelection: index - 1,

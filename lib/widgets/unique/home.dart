@@ -6,7 +6,7 @@ import '/preferences.dart';
 import '/widgets/button.dart';
 import '/widgets/spinner.dart';
 import '/widgets/title_bar.dart';
-import '/widgets/about.dart';
+import '/widgets/unique/about.dart';
 
 class SlyHomePage extends StatefulWidget {
   const SlyHomePage({super.key, required this.title});
