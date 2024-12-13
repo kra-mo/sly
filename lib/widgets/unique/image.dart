@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -28,7 +27,7 @@ Widget getImageView(
     curve: Curves.easeOutQuint,
     child: editedImageData != null
         ? GestureDetector(
-            onTap: () => showFullScreenViewer(context, editedImageData!),
+            onTap: () => showFullScreenViewer(context, editedImageData),
             child: InteractiveViewer(
               clipBehavior:
                   constraints.maxWidth > 600 ? Clip.none : Clip.hardEdge,
