@@ -23,18 +23,18 @@ class SlyImageAttribute<T> {
       : this(attribute.name, attribute.value);
 }
 
-class SlyClamptedAttribute<T> extends SlyImageAttribute<T> {
+class SlyClampedAttribute<T> extends SlyImageAttribute<T> {
   final T min;
   final T max;
 
-  SlyClamptedAttribute(
+  SlyClampedAttribute(
     super.name,
     super.value,
     this.min,
     this.max,
   );
 
-  SlyClamptedAttribute.copy(SlyClamptedAttribute attribute)
+  SlyClampedAttribute.copy(SlyClampedAttribute attribute)
       : this(
           attribute.name,
           attribute.value,
@@ -43,7 +43,7 @@ class SlyClamptedAttribute<T> extends SlyImageAttribute<T> {
         );
 }
 
-class SlyOverflowAttribute extends SlyClamptedAttribute<int> {
+class SlyOverflowAttribute extends SlyClampedAttribute<int> {
   @override
   set value(int v) {
     if (v < value) {
@@ -75,7 +75,7 @@ class SlyOverflowAttribute extends SlyClamptedAttribute<int> {
         );
 }
 
-class SlyRangeAttribute extends SlyClamptedAttribute<double> {
+class SlyRangeAttribute extends SlyClampedAttribute<double> {
   final double anchor;
 
   SlyRangeAttribute(

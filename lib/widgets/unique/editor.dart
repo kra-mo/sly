@@ -111,7 +111,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     final copyImage = SlyImage.from(_editedImage);
 
     final rotationAttr =
-        copyImage.geometryAttributes['rotation']! as SlyClamptedAttribute;
+        copyImage.geometryAttributes['rotation']! as SlyClampedAttribute;
 
     if (![rotationAttr.min, rotationAttr.max].contains(rotationAttr.value)) {
       copyImage.rotate(rotationAttr.value * 90);
