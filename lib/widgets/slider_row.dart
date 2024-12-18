@@ -24,6 +24,7 @@ class SlySliderRow extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
+    this.gradient,
   });
 
   final double value;
@@ -45,6 +46,7 @@ class SlySliderRow extends StatefulWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final SliderInteraction? allowedInteraction;
+  final LinearGradient? gradient;
 
   @override
   State<SlySliderRow> createState() => _SlySliderRowState();
@@ -91,6 +93,7 @@ class _SlySliderRowState extends State<SlySliderRow> {
     focusNode: widget.focusNode,
     autofocus: widget.autofocus,
     allowedInteraction: widget.allowedInteraction,
+    gradient: widget.gradient,
   );
 
   @override

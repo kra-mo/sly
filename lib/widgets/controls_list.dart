@@ -5,6 +5,27 @@ import '/image.dart';
 import '/history.dart';
 import '/widgets/slider_row.dart';
 
+LinearGradient? getGradientForAttributeName(String name) {
+  switch (name) {
+    case 'temp':
+      return LinearGradient(colors: [
+        Colors.blue,
+        Colors.lightBlue.shade100,
+        Colors.yellow.shade200,
+        Colors.orange.shade400,
+      ]);
+    case 'tint':
+      return LinearGradient(colors: [
+        Colors.lightGreen,
+        Colors.lightGreen.shade200,
+        Colors.purple.shade100,
+        Colors.purple.shade400,
+      ]);
+    default:
+      return null;
+  }
+}
+
 class SlyControlsListView extends StatelessWidget {
   final Map<String, SlyRangeAttribute> attributes;
   final BoxConstraints constraints;
@@ -51,6 +72,9 @@ class SlyControlsListView extends StatelessWidget {
               attributes.values.elementAt(index).value = value;
               updateImage();
             },
+            gradient: getGradientForAttributeName(
+              attributes.keys.elementAt(index),
+            ),
           ),
         );
       },

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class SlySlider extends StatefulWidget {
@@ -22,6 +24,7 @@ class SlySlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
+    this.gradient,
   });
 
   final double value;
@@ -43,6 +46,7 @@ class SlySlider extends StatefulWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final SliderInteraction? allowedInteraction;
+  final LinearGradient? gradient;
 
   @override
   State<SlySlider> createState() => _SlySliderState();
@@ -60,6 +64,7 @@ class _SlySliderState extends State<SlySlider> {
         inactiveTrackColor: Theme.of(context).disabledColor,
         trackHeight: 18,
         thumbShape: InsetSliderThumbShape(),
+        trackShape: SlySliderTrackShape(widget.gradient),
         overlayColor: Colors.transparent,
       ),
       child: GestureDetector(
@@ -125,19 +130,104 @@ class InsetSliderThumbShape extends SliderComponentShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    context.canvas.drawCircle(
-      center,
-      10,
+    context.canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: center,
+          width: 10 + (2 * activationAnimation.value),
+          height: 32 + (4 * activationAnimation.value),
+        ),
+        const Radius.circular(6),
+      ),
       Paint()
         ..color = sliderTheme.activeTrackColor!
         ..style = PaintingStyle.fill,
     );
-    context.canvas.drawCircle(
-      center,
-      6 * activationAnimation.value,
-      Paint()
-        ..color = sliderTheme.inactiveTrackColor!
-        ..style = PaintingStyle.fill,
+  }
+}
+
+class SlySliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
+  const SlySliderTrackShape(this.gradient);
+
+  final LinearGradient? gradient;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2,
+  }) {
+    assert(sliderTheme.disabledActiveTrackColor != null);
+    assert(sliderTheme.disabledInactiveTrackColor != null);
+    assert(sliderTheme.activeTrackColor != null);
+    assert(sliderTheme.inactiveTrackColor != null);
+    assert(sliderTheme.thumbShape != null);
+    // If the slider [SliderThemeData.trackHeight] is less than or equal to 0,
+    // then it makes no difference whether the track is painted or not,
+    // therefore the painting can be a no-op.
+    if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
+      return;
+    }
+
+    final Rect trackRect = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
     );
+
+    // Assign the track segment paints, which are leading: active and
+    // trailing: inactive.
+    final ColorTween activeTrackColorTween = ColorTween(
+        begin: sliderTheme.disabledActiveTrackColor,
+        end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween = ColorTween(
+        begin: sliderTheme.disabledInactiveTrackColor,
+        end: sliderTheme.inactiveTrackColor);
+    final Paint activePaint = Paint()
+      ..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final Paint inactivePaint = Paint()
+      ..shader = gradient?.createShader(trackRect)
+      ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final (Paint leftTrackPaint, Paint rightTrackPaint) =
+        switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
+
+    const int thumbRadius = 5;
+    context.canvas.drawRRect(
+      RRect.fromLTRBR(
+        trackRect.left - thumbRadius,
+        trackRect.top,
+        trackRect.right + thumbRadius,
+        trackRect.bottom,
+        Radius.circular(trackRect.height / 2),
+      ),
+      rightTrackPaint,
+    );
+
+    final bool isLTR = textDirection == TextDirection.ltr;
+    if (gradient == null && secondaryOffset != null) {
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          max(secondaryOffset.dx, thumbCenter.dx) + thumbRadius,
+          isLTR ? trackRect.top : trackRect.top,
+          min(secondaryOffset.dx, thumbCenter.dx) - thumbRadius,
+          isLTR ? trackRect.bottom : trackRect.bottom,
+          const Radius.circular(4),
+        ),
+        leftTrackPaint,
+      );
+    }
   }
 }
