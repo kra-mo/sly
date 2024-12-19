@@ -131,8 +131,8 @@ class SlyImage {
     'denoise': SlyRangeAttribute('Noise Reduction', 0, 0, 0, 1),
     'sharpness': SlyRangeAttribute('Sharpness', 0, 0, 0, 1),
     'vignette': SlyRangeAttribute('Vignette', 0, 0, 0, 1),
-    'border': SlyRangeAttribute('Border', 0, 0, -1, 1),
     'sepia': SlyRangeAttribute('Sepia', 0, 0, 0, 1),
+    'border': SlyRangeAttribute('Border', 0, 0, -1, 1),
   };
 
   /// For informational purposes only, not actually reflected in the buffer

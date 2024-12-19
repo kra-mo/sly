@@ -1,7 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '/widgets/snack_bar.dart';
-import '/widgets/unique/editor.dart';
+import '/juggler.dart';
+
+class SlyCarouselData extends InheritedWidget {
+  final (bool, bool, SlyJuggler, GlobalKey) data;
+
+  const SlyCarouselData({
+    super.key,
+    required this.data,
+    required super.child,
+  });
+
+  static SlyCarouselData? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SlyCarouselData>();
+  }
+
+  static SlyCarouselData of(BuildContext context) {
+    final SlyCarouselData? result = maybeOf(context);
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(SlyCarouselData oldWidget) => data != oldWidget.data;
+}
 
 class SlyImageCarousel extends StatefulWidget {
   const SlyImageCarousel({super.key});
@@ -13,7 +35,7 @@ class SlyImageCarousel extends StatefulWidget {
 class _SlyImageCarouselState extends State<SlyImageCarousel> {
   @override
   build(BuildContext context) {
-    final data = CarouselData.of(context).data;
+    final data = SlyCarouselData.of(context).data;
     final visible = data.$1;
     final wideLayout = data.$2;
     final juggler = data.$3;

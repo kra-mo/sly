@@ -12,8 +12,8 @@ import '/io.dart';
 import '/juggler.dart';
 import '/preferences.dart';
 import '/widgets/controls_list.dart';
-import '/widgets/button.dart';
 import '/widgets/snack_bar.dart';
+import '/widgets/unique/save_button.dart';
 import '/widgets/unique/carousel.dart';
 import '/widgets/unique/histogram.dart';
 import '/widgets/unique/navigation.dart';
@@ -38,30 +38,8 @@ class SlyEditorPage extends StatefulWidget {
   State<SlyEditorPage> createState() => _SlyEditorPageState();
 }
 
-class CarouselData extends InheritedWidget {
-  final (bool, bool, SlyJuggler, GlobalKey) data;
-
-  const CarouselData({
-    super.key,
-    required this.data,
-    required super.child,
-  });
-
-  static CarouselData? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<CarouselData>();
-  }
-
-  static CarouselData of(BuildContext context) {
-    final CarouselData? result = maybeOf(context);
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(CarouselData oldWidget) => data != oldWidget.data;
-}
-
 class _SlyEditorPageState extends State<SlyEditorPage> {
-  final _saveButtonKey = GlobalKey<SlyButtonState>();
+  final _saveButtonKey = GlobalKey<SlySaveButtonState>();
   final _imageViewKey = GlobalKey();
   GlobalKey _controlsKey = GlobalKey();
   GlobalKey _carouselKey = GlobalKey();
@@ -104,7 +82,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   bool _showHistogram = false;
   late bool _showCarousel = widget.juggler.images.length > 1;
 
-  SlyButton? _saveButton;
+  SlySaveButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
 
   Future<void> _save() async {
@@ -275,275 +253,266 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     });
   }
 
-  void _onAspectRatioSelected(double? ratio) {
-    if ((_cropController != null) && (_cropController!.aspectRatio != ratio)) {
-      _cropChanged = true;
-      _cropController!.aspectRatio = ratio;
+  void toggleCarousel() {
+    if (widget.juggler.images.length <= 1) {
+      widget.juggler.editImages(
+        context: context,
+        loadingCallback: () => showSlySnackBar(
+          context,
+          'Loading Image',
+          loading: true,
+        ),
+      );
+    } else {
+      setState(() => _showCarousel = !_showCarousel);
     }
-    Navigator.pop(context);
+  }
+
+  void showOriginal() async {
+    if (_editedImageData == _originalImageData) return;
+
+    Uint8List? previous;
+
+    if (_editedImageData != null) {
+      previous = Uint8List.fromList(_editedImageData!);
+    } else {
+      previous = null;
+    }
+
+    setState(() => _editedImageData = _originalImageData);
+
+    await Future.delayed(
+      const Duration(milliseconds: 1500),
+    );
+
+    if (_editedImageData != _originalImageData) {
+      previous = null;
+      return;
+    }
+
+    setState(() => _editedImageData = previous);
+
+    previous = null;
+  }
+
+  Widget getControlsChild(int index, bool wideLayout) {
+    switch (index) {
+      case 1:
+        return SlyControlsListView(
+          key: const Key('colorControls'),
+          attributes: _colorAttributes,
+          wideLayout: wideLayout,
+          history: history,
+          updateImage: updateImage,
+        );
+      case 2:
+        return SlyControlsListView(
+          key: const Key('effectControls'),
+          attributes: _effectAttributes,
+          wideLayout: wideLayout,
+          history: history,
+          updateImage: updateImage,
+        );
+      case 3:
+        return SlyCropControls(
+          cropController: _cropController,
+          wideLayout: wideLayout,
+          setCropChanged: (value) => _cropChanged = value,
+          getPortraitCrop: () => _portraitCrop,
+          setPortraitCrop: (value) => setState(() => _portraitCrop = value),
+          rotation: _geometryAttributes['rotation']!,
+          rotate: (value) => setState(() {
+            _geometryAttributes['rotation']!.value = value;
+          }),
+          flipImage: flipImage,
+        );
+      case 4:
+        return SlyExportControls(
+          saveButton: _saveButton,
+          wideLayout: wideLayout,
+          getSaveMetadata: () => _saveMetadata,
+          setSaveMetadata: (value) => _saveMetadata = value,
+        );
+      default:
+        return SlyControlsListView(
+          key: const Key('lightControls'),
+          attributes: _lightAttributes,
+          wideLayout: wideLayout,
+          history: history,
+          updateImage: updateImage,
+        );
+    }
+  }
+
+  void navigationDestinationSelected(int index, bool wideLayout) {
+    if (_selectedPageIndex == index) return;
+    if (_selectedPageIndex == 3 && _cropChanged == true) {
+      updateCroppedImage();
+      _cropChanged = false;
+    }
+
+    _selectedPageIndex = index;
+
+    setState(() {
+      _controlsChild = getControlsChild(index, wideLayout);
+    });
   }
 
   @override
-  Widget build(BuildContext context) {
-    _saveButton ??= getSaveButton(
-      _saveButtonKey,
-      context,
-      _saveButtonLabel,
-      (value) => _saveFormat = value,
-      () {
-        if (_editedImage.loading) {
-          _saveOnLoad = true;
-        } else {
-          _save();
-        }
-      },
-    );
-
-    return Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        SingleActivator(
-          LogicalKeyboardKey.keyZ,
-          control: !isApplePlatform,
-          meta: isApplePlatform,
-        ): const UndoTextIntent(
-          SelectionChangedCause.keyboard,
-        ),
-        SingleActivator(
-          LogicalKeyboardKey.keyZ,
-          control: !isApplePlatform,
-          meta: isApplePlatform,
-          shift: true,
-        ): const RedoTextIntent(
-          SelectionChangedCause.keyboard,
-        ),
-        SingleActivator(
-          LogicalKeyboardKey.keyY,
-          control: !isApplePlatform,
-          meta: isApplePlatform,
-        ): const RedoTextIntent(
-          SelectionChangedCause.keyboard,
-        ),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          UndoTextIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) {
-              history.undo();
-              return null;
-            },
+  Widget build(BuildContext context) => Shortcuts(
+        shortcuts: <ShortcutActivator, Intent>{
+          SingleActivator(
+            LogicalKeyboardKey.keyZ,
+            control: !isApplePlatform,
+            meta: isApplePlatform,
+          ): const UndoTextIntent(
+            SelectionChangedCause.keyboard,
           ),
-          RedoTextIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) {
-              history.redo();
-              return null;
-            },
+          SingleActivator(
+            LogicalKeyboardKey.keyZ,
+            control: !isApplePlatform,
+            meta: isApplePlatform,
+            shift: true,
+          ): const RedoTextIntent(
+            SelectionChangedCause.keyboard,
+          ),
+          SingleActivator(
+            LogicalKeyboardKey.keyY,
+            control: !isApplePlatform,
+            meta: isApplePlatform,
+          ): const RedoTextIntent(
+            SelectionChangedCause.keyboard,
           ),
         },
-        child: Focus(
-          autofocus: true,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final imageCarousel = CarouselData(
-                data: (
-                  _showCarousel,
-                  constraints.maxWidth > 600,
-                  widget.juggler,
-                  _carouselKey,
-                ),
-                child: const SlyImageCarousel(),
-              );
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            UndoTextIntent: CallbackAction<Intent>(
+              onInvoke: (Intent intent) {
+                history.undo();
+                return null;
+              },
+            ),
+            RedoTextIntent: CallbackAction<Intent>(
+              onInvoke: (Intent intent) {
+                history.redo();
+                return null;
+              },
+            ),
+          },
+          child: Focus(
+            autofocus: true,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final wideLayout = constraints.maxWidth > 600;
 
-              void toggleCarousel() {
-                if (widget.juggler.images.length <= 1) {
-                  widget.juggler.editImages(
-                    context: context,
-                    loadingCallback: () => showSlySnackBar(
-                      context,
-                      'Loading Image',
-                      loading: true,
+                if (newImage) {
+                  if (_selectedPageIndex == 3) _selectedPageIndex = 0;
+                  _controlsChild = getControlsChild(
+                    _selectedPageIndex,
+                    wideLayout,
+                  );
+                  newImage = false;
+                }
+
+                _controlsChild ??= getControlsChild(
+                  _selectedPageIndex,
+                  wideLayout,
+                );
+
+                _saveButton ??= SlySaveButton(
+                  key: _saveButtonKey,
+                  label: _saveButtonLabel,
+                  setImageFormat: (value) => _saveFormat = value,
+                  save: () {
+                    if (_editedImage.loading) {
+                      _saveOnLoad = true;
+                    } else {
+                      _save();
+                    }
+                  },
+                );
+
+                return SlyEditorScaffold(
+                  imageView: SlyImageView(
+                    globalKey: _imageViewKey,
+                    originalImageData: _originalImageData,
+                    editedImageData: _editedImageData,
+                    cropController: _cropController,
+                    onCrop: (rect) => _cropChanged = true,
+                    wideLayout: wideLayout,
+                    showCropView: () => _selectedPageIndex == 3,
+                    hflip: _geometryAttributes['hflip']!,
+                    vflip: _geometryAttributes['vflip']!,
+                    rotation: _geometryAttributes['rotation']!,
+                  ),
+                  controlsView: SlyControlsView(
+                    globalKey: _controlsKey,
+                    wideLayout: wideLayout,
+                    child: _controlsChild,
+                  ),
+                  toolbar: SlyToolbar(
+                    wideLayout: wideLayout,
+                    history: history,
+                    pageHasHistogram: () => [0, 1].contains(_selectedPageIndex),
+                    getShowHistogram: () => _showHistogram,
+                    setShowHistogram: (value) => setState(
+                      () => _showHistogram = value,
                     ),
-                  );
-                } else {
-                  setState(() => _showCarousel = !_showCarousel);
-                }
-              }
-
-              final imageView = getImageView(
-                _imageViewKey,
-                context,
-                constraints,
-                _originalImageData,
-                _editedImageData,
-                () => _selectedPageIndex == 3,
-                _cropController,
-                (rect) => _cropChanged = true,
-                _geometryAttributes['hflip']!,
-                _geometryAttributes['vflip']!,
-                _geometryAttributes['rotation']!,
-              );
-
-              Widget getControlsChild(index) {
-                switch (index) {
-                  case 1:
-                    return SlyControlsListView(
-                      key: const Key('colorControls'),
-                      attributes: _colorAttributes,
-                      constraints: constraints,
-                      history: history,
-                      updateImage: updateImage,
-                    );
-                  case 2:
-                    return SlyControlsListView(
-                      key: const Key('effectControls'),
-                      attributes: _effectAttributes,
-                      constraints: constraints,
-                      history: history,
-                      updateImage: updateImage,
-                    );
-                  case 3:
-                    return getCropControls(
-                      _cropController,
-                      () => _portraitCrop,
-                      (value) => setState(() => _portraitCrop = value),
-                      _onAspectRatioSelected,
-                      _geometryAttributes['rotation']!,
-                      (value) => setState(() {
-                        _geometryAttributes['rotation']!.value = value;
-                      }),
-                      flipImage,
-                    );
-                  case 4:
-                    return getExportControls(
-                      constraints,
-                      _saveButton,
-                      () => _saveMetadata,
-                      (value) => _saveMetadata = value,
-                    );
-                  default:
-                    return SlyControlsListView(
-                      key: const Key('lightControls'),
-                      attributes: _lightAttributes,
-                      constraints: constraints,
-                      history: history,
-                      updateImage: updateImage,
-                    );
-                }
-              }
-
-              _controlsChild ??= getControlsChild(_selectedPageIndex);
-
-              if (newImage) {
-                if (_selectedPageIndex == 3) _selectedPageIndex = 0;
-                _controlsChild = getControlsChild(_selectedPageIndex);
-                newImage = false;
-              }
-
-              void navigationDestinationSelected(int index) {
-                if (_selectedPageIndex == index) return;
-                if (_selectedPageIndex == 3 && _cropChanged == true) {
-                  updateCroppedImage();
-                  _cropChanged = false;
-                }
-
-                _selectedPageIndex = index;
-
-                setState(() {
-                  _controlsChild = getControlsChild(index);
-                });
-              }
-
-              final navigationRail = getNavigationRail(
-                () => _selectedPageIndex,
-                navigationDestinationSelected,
-              );
-              final navigationBar = getNavigationBar(
-                context,
-                () => _showCarousel,
-                () => _selectedPageIndex,
-                navigationDestinationSelected,
-                toggleCarousel,
-              );
-
-              final controlsView = getControlsView(
-                _controlsKey,
-                constraints,
-                _controlsChild,
-              );
-
-              final toolbar = getToolbar(
-                context,
-                constraints,
-                history,
-                () => [0, 1].contains(_selectedPageIndex),
-                () => _showHistogram,
-                (value) => setState(() => _showHistogram = value),
-                () async {
-                  if (_editedImageData == _originalImageData) return;
-
-                  Uint8List? previous;
-
-                  if (_editedImageData != null) {
-                    previous = Uint8List.fromList(_editedImageData!);
-                  } else {
-                    previous = null;
-                  }
-
-                  setState(() => _editedImageData = _originalImageData);
-
-                  await Future.delayed(
-                    const Duration(milliseconds: 1500),
-                  );
-
-                  if (_editedImageData != _originalImageData) {
-                    previous = null;
-                    return;
-                  }
-
-                  setState(() => _editedImageData = previous);
-
-                  previous = null;
-                },
-              );
-
-              final histogram = AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutQuint,
-                child: [0, 1].contains(_selectedPageIndex) && _showHistogram
-                    ? Padding(
-                        padding: EdgeInsets.only(
-                          bottom: constraints.maxWidth > 600 ? 12 : 0,
-                          top: (constraints.maxWidth > 600 &&
-                                  platformHasInsetTopBar)
-                              ? 0
-                              : 8,
-                        ),
-                        child: SizedBox(
-                          height: constraints.maxWidth > 600 ? 40 : 30,
-                          width: constraints.maxWidth > 600 ? null : 150,
-                          child: _histogram,
-                        ),
-                      )
-                    : Container(),
-              );
-
-              return getEditorScaffold(
-                context,
-                constraints,
-                imageView,
-                controlsView,
-                toolbar,
-                histogram,
-                navigationRail,
-                navigationBar,
-                imageCarousel,
-                () => _showCarousel,
-                () => _selectedPageIndex,
-                toggleCarousel,
-              );
-            },
+                    showOriginal: showOriginal,
+                  ),
+                  histogram: AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutQuint,
+                    child: [0, 1].contains(_selectedPageIndex) && _showHistogram
+                        ? Padding(
+                            padding: EdgeInsets.only(
+                              bottom: wideLayout ? 12 : 0,
+                              top: (wideLayout && platformHasInsetTopBar)
+                                  ? 0
+                                  : 8,
+                            ),
+                            child: SizedBox(
+                              height: wideLayout ? 40 : 30,
+                              width: wideLayout ? null : 150,
+                              child: _histogram,
+                            ),
+                          )
+                        : Container(),
+                  ),
+                  navigationRail: SlyNavigationRail(
+                    getSelectedPageIndex: () => _selectedPageIndex,
+                    onDestinationSelected: (index) =>
+                        navigationDestinationSelected(
+                      index,
+                      wideLayout,
+                    ),
+                  ),
+                  navigationBar: SlyNavigationBar(
+                    getSelectedPageIndex: () => _selectedPageIndex,
+                    getShowCarousel: () => _showCarousel,
+                    toggleCarousel: toggleCarousel,
+                    onDestinationSelected: (index) =>
+                        navigationDestinationSelected(
+                      index,
+                      wideLayout,
+                    ),
+                  ),
+                  imageCarousel: SlyCarouselData(
+                    data: (
+                      _showCarousel,
+                      wideLayout,
+                      widget.juggler,
+                      _carouselKey,
+                    ),
+                    child: const SlyImageCarousel(),
+                  ),
+                  showCarousel: _showCarousel,
+                  selectedPageIndex: _selectedPageIndex,
+                  toggleCarousel: toggleCarousel,
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
