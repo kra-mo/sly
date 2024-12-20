@@ -356,7 +356,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         context: context,
         loadingCallback: () => showSlySnackBar(
           context,
-          'Loading Image',
+          'Loading',
           loading: true,
         ),
       );

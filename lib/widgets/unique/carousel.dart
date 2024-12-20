@@ -90,7 +90,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                               context: context,
                               loadingCallback: () => showSlySnackBar(
                                 context,
-                                'Loading Image',
+                                'Loading',
                                 loading: true,
                               ),
                             );
@@ -132,7 +132,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                                   Navigator.pop(context);
                                   if (exportAll != null) exportAll();
                                 },
-                                child: const Text('Export All'),
+                                child: const Text('Save All'),
                               ),
                             ),
                             SlyButton(

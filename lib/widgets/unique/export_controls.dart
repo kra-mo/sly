@@ -27,13 +27,27 @@ class SlyExportControls extends StatelessWidget {
             padding: const EdgeInsets.only(
               top: 20,
               bottom: 12,
-              left: 32,
-              right: 32,
+              left: 24,
+              right: 24,
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Save Metadata'),
-                const Spacer(),
+                const Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Save Metadata'),
+                      Opacity(
+                        opacity: 0.6,
+                        child: Text(
+                          'Such as date and location taken',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 SlySwitch(
                   value: getSaveMetadata(),
                   onChanged: (value) => setSaveMetadata(value),
@@ -45,8 +59,8 @@ class SlyExportControls extends StatelessWidget {
             padding: const EdgeInsets.only(
               top: 6,
               bottom: 40,
-              left: 32,
-              right: 32,
+              left: 24,
+              right: 24,
             ),
             child: saveButton,
           ),
