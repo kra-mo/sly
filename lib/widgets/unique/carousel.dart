@@ -98,7 +98,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                         ),
                       ),
                       SlyTooltip(
-                        message: 'Options',
+                        message: 'Image Options',
                         child: IconButton(
                           visualDensity: const VisualDensity(
                             vertical: -2,
