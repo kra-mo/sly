@@ -41,7 +41,7 @@ class SlyExportControls extends StatelessWidget {
                       Opacity(
                         opacity: 0.6,
                         child: Text(
-                          'Such as date and location taken',
+                          'Such as date taken and location',
                           style: TextStyle(fontSize: 13),
                         ),
                       ),
