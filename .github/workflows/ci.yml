@@ -30,7 +30,7 @@ jobs:
           channel: stable
 
       - name: Build for Android
-        run: flutter build apk --split-per-abi --flavor unsigned --release
+        run: flutter build apk --split-per-abi --release
 
       - name: Zip compiled files
         run: |
