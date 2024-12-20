@@ -61,11 +61,11 @@ class SlyEditorScaffold extends StatelessWidget {
                       focusColor: Theme.of(context)
                           .colorScheme
                           .primary
-                          .withOpacity(0.1),
+                          .withValues(alpha: 0.1),
                       hoverColor: Theme.of(context)
                           .colorScheme
                           .primary
-                          .withOpacity(0.1),
+                          .withValues(alpha: 0.1),
                       splashColor: Colors.transparent,
                       elevation: 0,
                       hoverElevation: 0,

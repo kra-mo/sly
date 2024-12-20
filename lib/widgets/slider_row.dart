@@ -116,7 +116,7 @@ class _SlySliderRowState extends State<SlySliderRow> {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                     fontFeatures: const <FontFeature>[
                       FontFeature.tabularFigures(),
                     ],

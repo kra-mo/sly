@@ -8,8 +8,8 @@ final lightThemeData = ThemeData(
   splashColor: Colors.transparent,
   highlightColor: Colors.transparent,
   disabledColor: const Color(0xFFDADBDF),
-  focusColor: const Color(0xFF212A40).withOpacity(0.12),
-  hoverColor: const Color(0xFF212A40).withOpacity(0.06),
+  focusColor: const Color(0xFF212A40).withValues(alpha: 0.12),
+  hoverColor: const Color(0xFF212A40).withValues(alpha: 0.06),
   colorScheme: ColorScheme(
     brightness: Brightness.light,
     primary: const Color(0xFF2E3133),

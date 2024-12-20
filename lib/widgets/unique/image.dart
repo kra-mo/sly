@@ -83,7 +83,8 @@ class SlyImageView extends StatelessWidget {
               key: const Key('cropImageView'),
               gridThickWidth: wideLayout ? 6 : 8,
               gridCornerColor: Theme.of(context).colorScheme.primary,
-              gridColor: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+              gridColor:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
               controller: cropController,
               image: Image.memory(
                 originalImageData!,

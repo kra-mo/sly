@@ -33,7 +33,7 @@ class _SlySwitchState extends State<SlySwitch> {
       inactiveTrackColor: Theme.of(context).disabledColor,
       overlayColor: WidgetStateProperty.resolveWith((states) {
         return states.contains(WidgetState.focused)
-            ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)
+            ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2)
             : Colors.transparent;
       }),
       value: value,

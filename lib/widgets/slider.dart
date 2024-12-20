@@ -60,7 +60,7 @@ class _SlySliderState extends State<SlySlider> {
     return SliderTheme(
       data: SliderThemeData(
         secondaryActiveTrackColor:
-            Theme.of(context).colorScheme.primary.withOpacity(0.35),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
         inactiveTrackColor: Theme.of(context).disabledColor,
         trackHeight: 18,
         thumbShape: InsetSliderThumbShape(),

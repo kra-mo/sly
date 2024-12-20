@@ -48,7 +48,7 @@ LineChart _buildHistogram(Uint8List imagdeData) {
           show: true,
           gradient: LinearGradient(
             colors: [colors[i][0], colors[i][1]]
-                .map((color) => color.withOpacity(1 / 3))
+                .map((color) => color.withValues(alpha: 1 / 3))
                 .toList(),
           ),
         ),
