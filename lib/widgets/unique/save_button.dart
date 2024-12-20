@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '/image.dart';
-import '/widgets/dialog.dart';
 import '/widgets/button.dart';
-import '/widgets/spinner.dart';
 
 class SlySaveButton extends StatefulWidget {
   final String label;
-  final Function setImageFormat;
-  final Function save;
+  final VoidCallback? onPressed;
 
   const SlySaveButton({
     super.key,
     required this.label,
-    required this.setImageFormat,
-    required this.save,
+    this.onPressed,
   });
 
   void setChild(Widget newChild) {
@@ -41,74 +36,8 @@ class SlySaveButtonState extends State<SlySaveButton> {
     saveButton = SlyButton(
       key: _buttonKey,
       suggested: true,
+      onPressed: widget.onPressed,
       child: Text(widget.label),
-      onPressed: () async {
-        setButtonChild(
-          const Padding(
-            padding: EdgeInsets.all(6),
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: SlySpinner(),
-            ),
-          ),
-        );
-
-        SlyImageFormat? format;
-
-        await showSlyDialog(
-          context,
-          'Choose a Quality',
-          <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SlyButton(
-                onPressed: () {
-                  format = SlyImageFormat.jpeg75;
-                  Navigator.pop(context);
-                },
-                child: const Text('For Sharing'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SlyButton(
-                onPressed: () {
-                  format = SlyImageFormat.jpeg90;
-                  Navigator.pop(context);
-                },
-                child: const Text('For Storing'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: SlyButton(
-                onPressed: () {
-                  format = SlyImageFormat.png;
-                  Navigator.pop(context);
-                },
-                child: const Text('Lossless'),
-              ),
-            ),
-            SlyButton(
-              suggested: true,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-
-        // The user cancelled the format selection
-        if (format == null) {
-          setButtonChild(Text(widget.label));
-          return;
-        }
-
-        widget.setImageFormat(format!);
-        widget.save();
-      },
     );
 
     return saveButton;

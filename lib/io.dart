@@ -23,25 +23,60 @@ Future<img.Image?> loadImgImage(Uint8List bytes) async {
   );
 }
 
-/// Saves the image to the user's gallery on iOS and Android
+/// Saves the images to the user's gallery on iOS and Android
 /// or a user-picked location on desktop or the web.
 ///
 /// Returns false if the operation was cancelled.
-Future<bool> saveImage(Uint8List imageData,
-    {String fileName = 'Edited Image', String fileExtension = 'png'}) async {
+Future<bool> saveImages(
+  List<Uint8List> images, {
+  List<String?>? fileNames,
+  String fileExtension = 'png',
+}) async {
+  fileNames ??= [];
+
   if (isMobile) {
-    await Gal.putImageBytes(imageData, name: fileName);
+    // This is sequential, but the I/O is probably cheap enough
+    // for it not to matter.
+    for (int index = 0; index < images.length; index++) {
+      await Gal.putImageBytes(
+        images[0],
+        name: fileNames[index] ?? 'Edited Image',
+      );
+    }
+
     return true;
   }
 
-  final FileSaveLocation? result =
-      await getSaveLocation(suggestedName: '$fileName.$fileExtension');
+  if (images.length == 1 || isWeb) {
+    for (int index = 0; index < images.length; index++) {
+      final fileName = fileNames[index] ??= 'Edited Image';
+
+      final FileSaveLocation? result =
+          await getSaveLocation(suggestedName: '$fileName.$fileExtension');
+      if (result == null) {
+        if (images.length == 1) return false;
+        continue;
+      }
+
+      XFile.fromData(images[index],
+              // An empty string seems to be returned on the web
+              name: result.path == '' ? '$fileName.$fileExtension' : null)
+          .saveTo(result.path);
+    }
+    return true;
+  }
+
+  final String? result = await getDirectoryPath();
   if (result == null) return false;
 
-  XFile.fromData(imageData,
-          // An empty string seems to be returned on the web
-          name: result.path == '' ? '$fileName.$fileExtension' : null)
-      .saveTo(result.path);
+  for (int index = 0; index < images.length; index++) {
+    final fileName = '${fileNames[index] ?? 'Edited Image'}.$fileExtension';
+
+    XFile.fromData(
+      images[index],
+      name: fileName,
+    ).saveTo('$result$pathSeparator$fileName');
+  }
   return true;
 }
 

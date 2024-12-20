@@ -11,28 +11,26 @@ import '/history.dart';
 import '/io.dart';
 import '/juggler.dart';
 import '/preferences.dart';
-import '/widgets/controls_list.dart';
+import '/widgets/button.dart';
+import '/widgets/dialog.dart';
+import '/widgets/spinner.dart';
 import '/widgets/snack_bar.dart';
+import '/widgets/controls_list.dart';
 import '/widgets/unique/save_button.dart';
 import '/widgets/unique/carousel.dart';
 import '/widgets/unique/histogram.dart';
 import '/widgets/unique/navigation.dart';
 import '/widgets/unique/controls.dart';
-import '/widgets/unique/crop_controls.dart';
+import '/widgets/unique/geometry_controls.dart';
 import '/widgets/unique/export_controls.dart';
 import '/widgets/unique/toolbar.dart';
 import '/widgets/unique/image.dart';
 import '/widgets/unique/editor_scaffold.dart';
 
 class SlyEditorPage extends StatefulWidget {
-  final String suggestedFileName;
   final SlyJuggler juggler;
 
-  const SlyEditorPage({
-    super.key,
-    required this.juggler,
-    this.suggestedFileName = 'Edited Image',
-  });
+  const SlyEditorPage({super.key, required this.juggler});
 
   @override
   State<SlyEditorPage> createState() => _SlyEditorPageState();
@@ -46,10 +44,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   Widget? _controlsChild;
 
-  CropController? get _cropController => widget.juggler.cropController;
-  SlyImage get _originalImage => widget.juggler.originalImage;
-  SlyImage get _editedImage => widget.juggler.editedImage!;
-  set _editedImage(value) => widget.juggler.editedImage = value;
+  late final SlyJuggler juggler = widget.juggler;
+
+  CropController? get _cropController => juggler.cropController;
+  SlyImage get _originalImage => juggler.originalImage;
+  SlyImage get _editedImage => juggler.editedImage!;
+  set _editedImage(value) => juggler.editedImage = value;
 
   get _lightAttributes => _editedImage.lightAttributes;
   get _colorAttributes => _editedImage.colorAttributes;
@@ -66,6 +66,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   bool _saveMetadata = true;
   SlyImageFormat _saveFormat = SlyImageFormat.png;
   bool _saveOnLoad = false;
+  bool _saveAll = false;
 
   bool _cropChanged = false;
   bool _portraitCrop = false;
@@ -80,48 +81,62 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
-  late bool _showCarousel = widget.juggler.images.length > 1;
+  late bool _showCarousel = juggler.images.length > 1;
+
+  bool _wideLayout = false;
 
   SlySaveButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
 
   Future<void> _save() async {
-    final copyImage = SlyImage.from(_editedImage);
+    final List<Map<String, dynamic>?> images =
+        _saveAll ? juggler.images : [juggler.images[juggler.selected]];
+    _saveAll = false;
 
-    final rotationAttr =
-        copyImage.geometryAttributes['rotation']! as SlyClampedAttribute;
+    final newImages = <Uint8List>[];
+    final fileNames = <String?>[];
 
-    if (![rotationAttr.min, rotationAttr.max].contains(rotationAttr.value)) {
-      copyImage.rotate(rotationAttr.value * 90);
-    }
+    for (final image in images) {
+      if (image == null) continue;
 
-    final hflip = copyImage.geometryAttributes['hflip']!.value;
-    final vflip = copyImage.geometryAttributes['vflip']!.value;
+      final copyImage =
+          SlyImage.from(image['editedImage'] ?? image['originalImage']);
 
-    if (hflip && vflip) {
-      copyImage.flip(SlyImageFlipDirection.both);
-    } else if (hflip) {
-      copyImage.flip(SlyImageFlipDirection.horizontal);
-    } else if (vflip) {
-      copyImage.flip(SlyImageFlipDirection.vertical);
-    }
+      final rotationAttr =
+          copyImage.geometryAttributes['rotation']! as SlyClampedAttribute;
 
-    if (_saveMetadata) {
-      copyImage.copyMetadataFrom(_originalImage);
-    } else {
-      copyImage.removeMetadata();
-    }
+      if (![rotationAttr.min, rotationAttr.max].contains(rotationAttr.value)) {
+        copyImage.rotate(rotationAttr.value * 90);
+      }
 
-    if (!(await saveImage(
-        await copyImage.encode(format: _saveFormat, fullRes: true),
-        fileName: widget.suggestedFileName,
-        fileExtension: _saveFormat == SlyImageFormat.png ? 'png' : 'jpg'))) {
-      _saveButton?.setChild(Text(_saveButtonLabel));
+      final hflip = copyImage.geometryAttributes['hflip']!.value;
+      final vflip = copyImage.geometryAttributes['vflip']!.value;
+
+      if (hflip && vflip) {
+        copyImage.flip(SlyImageFlipDirection.both);
+      } else if (hflip) {
+        copyImage.flip(SlyImageFlipDirection.horizontal);
+      } else if (vflip) {
+        copyImage.flip(SlyImageFlipDirection.vertical);
+      }
+
+      if (_saveMetadata) {
+        copyImage.copyMetadataFrom(image['originalImage']);
+      } else {
+        copyImage.removeMetadata();
+      }
+
+      newImages.add(await copyImage.encode(format: _saveFormat, fullRes: true));
+      fileNames.add(image['suggestedFileName']);
+
       copyImage.dispose();
-      return;
     }
 
-    copyImage.dispose();
+    await saveImages(
+      newImages,
+      fileNames: fileNames,
+      fileExtension: _saveFormat == SlyImageFormat.png ? 'png' : 'jpg',
+    );
 
     if (mounted) {
       _saveButton?.setChild(
@@ -133,6 +148,79 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     }
 
     _saveButton?.setChild(Text(_saveButtonLabel));
+  }
+
+  void _startSave() async {
+    _saveButton?.setChild(
+      const Padding(
+        padding: EdgeInsets.all(6),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: SlySpinner(),
+        ),
+      ),
+    );
+
+    SlyImageFormat? format;
+
+    await showSlyDialog(
+      context,
+      'Choose a Quality',
+      <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: SlyButton(
+            onPressed: () {
+              format = SlyImageFormat.jpeg75;
+              Navigator.pop(context);
+            },
+            child: const Text('For Sharing'),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: SlyButton(
+            onPressed: () {
+              format = SlyImageFormat.jpeg90;
+              Navigator.pop(context);
+            },
+            child: const Text('For Storing'),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: SlyButton(
+            onPressed: () {
+              format = SlyImageFormat.png;
+              Navigator.pop(context);
+            },
+            child: const Text('Lossless'),
+          ),
+        ),
+        SlyButton(
+          suggested: true,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+
+    // The user cancelled the format selection
+    if (format == null) {
+      _saveButton?.setChild(Text(_saveButtonLabel));
+      return;
+    }
+
+    _saveFormat = format!;
+
+    if (_editedImage.loading) {
+      _saveOnLoad = true;
+    } else {
+      _save();
+    }
   }
 
   void _onImageUpdate(event) {
@@ -171,8 +259,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           _saveOnLoad = false;
         }
 
+        final hash = _editedImage.hashCode;
+
         _editedImage.encode(format: SlyImageFormat.jpeg75).then((data) {
           if (!mounted) return;
+          if (_editedImage.hashCode != hash) return;
+
           setState(() => _editedImageData = data);
         });
 
@@ -180,6 +272,11 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           if (!mounted) return;
           setState(() => _histogram = data);
         });
+
+      case 'removed':
+        setState(
+            () => _showCarousel = (_showCarousel && juggler.images.length > 1));
+        setState(() => _carouselKey = GlobalKey());
     }
   }
 
@@ -192,7 +289,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       setState(() => _showHistogram = showHistogram);
     });
 
-    widget.juggler.controller.stream.listen(_onImageUpdate);
+    juggler.controller.stream.listen(_onImageUpdate);
     updateImage();
 
     _originalImage.encode(format: SlyImageFormat.png).then((data) {
@@ -254,8 +351,8 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   }
 
   void toggleCarousel() {
-    if (widget.juggler.images.length <= 1) {
-      widget.juggler.editImages(
+    if (juggler.images.length <= 1) {
+      juggler.editImages(
         context: context,
         loadingCallback: () => showSlySnackBar(
           context,
@@ -295,13 +392,13 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     previous = null;
   }
 
-  Widget getControlsChild(int index, bool wideLayout) {
+  Widget getControlsChild(int index) {
     switch (index) {
       case 1:
         return SlyControlsListView(
           key: const Key('colorControls'),
           attributes: _colorAttributes,
-          wideLayout: wideLayout,
+          wideLayout: _wideLayout,
           history: history,
           updateImage: updateImage,
         );
@@ -309,14 +406,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return SlyControlsListView(
           key: const Key('effectControls'),
           attributes: _effectAttributes,
-          wideLayout: wideLayout,
+          wideLayout: _wideLayout,
           history: history,
           updateImage: updateImage,
         );
       case 3:
-        return SlyCropControls(
+        return SlyGeometryControls(
           cropController: _cropController,
-          wideLayout: wideLayout,
+          wideLayout: _wideLayout,
           setCropChanged: (value) => _cropChanged = value,
           getPortraitCrop: () => _portraitCrop,
           setPortraitCrop: (value) => setState(() => _portraitCrop = value),
@@ -329,7 +426,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       case 4:
         return SlyExportControls(
           saveButton: _saveButton,
-          wideLayout: wideLayout,
+          wideLayout: _wideLayout,
           getSaveMetadata: () => _saveMetadata,
           setSaveMetadata: (value) => _saveMetadata = value,
         );
@@ -337,14 +434,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return SlyControlsListView(
           key: const Key('lightControls'),
           attributes: _lightAttributes,
-          wideLayout: wideLayout,
+          wideLayout: _wideLayout,
           history: history,
           updateImage: updateImage,
         );
     }
   }
 
-  void navigationDestinationSelected(int index, bool wideLayout) {
+  void navigationDestinationSelected(int index) {
     if (_selectedPageIndex == index) return;
     if (_selectedPageIndex == 3 && _cropChanged == true) {
       updateCroppedImage();
@@ -354,7 +451,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     _selectedPageIndex = index;
 
     setState(() {
-      _controlsChild = getControlsChild(index, wideLayout);
+      _controlsChild = getControlsChild(index);
     });
   }
 
@@ -403,55 +500,43 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
             autofocus: true,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final wideLayout = constraints.maxWidth > 600;
-
                 if (newImage) {
                   if (_selectedPageIndex == 3) _selectedPageIndex = 0;
-                  _controlsChild = getControlsChild(
-                    _selectedPageIndex,
-                    wideLayout,
-                  );
+                  _controlsChild = getControlsChild(_selectedPageIndex);
                   newImage = false;
+                } else if (_wideLayout != constraints.maxWidth > 600) {
+                  _wideLayout = !_wideLayout;
+                  _controlsChild = getControlsChild(_selectedPageIndex);
                 }
 
-                _controlsChild ??= getControlsChild(
-                  _selectedPageIndex,
-                  wideLayout,
-                );
+                _controlsChild ??= getControlsChild(_selectedPageIndex);
 
                 _saveButton ??= SlySaveButton(
                   key: _saveButtonKey,
                   label: _saveButtonLabel,
-                  setImageFormat: (value) => _saveFormat = value,
-                  save: () {
-                    if (_editedImage.loading) {
-                      _saveOnLoad = true;
-                    } else {
-                      _save();
-                    }
-                  },
+                  onPressed: _startSave,
                 );
 
                 return SlyEditorScaffold(
                   imageView: SlyImageView(
-                    globalKey: _imageViewKey,
+                    key: _imageViewKey,
                     originalImageData: _originalImageData,
                     editedImageData: _editedImageData,
                     cropController: _cropController,
                     onCrop: (rect) => _cropChanged = true,
-                    wideLayout: wideLayout,
+                    wideLayout: _wideLayout,
                     showCropView: () => _selectedPageIndex == 3,
                     hflip: _geometryAttributes['hflip']!,
                     vflip: _geometryAttributes['vflip']!,
                     rotation: _geometryAttributes['rotation']!,
                   ),
                   controlsView: SlyControlsView(
-                    globalKey: _controlsKey,
-                    wideLayout: wideLayout,
+                    key: _controlsKey,
+                    wideLayout: _wideLayout,
                     child: _controlsChild,
                   ),
                   toolbar: SlyToolbar(
-                    wideLayout: wideLayout,
+                    wideLayout: _wideLayout,
                     history: history,
                     pageHasHistogram: () => [0, 1].contains(_selectedPageIndex),
                     getShowHistogram: () => _showHistogram,
@@ -466,14 +551,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     child: [0, 1].contains(_selectedPageIndex) && _showHistogram
                         ? Padding(
                             padding: EdgeInsets.only(
-                              bottom: wideLayout ? 12 : 0,
-                              top: (wideLayout && platformHasInsetTopBar)
+                              bottom: _wideLayout ? 12 : 0,
+                              top: (_wideLayout && platformHasInsetTopBar)
                                   ? 0
                                   : 8,
                             ),
                             child: SizedBox(
-                              height: wideLayout ? 40 : 30,
-                              width: wideLayout ? null : 150,
+                              height: _wideLayout ? 40 : 30,
+                              width: _wideLayout ? null : 150,
                               child: _histogram,
                             ),
                           )
@@ -482,27 +567,27 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   navigationRail: SlyNavigationRail(
                     getSelectedPageIndex: () => _selectedPageIndex,
                     onDestinationSelected: (index) =>
-                        navigationDestinationSelected(
-                      index,
-                      wideLayout,
-                    ),
+                        navigationDestinationSelected(index),
                   ),
                   navigationBar: SlyNavigationBar(
                     getSelectedPageIndex: () => _selectedPageIndex,
                     getShowCarousel: () => _showCarousel,
                     toggleCarousel: toggleCarousel,
                     onDestinationSelected: (index) =>
-                        navigationDestinationSelected(
-                      index,
-                      wideLayout,
-                    ),
+                        navigationDestinationSelected(index),
                   ),
                   imageCarousel: SlyCarouselData(
                     data: (
                       _showCarousel,
-                      wideLayout,
-                      widget.juggler,
+                      _wideLayout,
+                      juggler,
                       _carouselKey,
+                      () {
+                        navigationDestinationSelected(4);
+
+                        _saveAll = true;
+                        _startSave();
+                      },
                     ),
                     child: const SlyImageCarousel(),
                   ),

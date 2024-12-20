@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -16,12 +17,7 @@ class SlyJuggler {
   StreamController<String> controller = StreamController<String>();
   final List<Map<String, dynamic>?> images = [];
 
-  late final List<Widget> carouselChildren = [
-    const ImageIcon(
-      AssetImage('assets/icons/add.webp'),
-      semanticLabel: 'Add Images',
-    ),
-  ];
+  final List<Widget> carouselChildren = [];
 
   int _selected = 0;
   get selected => _selected;
@@ -42,6 +38,7 @@ class SlyJuggler {
         editedImage!.controller.stream.listen((event) => controller.add(event));
   }
 
+  String? get suggestedFileName => images[selected]?['suggestedFileName'];
   CropController? get cropController => images[selected]?['cropController'];
   StreamSubscription<String>? get subscription =>
       images[selected]?['subscription'];
@@ -52,10 +49,11 @@ class SlyJuggler {
   SlyJuggler();
 
   /// Adds an image to the Juggler and updates the Carousel.
-  void addImage(SlyImage image) {
-    images.insert(0, {'originalImage': image});
+  void add(SlyImage image, {String suggesedFileName = 'Edited Image'}) {
+    images.insert(
+        0, {'originalImage': image, 'suggestedFileName': suggesedFileName});
     carouselChildren.insert(
-      1,
+      0,
       FutureBuilder<Uint8List>(
         future: image.encode(
           format: SlyImageFormat.jpeg75,
@@ -77,6 +75,20 @@ class SlyJuggler {
       ),
     );
     controller.add('image added');
+  }
+
+  /// Removes the image at `index`.
+  ///
+  /// If there are any more images, selects the one to the left.
+  void remove(int index) {
+    images.removeAt(index);
+    carouselChildren.removeAt(index);
+
+    if (images.isNotEmpty) {
+      selected = max(0, index - 1);
+    }
+
+    controller.add('removed');
   }
 
   /// Used to pick new images to edit or to select existing ones.
@@ -108,7 +120,7 @@ class SlyJuggler {
       }
       if (loadingCallback != null) loadingCallback();
 
-      final List<SlyImage> newImages = [];
+      final List<List> newImages = [];
       for (final file in files) {
         final image = await SlyImage.fromData(await file.readAsBytes());
         if (image == null) {
@@ -120,7 +132,10 @@ class SlyJuggler {
           return;
         }
 
-        newImages.add(image);
+        newImages.add([
+          image,
+          '${file.name.replaceAll(RegExp(r'\.[^\.]+$'), '')} Edited',
+        ]);
       }
 
       if (!context.mounted) {
@@ -128,12 +143,14 @@ class SlyJuggler {
         return;
       }
 
-      if (images.isEmpty) {
-        for (final image in newImages) {
-          addImage(image);
-        }
-        selected = 0;
+      final empty = images.isEmpty;
 
+      for (final image in newImages) {
+        add(image[0], suggesedFileName: image[1] != '' ? image[1] : null);
+      }
+      selected = 0;
+
+      if (empty) {
         Navigator.pushReplacement(
           context,
           animate
@@ -145,11 +162,6 @@ class SlyJuggler {
                       SlyEditorPage(juggler: this),
                 ),
         );
-      } else {
-        for (final image in newImages) {
-          addImage(image);
-        }
-        selected = 0;
       }
     } else {
       selected = newSelection;

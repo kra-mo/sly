@@ -14,7 +14,6 @@ class SlyImageView extends StatelessWidget {
   final Uint8List? editedImageData;
   final CropController? cropController;
   final ValueChanged<Rect>? onCrop;
-  final GlobalKey globalKey;
   final bool wideLayout;
   final Function showCropView;
   final SlyImageAttribute hflip;
@@ -27,7 +26,6 @@ class SlyImageView extends StatelessWidget {
     this.editedImageData,
     this.cropController,
     this.onCrop,
-    required this.globalKey,
     required this.wideLayout,
     required this.showCropView,
     required this.hflip,
@@ -103,7 +101,6 @@ class SlyImageView extends StatelessWidget {
           );
 
     return AnimatedPadding(
-      key: globalKey,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutQuint,
       padding: showCropView()

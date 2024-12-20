@@ -2,11 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-final isAndroid = !kIsWeb && Platform.isAndroid;
-final isIOS = !kIsWeb && Platform.isIOS;
-final isLinux = !kIsWeb && Platform.isLinux;
-final isMacOS = !kIsWeb && Platform.isMacOS;
-final isWindows = !kIsWeb && Platform.isWindows;
+const isWeb = kIsWeb;
+final isAndroid = !isWeb && Platform.isAndroid;
+final isIOS = !isWeb && Platform.isIOS;
+final isLinux = !isWeb && Platform.isLinux;
+final isMacOS = !isWeb && Platform.isMacOS;
+final isWindows = !isWeb && Platform.isWindows;
 
 final isDesktop = isLinux || isMacOS || isWindows;
 final isMobile = isIOS || isAndroid;
@@ -20,3 +21,5 @@ final platformInsetTopBarHeight = isMacOS
         : 0.0;
 final platformHasRightAlignedWindowControls = isLinux || isWindows;
 final platformHasBackGesture = isAndroid;
+
+final pathSeparator = Platform.pathSeparator;

@@ -8,7 +8,7 @@ import '/widgets/tooltip.dart';
 import '/widgets/dialog.dart';
 import '/widgets/toggle_buttons.dart';
 
-class SlyCropControls extends StatelessWidget {
+class SlyGeometryControls extends StatelessWidget {
   final CropController? cropController;
   final bool wideLayout;
   final Function setCropChanged;
@@ -18,7 +18,7 @@ class SlyCropControls extends StatelessWidget {
   final Function rotate;
   final Function flipImage;
 
-  const SlyCropControls({
+  const SlyGeometryControls({
     super.key,
     this.cropController,
     required this.wideLayout,
