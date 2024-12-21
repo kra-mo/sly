@@ -548,9 +548,10 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     onDestinationSelected: (index) =>
                         navigationDestinationSelected(index),
                   ),
-                  imageCarousel: SlyCarouselData(
-                    data: (_showCarousel, juggler, _carouselKey),
-                    child: const SlyImageCarousel(),
+                  imageCarousel: SlyImageCarousel(
+                    visible: _showCarousel,
+                    juggler: juggler,
+                    globalKey: _carouselKey,
                   ),
                   showCarousel: _showCarousel,
                   selectedPageIndex: _selectedPageIndex,
