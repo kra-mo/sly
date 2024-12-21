@@ -34,13 +34,9 @@ class HistoryManager {
     canRedo = _redoList.isNotEmpty;
   }
 
-  void undo() {
-    _undoOrRedo(redo: false);
-  }
+  void undo() => _undoOrRedo(redo: false);
 
-  void redo() {
-    _undoOrRedo(redo: true);
-  }
+  void redo() => _undoOrRedo(redo: true);
 
   void _undoOrRedo({required bool redo}) {
     final list = redo ? _redoList : _undoList;

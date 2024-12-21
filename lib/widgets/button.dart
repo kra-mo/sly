@@ -96,13 +96,10 @@ class SlyButtonState extends State<SlyButton> {
     return elevatedButton!;
   }
 
-  void setChild(Widget newChild) {
-    setState(() {
-      elevatedButtonChild = SizedBox(
-        key: UniqueKey(),
-        height: 40,
-        child: Center(child: newChild),
-      );
-    });
-  }
+  void setChild(Widget newChild) =>
+      setState(() => elevatedButtonChild = SizedBox(
+            key: UniqueKey(),
+            height: 40,
+            child: Center(child: newChild),
+          ));
 }

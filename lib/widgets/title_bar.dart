@@ -55,9 +55,7 @@ class SlyTitleBar extends StatelessWidget {
                         icon: const ImageIcon(
                           AssetImage('assets/icons/window-close.webp'),
                         ),
-                        onPressed: () {
-                          exit(0);
-                        },
+                        onPressed: () => exit(0),
                       ),
                     ),
                   ],

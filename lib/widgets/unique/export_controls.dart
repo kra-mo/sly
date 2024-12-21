@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:sly/widgets/button.dart';
 
 import '/widgets/switch.dart';
 import '/widgets/unique/save_button.dart';
 
 class SlyExportControls extends StatelessWidget {
-  final SlySaveButton? saveButton;
   final bool wideLayout;
   final Function getSaveMetadata;
   final Function setSaveMetadata;
+  final bool multipleImages;
+  final SlySaveButton? saveButton;
+  final VoidCallback? exportAll;
 
   const SlyExportControls({
     super.key,
-    this.saveButton,
     required this.wideLayout,
     required this.getSaveMetadata,
     required this.setSaveMetadata,
+    required this.multipleImages,
+    this.saveButton,
+    this.exportAll,
   });
 
   @override
@@ -58,12 +63,26 @@ class SlyExportControls extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
               top: 6,
-              bottom: 40,
+              bottom: 6,
               left: 24,
               right: 24,
             ),
             child: saveButton,
           ),
+          multipleImages
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    top: 6,
+                    bottom: 40,
+                    left: 24,
+                    right: 24,
+                  ),
+                  child: SlyButton(
+                    onPressed: exportAll,
+                    child: const Text('Save All'),
+                  ),
+                )
+              : Container(),
         ],
       );
 }

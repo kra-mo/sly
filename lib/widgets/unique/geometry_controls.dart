@@ -50,82 +50,44 @@ class SlyGeometryControls extends StatelessWidget {
             AssetImage('assets/icons/aspect-ratio.webp'),
           ),
           padding: const EdgeInsets.all(12),
-          onPressed: () {
-            showSlyDialog(context, 'Select Aspect Ratio', <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SlyToggleButtons(
-                  defaultItem: getPortraitCrop() ? 1 : 0,
-                  onSelected: (index) {
-                    setPortraitCrop(index == 1);
-                  },
-                  children: const <Widget>[
-                    Text('Landscape'),
-                    Text('Portrait'),
-                  ],
-                ),
+          onPressed: () =>
+              showSlyDialog(context, 'Select Aspect Ratio', <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SlyToggleButtons(
+                defaultItem: getPortraitCrop() ? 1 : 0,
+                onSelected: (index) => setPortraitCrop(index == 1),
+                children: const <Widget>[
+                  Text('Landscape'),
+                  Text('Portrait'),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SlyButton(
-                  onPressed: () {
-                    onAspectRatioSelected(null);
-                  },
-                  child: const Text('Free'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SlyButton(
-                  onPressed: () {
-                    onAspectRatioSelected(1);
-                  },
-                  child: const Text('Square'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SlyButton(
-                  onPressed: () {
-                    onAspectRatioSelected(
-                      getPortraitCrop() ? 3 / 4 : 4 / 3,
-                    );
-                  },
-                  child: const Text('4:3'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SlyButton(
-                  onPressed: () {
-                    onAspectRatioSelected(
-                      getPortraitCrop() ? 2 / 3 : 3 / 2,
-                    );
-                  },
-                  child: const Text('3:2'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SlyButton(
-                  onPressed: () {
-                    onAspectRatioSelected(
-                      getPortraitCrop() ? 9 / 16 : 16 / 9,
-                    );
-                  },
-                  child: const Text('16:9'),
-                ),
-              ),
-              SlyButton(
-                suggested: true,
-                onPressed: () {
-                  if (cropController == null) return;
-                  onAspectRatioSelected(cropController!.aspectRatio);
-                },
-                child: const Text('Cancel'),
-              ),
-            ]);
-          },
+            ),
+            SlyButton(
+              child: const Text('Free'),
+              onPressed: () => onAspectRatioSelected(null),
+            ),
+            SlyButton(
+              child: const Text('Square'),
+              onPressed: () => onAspectRatioSelected(1),
+            ),
+            SlyButton(
+              child: const Text('4:3'),
+              onPressed: () =>
+                  onAspectRatioSelected(getPortraitCrop() ? 3 / 4 : 4 / 3),
+            ),
+            SlyButton(
+              child: const Text('3:2'),
+              onPressed: () =>
+                  onAspectRatioSelected(getPortraitCrop() ? 2 / 3 : 3 / 2),
+            ),
+            SlyButton(
+              child: const Text('16:9'),
+              onPressed: () =>
+                  onAspectRatioSelected(getPortraitCrop() ? 9 / 16 : 16 / 9),
+            ),
+            const SlyCancelButton(),
+          ]),
         ),
       ),
       SlyTooltip(
@@ -137,9 +99,7 @@ class SlyGeometryControls extends StatelessWidget {
             AssetImage('assets/icons/rotate-left.webp'),
           ),
           padding: const EdgeInsets.all(12),
-          onPressed: () {
-            rotate(rotation.value - 1);
-          },
+          onPressed: () => rotate(rotation.value - 1),
         ),
       ),
       SlyTooltip(
@@ -151,9 +111,7 @@ class SlyGeometryControls extends StatelessWidget {
             AssetImage('assets/icons/rotate-right.webp'),
           ),
           padding: const EdgeInsets.all(12),
-          onPressed: () {
-            rotate(rotation.value + 1);
-          },
+          onPressed: () => rotate(rotation.value + 1),
         ),
       ),
       SlyTooltip(
@@ -165,9 +123,7 @@ class SlyGeometryControls extends StatelessWidget {
             AssetImage('assets/icons/flip-horizontal.webp'),
           ),
           padding: const EdgeInsets.all(12),
-          onPressed: () {
-            flipImage(SlyImageFlipDirection.horizontal);
-          },
+          onPressed: () => flipImage(SlyImageFlipDirection.horizontal),
         ),
       ),
       SlyTooltip(
@@ -179,9 +135,7 @@ class SlyGeometryControls extends StatelessWidget {
             AssetImage('assets/icons/flip-vertical.webp'),
           ),
           padding: const EdgeInsets.all(12),
-          onPressed: () {
-            flipImage(SlyImageFlipDirection.vertical);
-          },
+          onPressed: () => flipImage(SlyImageFlipDirection.vertical),
         ),
       ),
     ];

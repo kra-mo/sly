@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '/widgets/dialog.dart';
-import '/widgets/button.dart';
 import '/widgets/markup_text.dart';
 import '/widgets/title_bar.dart';
 
@@ -53,13 +52,8 @@ can be viewed [here](slycallback://0).
                     ),
                   )
             ]),
-            const SizedBox(height: 24),
-            SlyButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Done'),
-            ),
+            const SizedBox(height: 12),
+            const SlyCancelButton(label: 'Done'),
           ],
         ),
       ),

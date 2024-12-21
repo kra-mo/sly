@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '/widgets/button.dart';
+
+/// Presents a dialog with `title` and `children` underneath it.
+///
+/// On smaller screens, the dialog is presented as a bottom sheet.
+///
+/// If it is not required to complete the action inside the dialog,
+/// consider adding a `SlyCancelButton` to the end of `children`
+/// for the user to be able to exit the dialog conveniently.
+///
+/// Children have pre-baked spacing between them, if that is not desired,
+/// consider passing in a single child with your own padding.
 Future<void> showSlyDialog(
   BuildContext context,
   String title,
@@ -28,7 +40,7 @@ Future<void> showSlyDialog(
           ),
           titlePadding: const EdgeInsets.only(
             top: 32,
-            bottom: 24,
+            bottom: 20,
             left: 16,
             right: 16,
           ),
@@ -39,7 +51,16 @@ Future<void> showSlyDialog(
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          children: children,
+          children: children
+              .asMap()
+              .entries
+              .map((entry) => entry.key == children.length - 1
+                  ? entry.value
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: entry.value,
+                    ))
+              .toList(),
         );
       },
       transitionDuration: const Duration(milliseconds: 300),
@@ -94,7 +115,7 @@ Future<void> showSlyDialog(
             Padding(
               padding: const EdgeInsets.only(
                 top: 32,
-                bottom: 24,
+                bottom: 20,
                 left: 16,
                 right: 16,
               ),
@@ -109,19 +130,38 @@ Future<void> showSlyDialog(
                 ),
               ),
             ),
-            ListView(
+            ListView.separated(
               padding: const EdgeInsets.only(
-                bottom: 36,
+                bottom: 32,
                 left: 24,
                 right: 24,
               ),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              children: children,
+              itemCount: children.length,
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 12),
+              itemBuilder: (BuildContext context, int index) => children[index],
             ),
           ],
         );
       },
     );
   }
+}
+
+class SlyCancelButton extends StatelessWidget {
+  final String? label;
+
+  /// A button to dismiss a dialog.
+  ///
+  /// If the `label` parameter is not provided, it will be 'Cancel'.
+  const SlyCancelButton({super.key, this.label});
+
+  @override
+  Widget build(BuildContext context) => SlyButton(
+        suggested: true,
+        onPressed: () => Navigator.pop(context),
+        child: Text(label ?? 'Cancel'),
+      );
 }

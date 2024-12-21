@@ -67,9 +67,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
             const AssetImage('assets/icons/preferences.webp'),
           ),
           padding: const EdgeInsets.all(12),
-          onPressed: () {
-            showSlyPreferencesDialog(context);
-          },
+          onPressed: () => showSlyPreferencesDialog(context),
         ),
       ),
     );
@@ -136,9 +134,7 @@ class _SlyHomePageState extends State<SlyHomePage> {
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: SlyButton(
-                                onPressed: () {
-                                  showSlyAboutDialog(context);
-                                },
+                                onPressed: () => showSlyAboutDialog(context),
                                 child: const Text('About Sly'),
                               ),
                             ),

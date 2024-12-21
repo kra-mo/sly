@@ -84,9 +84,7 @@ class SlyToolbar extends StatelessWidget {
                       : Theme.of(context).disabledColor,
                   const AssetImage('assets/icons/undo.webp'),
                 ),
-                onPressed: () {
-                  history.undo();
-                },
+                onPressed: () => history.undo(),
               ),
             ),
             SlyTooltip(
@@ -100,9 +98,7 @@ class SlyToolbar extends StatelessWidget {
                       : Theme.of(context).disabledColor,
                   const AssetImage('assets/icons/redo.webp'),
                 ),
-                onPressed: () {
-                  history.redo();
-                },
+                onPressed: () => history.redo(),
               ),
             ),
           ].whereType<Widget>().toList(),

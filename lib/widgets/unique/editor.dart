@@ -168,43 +168,28 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
       context,
       'Choose a Quality',
       <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: SlyButton(
-            onPressed: () {
-              format = SlyImageFormat.jpeg75;
-              Navigator.pop(context);
-            },
-            child: const Text('For Sharing'),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: SlyButton(
-            onPressed: () {
-              format = SlyImageFormat.jpeg90;
-              Navigator.pop(context);
-            },
-            child: const Text('For Storing'),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: SlyButton(
-            onPressed: () {
-              format = SlyImageFormat.png;
-              Navigator.pop(context);
-            },
-            child: const Text('Lossless'),
-          ),
-        ),
         SlyButton(
-          suggested: true,
           onPressed: () {
+            format = SlyImageFormat.jpeg75;
             Navigator.pop(context);
           },
-          child: const Text('Cancel'),
+          child: const Text('For Sharing'),
         ),
+        SlyButton(
+          onPressed: () {
+            format = SlyImageFormat.jpeg90;
+            Navigator.pop(context);
+          },
+          child: const Text('For Storing'),
+        ),
+        SlyButton(
+          onPressed: () {
+            format = SlyImageFormat.png;
+            Navigator.pop(context);
+          },
+          child: const Text('Lossless'),
+        ),
+        const SlyCancelButton(),
       ],
     );
 
@@ -350,20 +335,16 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
     });
   }
 
-  void toggleCarousel() {
-    if (juggler.images.length <= 1) {
-      juggler.editImages(
-        context: context,
-        loadingCallback: () => showSlySnackBar(
-          context,
-          'Loading',
-          loading: true,
-        ),
-      );
-    } else {
-      setState(() => _showCarousel = !_showCarousel);
-    }
-  }
+  void toggleCarousel() => juggler.images.length <= 1
+      ? juggler.editImages(
+          context: context,
+          loadingCallback: () => showSlySnackBar(
+            context,
+            'Loading',
+            loading: true,
+          ),
+        )
+      : setState(() => _showCarousel = !_showCarousel);
 
   void showOriginal() async {
     if (_editedImageData == _originalImageData) return;
@@ -418,17 +399,22 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
           getPortraitCrop: () => _portraitCrop,
           setPortraitCrop: (value) => setState(() => _portraitCrop = value),
           rotation: _geometryAttributes['rotation']!,
-          rotate: (value) => setState(() {
-            _geometryAttributes['rotation']!.value = value;
-          }),
+          rotate: (value) => setState(
+            () => _geometryAttributes['rotation']!.value = value,
+          ),
           flipImage: flipImage,
         );
       case 4:
         return SlyExportControls(
-          saveButton: _saveButton,
           wideLayout: _wideLayout,
           getSaveMetadata: () => _saveMetadata,
           setSaveMetadata: (value) => _saveMetadata = value,
+          multipleImages: juggler.images.length > 1,
+          saveButton: _saveButton,
+          exportAll: () {
+            _saveAll = true;
+            _startSave();
+          },
         );
       default:
         return SlyControlsListView(
@@ -450,9 +436,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
 
     _selectedPageIndex = index;
 
-    setState(() {
-      _controlsChild = getControlsChild(index);
-    });
+    setState(() => _controlsChild = getControlsChild(index));
   }
 
   @override
@@ -577,18 +561,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         navigationDestinationSelected(index),
                   ),
                   imageCarousel: SlyCarouselData(
-                    data: (
-                      _showCarousel,
-                      _wideLayout,
-                      juggler,
-                      _carouselKey,
-                      () {
-                        navigationDestinationSelected(4);
-
-                        _saveAll = true;
-                        _startSave();
-                      },
-                    ),
+                    data: (_showCarousel, _wideLayout, juggler, _carouselKey),
                     child: const SlyImageCarousel(),
                   ),
                   showCarousel: _showCarousel,

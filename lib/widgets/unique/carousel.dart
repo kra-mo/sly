@@ -7,7 +7,7 @@ import '/widgets/tooltip.dart';
 import '/juggler.dart';
 
 class SlyCarouselData extends InheritedWidget {
-  final (bool, bool, SlyJuggler, GlobalKey, VoidCallback?) data;
+  final (bool, bool, SlyJuggler, GlobalKey) data;
 
   const SlyCarouselData({
     super.key,
@@ -43,7 +43,6 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
     final wideLayout = data.$2;
     final juggler = data.$3;
     final globalKey = data.$4;
-    final exportAll = data.$5;
 
     final buttonStyle = IconButton.styleFrom(
       backgroundColor: wideLayout
@@ -85,20 +84,18 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                           icon: const ImageIcon(AssetImage(
                             'assets/icons/add.webp',
                           )),
-                          onPressed: () {
-                            juggler.editImages(
-                              context: context,
-                              loadingCallback: () => showSlySnackBar(
-                                context,
-                                'Loading',
-                                loading: true,
-                              ),
-                            );
-                          },
+                          onPressed: () => juggler.editImages(
+                            context: context,
+                            loadingCallback: () => showSlySnackBar(
+                              context,
+                              'Loading',
+                              loading: true,
+                            ),
+                          ),
                         ),
                       ),
                       SlyTooltip(
-                        message: 'Image Options',
+                        message: 'Remove Image',
                         child: IconButton(
                           visualDensity: const VisualDensity(
                             vertical: -2,
@@ -109,37 +106,29 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           icon: const ImageIcon(AssetImage(
-                            'assets/icons/cog.webp',
+                            'assets/icons/delete.webp',
                           )),
                           onPressed: () =>
-                              showSlyDialog(context, 'Image Options', [
-                            juggler.images.length > 1
-                                ? Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: SlyButton(
-                                      onPressed: () {
-                                        juggler.remove(juggler.selected);
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text('Remove'),
-                                    ),
-                                  )
-                                : Container(),
+                              showSlyDialog(context, 'Remove Image?', [
                             Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: SlyButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  if (exportAll != null) exportAll();
-                                },
-                                child: const Text('Save All'),
+                              child: ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 240),
+                                child: const Text(
+                                  'The original will not be deleted, but unsaved edits will be lost.',
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
                             SlyButton(
-                              suggested: true,
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
-                            )
+                              onPressed: () {
+                                juggler.remove(juggler.selected);
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Remove'),
+                            ),
+                            const SlyCancelButton(),
                           ]),
                         ),
                       ),
