@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '/platform.dart';
+import '/layout.dart';
 import '/image.dart';
 import '/history.dart';
 import '/widgets/slider_row.dart';
@@ -28,14 +29,12 @@ LinearGradient? getGradientForAttributeName(String name) {
 
 class SlyControlsListView extends StatelessWidget {
   final Map<String, SlyRangeAttribute> attributes;
-  final bool wideLayout;
   final HistoryManager history;
   final Function updateImage;
 
   const SlyControlsListView({
     super.key,
     required this.attributes,
-    required this.wideLayout,
     required this.history,
     required this.updateImage,
   });
@@ -43,13 +42,15 @@ class SlyControlsListView extends StatelessWidget {
   @override
   build(BuildContext context) {
     return ListView.builder(
-      physics: wideLayout ? null : const NeverScrollableScrollPhysics(),
+      physics: isWide(context) ? null : const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: attributes.length,
       itemBuilder: (context, index) {
         return Padding(
           padding: EdgeInsets.only(
-            top: index == 0 && wideLayout && !platformHasInsetTopBar ? 16 : 0,
+            top: index == 0 && isWide(context) && !platformHasInsetTopBar
+                ? 16
+                : 0,
             bottom: index == attributes.length - 1 ? 28 : 0,
             left: platformHasBackGesture ? 8 : 0,
             right: platformHasBackGesture ? 8 : 0,

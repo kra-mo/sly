@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '/layout.dart';
 import '/history.dart';
 import '/preferences.dart';
 import '/widgets/tooltip.dart';
 
 class SlyToolbar extends StatelessWidget {
-  final bool wideLayout;
   final HistoryManager history;
   final Function pageHasHistogram;
   final Function getShowHistogram;
@@ -14,7 +14,6 @@ class SlyToolbar extends StatelessWidget {
 
   const SlyToolbar({
     super.key,
-    required this.wideLayout,
     required this.history,
     required this.pageHasHistogram,
     required this.getShowHistogram,
@@ -24,7 +23,7 @@ class SlyToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: wideLayout
+        padding: isWide(context)
             ? const EdgeInsets.only(
                 left: 12,
                 right: 12,
@@ -38,7 +37,8 @@ class SlyToolbar extends StatelessWidget {
                 bottom: 0,
               ),
         child: Wrap(
-          alignment: wideLayout ? WrapAlignment.start : WrapAlignment.center,
+          alignment:
+              isWide(context) ? WrapAlignment.start : WrapAlignment.center,
           children: <Widget?>[
             pageHasHistogram()
                 ? SlyTooltip(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/layout.dart';
 import '/widgets/button.dart';
 
 /// Presents a dialog with `title` and `children` underneath it.
@@ -17,7 +18,7 @@ Future<void> showSlyDialog(
   String title,
   List<Widget> children,
 ) async {
-  if (MediaQuery.of(context).size.width > 600) {
+  if (isWide(context)) {
     await showGeneralDialog(
       barrierDismissible: true,
       barrierLabel: title,

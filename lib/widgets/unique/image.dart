@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:crop_image/crop_image.dart';
 
 import '/platform.dart';
+import '/layout.dart';
 import '/image.dart';
 import '/widgets/spinner.dart';
 import '/widgets/unique/fullscreen_viewer.dart';
@@ -14,7 +15,6 @@ class SlyImageView extends StatelessWidget {
   final Uint8List? editedImageData;
   final CropController? cropController;
   final ValueChanged<Rect>? onCrop;
-  final bool wideLayout;
   final Function showCropView;
   final SlyImageAttribute hflip;
   final SlyImageAttribute vflip;
@@ -26,7 +26,6 @@ class SlyImageView extends StatelessWidget {
     this.editedImageData,
     this.cropController,
     this.onCrop,
-    required this.wideLayout,
     required this.showCropView,
     required this.hflip,
     required this.vflip,
@@ -42,7 +41,7 @@ class SlyImageView extends StatelessWidget {
             ? GestureDetector(
                 onTap: () => showFullScreenViewer(context, editedImageData!),
                 child: InteractiveViewer(
-                  clipBehavior: wideLayout ? Clip.none : Clip.hardEdge,
+                  clipBehavior: isWide(context) ? Clip.none : Clip.hardEdge,
                   key: const Key('imageView'),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.all(
@@ -79,7 +78,7 @@ class SlyImageView extends StatelessWidget {
             ),
             child: CropImage(
               key: const Key('cropImageView'),
-              gridThickWidth: wideLayout ? 6 : 8,
+              gridThickWidth: isWide(context) ? 6 : 8,
               gridCornerColor: Theme.of(context).colorScheme.primary,
               gridColor:
                   Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
@@ -110,7 +109,7 @@ class SlyImageView extends StatelessWidget {
               left: 32,
               right: 32,
             )
-          : wideLayout
+          : isWide(context)
               ? EdgeInsets.only(
                   top: platformHasInsetTopBar ? 0 : 8,
                   bottom: 8,
@@ -125,7 +124,7 @@ class SlyImageView extends StatelessWidget {
         flipY: vflip.value,
         child: RotatedBox(
           quarterTurns: rotation.value,
-          child: wideLayout
+          child: isWide(context)
               ? showCropView()
                   ? cropImageView
                   : imageView

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '/layout.dart';
+
 class SlyControlsView extends StatelessWidget {
-  final bool wideLayout;
   final Widget? child;
 
-  const SlyControlsView({
-    super.key,
-    required this.wideLayout,
-    this.child,
-  });
+  const SlyControlsView({super.key, this.child});
 
   @override
   Widget build(BuildContext context) => AnimatedSize(
@@ -25,7 +22,7 @@ class SlyControlsView extends StatelessWidget {
             return SlideTransition(
               key: ValueKey<Key?>(newChild.key),
               position: Tween<Offset>(
-                begin: wideLayout
+                begin: isWide(context)
                     ? const Offset(0.07, 0.0)
                     : const Offset(0.0, 0.07),
                 end: Offset.zero,

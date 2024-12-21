@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:sly/widgets/button.dart';
 import 'package:sly/widgets/dialog.dart';
 
+import '/layout.dart';
+import '/juggler.dart';
 import '/widgets/snack_bar.dart';
 import '/widgets/tooltip.dart';
-import '/juggler.dart';
 
 class SlyCarouselData extends InheritedWidget {
-  final (bool, bool, SlyJuggler, GlobalKey) data;
+  final (bool, SlyJuggler, GlobalKey) data;
 
   const SlyCarouselData({
     super.key,
@@ -40,12 +41,11 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
   build(BuildContext context) {
     final data = SlyCarouselData.of(context).data;
     final visible = data.$1;
-    final wideLayout = data.$2;
-    final juggler = data.$3;
-    final globalKey = data.$4;
+    final juggler = data.$2;
+    final globalKey = data.$3;
 
     final buttonStyle = IconButton.styleFrom(
-      backgroundColor: wideLayout
+      backgroundColor: isWide(context)
           ? Theme.of(context).brightness == Brightness.light
               ? Colors.white.withValues(alpha: 0.8)
               : Colors.black.withValues(alpha: 0.8)
@@ -60,12 +60,13 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
       curve: Curves.easeOutQuint,
       child: visible
           ? Container(
-              color: wideLayout ? null : Theme.of(context).hoverColor,
+              color: isWide(context) ? null : Theme.of(context).hoverColor,
               child: AnimatedPadding(
                 key: globalKey,
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.easeOutQuint,
-                padding: EdgeInsets.only(bottom: wideLayout ? 12 : 3, left: 8),
+                padding:
+                    EdgeInsets.only(bottom: isWide(context) ? 12 : 3, left: 8),
                 child: SizedBox(
                   height: 75,
                   child: Row(spacing: 4, children: [

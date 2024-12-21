@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sly/widgets/button.dart';
 
+import '/layout.dart';
 import '/widgets/switch.dart';
 import '/widgets/unique/save_button.dart';
 
 class SlyExportControls extends StatelessWidget {
-  final bool wideLayout;
   final Function getSaveMetadata;
   final Function setSaveMetadata;
   final bool multipleImages;
@@ -14,7 +14,6 @@ class SlyExportControls extends StatelessWidget {
 
   const SlyExportControls({
     super.key,
-    required this.wideLayout,
     required this.getSaveMetadata,
     required this.setSaveMetadata,
     required this.multipleImages,
@@ -25,7 +24,7 @@ class SlyExportControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListView(
         key: const Key('exportControls'),
-        physics: wideLayout ? null : const NeverScrollableScrollPhysics(),
+        physics: isWide(context) ? null : const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         children: [
           Padding(

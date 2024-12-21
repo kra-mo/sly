@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:crop_image/crop_image.dart';
 
+import '/layout.dart';
 import '/image.dart';
 import '/widgets/button.dart';
 import '/widgets/tooltip.dart';
@@ -10,7 +11,6 @@ import '/widgets/toggle_buttons.dart';
 
 class SlyGeometryControls extends StatelessWidget {
   final CropController? cropController;
-  final bool wideLayout;
   final Function setCropChanged;
   final Function getPortraitCrop;
   final Function setPortraitCrop;
@@ -21,7 +21,6 @@ class SlyGeometryControls extends StatelessWidget {
   const SlyGeometryControls({
     super.key,
     this.cropController,
-    required this.wideLayout,
     required this.setCropChanged,
     required this.getPortraitCrop,
     required this.setPortraitCrop,
@@ -142,7 +141,7 @@ class SlyGeometryControls extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(12),
-      child: wideLayout
+      child: isWide(context)
           ? Wrap(
               direction: Axis.vertical,
               spacing: 6,

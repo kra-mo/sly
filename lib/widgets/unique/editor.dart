@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:crop_image/crop_image.dart';
 
 import '/platform.dart';
+import '/layout.dart';
 import '/image.dart';
 import '/history.dart';
 import '/io.dart';
@@ -82,8 +83,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
   int _selectedPageIndex = 0;
   bool _showHistogram = false;
   late bool _showCarousel = juggler.images.length > 1;
-
-  bool _wideLayout = false;
 
   SlySaveButton? _saveButton;
   final String _saveButtonLabel = isIOS ? 'Save to Photos' : 'Save';
@@ -379,7 +378,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return SlyControlsListView(
           key: const Key('colorControls'),
           attributes: _colorAttributes,
-          wideLayout: _wideLayout,
           history: history,
           updateImage: updateImage,
         );
@@ -387,14 +385,12 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return SlyControlsListView(
           key: const Key('effectControls'),
           attributes: _effectAttributes,
-          wideLayout: _wideLayout,
           history: history,
           updateImage: updateImage,
         );
       case 3:
         return SlyGeometryControls(
           cropController: _cropController,
-          wideLayout: _wideLayout,
           setCropChanged: (value) => _cropChanged = value,
           getPortraitCrop: () => _portraitCrop,
           setPortraitCrop: (value) => setState(() => _portraitCrop = value),
@@ -406,7 +402,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         );
       case 4:
         return SlyExportControls(
-          wideLayout: _wideLayout,
           getSaveMetadata: () => _saveMetadata,
           setSaveMetadata: (value) => _saveMetadata = value,
           multipleImages: juggler.images.length > 1,
@@ -420,7 +415,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
         return SlyControlsListView(
           key: const Key('lightControls'),
           attributes: _lightAttributes,
-          wideLayout: _wideLayout,
           history: history,
           updateImage: updateImage,
         );
@@ -488,9 +482,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   if (_selectedPageIndex == 3) _selectedPageIndex = 0;
                   _controlsChild = getControlsChild(_selectedPageIndex);
                   newImage = false;
-                } else if (_wideLayout != constraints.maxWidth > 600) {
-                  _wideLayout = !_wideLayout;
-                  _controlsChild = getControlsChild(_selectedPageIndex);
                 }
 
                 _controlsChild ??= getControlsChild(_selectedPageIndex);
@@ -508,7 +499,6 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     editedImageData: _editedImageData,
                     cropController: _cropController,
                     onCrop: (rect) => _cropChanged = true,
-                    wideLayout: _wideLayout,
                     showCropView: () => _selectedPageIndex == 3,
                     hflip: _geometryAttributes['hflip']!,
                     vflip: _geometryAttributes['vflip']!,
@@ -516,11 +506,9 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                   ),
                   controlsView: SlyControlsView(
                     key: _controlsKey,
-                    wideLayout: _wideLayout,
                     child: _controlsChild,
                   ),
                   toolbar: SlyToolbar(
-                    wideLayout: _wideLayout,
                     history: history,
                     pageHasHistogram: () => [0, 1].contains(_selectedPageIndex),
                     getShowHistogram: () => _showHistogram,
@@ -535,14 +523,14 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                     child: [0, 1].contains(_selectedPageIndex) && _showHistogram
                         ? Padding(
                             padding: EdgeInsets.only(
-                              bottom: _wideLayout ? 12 : 0,
-                              top: (_wideLayout && platformHasInsetTopBar)
+                              bottom: isWide(context) ? 12 : 0,
+                              top: (isWide(context) && platformHasInsetTopBar)
                                   ? 0
                                   : 8,
                             ),
                             child: SizedBox(
-                              height: _wideLayout ? 40 : 30,
-                              width: _wideLayout ? null : 150,
+                              height: isWide(context) ? 40 : 30,
+                              width: isWide(context) ? null : 150,
                               child: _histogram,
                             ),
                           )
@@ -561,7 +549,7 @@ class _SlyEditorPageState extends State<SlyEditorPage> {
                         navigationDestinationSelected(index),
                   ),
                   imageCarousel: SlyCarouselData(
-                    data: (_showCarousel, _wideLayout, juggler, _carouselKey),
+                    data: (_showCarousel, juggler, _carouselKey),
                     child: const SlyImageCarousel(),
                   ),
                   showCarousel: _showCarousel,
