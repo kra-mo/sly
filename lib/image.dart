@@ -130,8 +130,8 @@ class SlyImage {
   Map<String, SlyRangeAttribute> effectAttributes = {
     'denoise': SlyRangeAttribute('Noise Reduction', 0, 0, 0, 1),
     'sharpness': SlyRangeAttribute('Sharpness', 0, 0, 0, 1),
-    'vignette': SlyRangeAttribute('Vignette', 0, 0, 0, 1),
     'sepia': SlyRangeAttribute('Sepia', 0, 0, 0, 1),
+    'vignette': SlyRangeAttribute('Vignette', 0, 0, 0, 1),
     'border': SlyRangeAttribute('Border', 0, 0, -1, 1),
   };
 
