@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sly/widgets/button.dart';
-import 'package:sly/widgets/dialog.dart';
 
 import '/layout.dart';
 import '/juggler.dart';
@@ -11,12 +9,14 @@ class SlyImageCarousel extends StatefulWidget {
   final bool visible;
   final SlyJuggler juggler;
   final GlobalKey globalKey;
+  final VoidCallback? removeImage;
 
   const SlyImageCarousel({
+    super.key,
     required this.visible,
     required this.juggler,
     required this.globalKey,
-    super.key,
+    this.removeImage,
   });
 
   @override
@@ -93,28 +93,7 @@ class _SlyImageCarouselState extends State<SlyImageCarousel> {
                           icon: const ImageIcon(AssetImage(
                             'assets/icons/delete.webp',
                           )),
-                          onPressed: () =>
-                              showSlyDialog(context, 'Remove Image?', [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: ConstrainedBox(
-                                constraints:
-                                    const BoxConstraints(maxWidth: 240),
-                                child: const Text(
-                                  'The original will not be deleted, but unsaved edits will be lost.',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            SlyButton(
-                              onPressed: () {
-                                juggler.remove(juggler.selected);
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Remove'),
-                            ),
-                            const SlyCancelButton(),
-                          ]),
+                          onPressed: widget.removeImage,
                         ),
                       ),
                     ]),
