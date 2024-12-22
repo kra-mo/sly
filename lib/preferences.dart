@@ -53,6 +53,6 @@ void showSlyPreferencesDialog(BuildContext context) {
       ],
     ),
     const SizedBox(height: 8),
-    const SlyCancelButton(label: 'Done'),
+    const SlyCancelButton(label: 'Done', suggested: false),
   ]);
 }

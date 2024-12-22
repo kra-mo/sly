@@ -53,7 +53,7 @@ can be viewed [here](slycallback://0).
                   )
             ]),
             const SizedBox(height: 12),
-            const SlyCancelButton(label: 'Done'),
+            const SlyCancelButton(label: 'Done', suggested: false),
           ],
         ),
       ),

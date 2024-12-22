@@ -153,16 +153,20 @@ Future<void> showSlyDialog(
 
 class SlyCancelButton extends StatelessWidget {
   final String? label;
+  final bool suggested;
 
   /// A button to dismiss a dialog.
   ///
   /// If the `label` parameter is not provided, it will be 'Cancel'.
-  const SlyCancelButton({super.key, this.label});
+  const SlyCancelButton({super.key, this.label, this.suggested = true});
 
   @override
-  Widget build(BuildContext context) => SlyButton(
-        suggested: true,
-        onPressed: () => Navigator.pop(context),
-        child: Text(label ?? 'Cancel'),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: SlyButton(
+          suggested: suggested,
+          onPressed: () => Navigator.pop(context),
+          child: Text(label ?? 'Cancel'),
+        ),
       );
 }
